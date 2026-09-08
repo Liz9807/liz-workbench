@@ -119,9 +119,33 @@ button.link{background:none;padding:4px;font-size:12px;color:var(--sub);text-dec
 .toast.show{opacity:1}
 #exportOut{white-space:pre-wrap;font-size:12px;color:var(--sub);background:var(--fill);
   border-radius:10px;padding:12px;margin-top:12px;max-height:260px;overflow:auto;display:none}
+
+/* 密码锁 */
+#lockScreen{position:fixed;inset:0;background:var(--bg);z-index:100;display:flex;
+  align-items:center;justify-content:center;padding:24px}
+#lockScreen .lock-box{width:100%;max-width:340px;text-align:center}
+#lockScreen .lock-title{font-size:18px;font-weight:600;letter-spacing:1px;color:var(--ink);margin-bottom:8px}
+#lockScreen .lock-sub{font-size:12px;color:var(--faint);margin-bottom:26px;line-height:1.7}
+#lockScreen input{width:100%;text-align:center;font-size:20px;letter-spacing:8px;padding:12px;
+  border:1px solid var(--line);background:var(--card);border-radius:12px;outline:none;color:var(--ink)}
+#lockScreen input:focus{border-color:var(--ink)}
+#lockScreen .lock-err{font-size:12px;color:#a32d2d;margin-top:10px;min-height:18px}
+#lockScreen .lock-btn{width:100%;margin-top:8px;background:var(--ink);color:#fff;border-radius:12px;
+  font-size:14px;padding:12px;letter-spacing:2px}
+.lock-hint{font-size:11px;color:var(--faint);margin-top:18px;line-height:1.6}
 </style>
 </head>
 <body>
+<div id="lockScreen" style="display:none">
+  <div class="lock-box">
+    <div class="lock-title">清晰工作台</div>
+    <div class="lock-sub" id="lockSub">这是你的私人空间</div>
+    <input type="password" id="lockInput" placeholder="••••" autocomplete="current-password">
+    <div class="lock-err" id="lockErr"></div>
+    <button class="lock-btn" id="lockBtn">进入</button>
+    <div class="lock-hint" id="lockHint"></div>
+  </div>
+</div>
 <div class="wrap">
 
   <header>
@@ -388,8 +412,70 @@ window.reviveB=reviveB;window.pickA=pickA;window.changeToday=changeToday;
 window.saveTodayNotes=saveTodayNotes;window.toggleDone=toggleDone;
 window.saveFeedback=saveFeedback;window.exportMarkdown=exportMarkdown;window.backupJSON=backupJSON;
 
-load();document.getElementById('todayLabel').textContent=todayCn();
-startClock();initMotto();renderA();renderB();renderToday();renderFeed();
+/* ---- 密码锁 ---- */
+var LOCK_KEY='liz-workbench-lock';
+function lockHash(s){var h=5381;for(var i=0;i<s.length;i++){h=((h<<5)+h+s.charCodeAt(i))>>>0}
+  return 'l'+h.toString(36)+'_'+s.length.toString(36)}
+function lockRead(){try{return localStorage.getItem(LOCK_KEY)}catch(e){return undefined}}
+function initAll(){
+  document.getElementById('todayLabel').textContent=todayCn();
+  startClock();initMotto();renderA();renderB();renderToday();renderFeed();
+}
+function setupFirstLock(){
+  var sc=document.getElementById('lockScreen');
+  if(lockRead()!==undefined&&lockRead()!==null){showUnlock();return}
+  if(storageFail){sc.style.display='none';initAll();return} /* 预览环境无存储 → 不锁 */
+  sc.style.display='flex';
+  var sub=document.getElementById('lockSub'),btn=document.getElementById('lockBtn'),
+      inp=document.getElementById('lockInput'),err=document.getElementById('lockErr'),
+      hint=document.getElementById('lockHint');
+  var temp='',step=1;
+  function renderStep(){
+    inp.value='';err.textContent='';
+    if(step===1){sub.textContent='欢迎使用，先设一个密码';btn.textContent='下一步';
+      hint.textContent='之后每次打开都需要它，请记好'}
+    else{sub.textContent='再输入一次，确认密码';btn.textContent='完成';
+      hint.textContent='两次一致才生效'}
+  }
+  renderStep();inp.focus();
+  btn.onclick=function(){
+    var v=inp.value;
+    if(!v){err.textContent='先输入密码';return}
+    if(step===1){temp=v;step=2;renderStep()}
+    else{
+      if(v!==temp){err.textContent='两次不一致，重新来';step=1;temp='';renderStep();return}
+      try{localStorage.setItem(LOCK_KEY,lockHash(v))}catch(e){}
+      sc.style.display='none';initAll();toast('密码已设置')
+    }
+  };
+  inp.onkeydown=function(e){if(e.key==='Enter')btn.click()};
+}
+function showUnlock(){
+  var sc=document.getElementById('lockScreen');
+  if(storageFail||lockRead()===null||lockRead()===undefined){sc.style.display='none';initAll();return}
+  sc.style.display='flex';
+  var sub=document.getElementById('lockSub'),btn=document.getElementById('lockBtn'),
+      inp=document.getElementById('lockInput'),err=document.getElementById('lockErr'),
+      hint=document.getElementById('lockHint');
+  inp.value='';err.textContent='';
+  sub.textContent='输入密码，进入你的空间';btn.textContent='进入';
+  hint.textContent='你的数据只存在这台设备的浏览器里';
+  inp.focus();
+  function go(){
+    var v=inp.value;
+    if(!v){err.textContent='请输入密码';return}
+    if(lockRead()===lockHash(v)){sc.style.display='none';initAll()}
+    else{err.textContent='密码不对，再试一次';inp.value='';inp.focus()}
+  }
+  btn.onclick=go;
+  inp.onkeydown=function(e){if(e.key==='Enter')go()};
+}
+/* 入口 */
+load();
+if(lockRead()===null||lockRead()===undefined){setupFirstLock()}
+else{showUnlock()}
+
+
 })();
 </script>
 </body>
