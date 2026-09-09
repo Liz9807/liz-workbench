@@ -26,7 +26,7 @@ body{background:#faf9f6;color:var(--ink);
 .screen{position:fixed;inset:0;display:none;flex-direction:column;overflow-y:auto}
 .screen.on{display:flex}
 .serif{font-family:"Songti SC","Noto Serif SC","STSong",serif}
-input[type=text],textarea{font-family:inherit;font-size:14px;color:var(--ink);
+input[type=text],textarea{font-family:inherit;font-size:16px;color:var(--ink);
   border:1px solid var(--line);background:var(--fill);border-radius:10px;
   padding:10px 12px;outline:none;width:100%}
 input[type=text]{padding:11px 12px}
@@ -83,13 +83,13 @@ button:active{opacity:.6}
   display:flex;align-items:center;justify-content:center;font-size:17px;line-height:1;font-family:-apple-system,sans-serif}
 .map-date{position:absolute;top:26px;right:24px;font-size:10px;letter-spacing:2px;color:var(--brown-faint)}
 .map-title{position:absolute;top:72px;left:0;right:0;text-align:center;font-size:16px;color:#6a6354;letter-spacing:9px;font-style:italic}
-.map-mid{position:absolute;top:112px;bottom:60px;left:0;right:0;display:flex;align-items:center;gap:clamp(16px,4.5vw,38px);padding:0 8%}
+.map-mid{position:absolute;top:108px;bottom:60px;left:0;right:0;display:flex;align-items:center;justify-content:center;gap:clamp(18px,5vw,40px);padding:0 7%}
 .map-planet{position:relative;flex:0 0 auto}
-.map-planet .mini{position:relative;width:clamp(62px,17vw,84px);height:clamp(62px,17vw,84px);border-radius:50%;background:radial-gradient(circle at 35% 30%,#fbfcf8 0%,#e6ede0 50%,#c8d3bf 100%);box-shadow:inset -4px -6px 0 rgba(120,135,108,.2)}
+.map-planet .mini{position:relative;width:clamp(64px,17vw,88px);height:clamp(64px,17vw,88px);border-radius:50%;background:radial-gradient(circle at 35% 30%,#fbfcf8 0%,#e6ede0 50%,#c8d3bf 100%);box-shadow:inset -4px -6px 0 rgba(120,135,108,.2)}
 .map-planet .mini .a{position:absolute;left:6%;width:88%;height:1px;background:#8fa284;opacity:.4}
 .map-planet .mini .a1{top:28%}.map-planet .mini .a2{top:52%;opacity:.3}.map-planet .mini .a3{top:76%;opacity:.3}
 .map-planet .ring{position:absolute;inset:-9px;border:1px solid #c9a47f;opacity:.4;border-radius:50%}
-.map-list{flex:1;min-width:0;display:flex;flex-direction:column;gap:clamp(24px,4.6vh,40px)}
+.map-list{flex:0 0 auto;display:flex;flex-direction:column;gap:clamp(22px,4.2vh,38px)}
 .map-item{display:flex;align-items:center;gap:clamp(9px,2.4vw,14px);cursor:pointer;min-width:0}
 .map-item .dot{flex:0 0 auto;width:clamp(12px,3.4vw,15px);height:clamp(12px,3.4vw,15px);border-radius:50%;border:1.6px solid var(--brown);background:transparent;display:flex;align-items:center;justify-content:center}
 .map-item .dot i{width:6px;height:6px;border-radius:50%;background:var(--brown)}
@@ -98,13 +98,6 @@ button:active{opacity:.6}
 .map-item .tx .cn{font-size:11px;color:var(--brown-faint);letter-spacing:1.5px;line-height:1.3;white-space:nowrap}
 .map-item:hover .en{opacity:.7}
 .map-motto{position:absolute;bottom:26px;left:0;right:0;text-align:center;font-size:10.5px;color:var(--brown-sub);letter-spacing:3px;font-style:italic}
-@media (max-width:380px){
-  .map-mid{flex-direction:column;gap:4vh;padding:0 12%;justify-content:center}
-  .map-planet .mini{width:74px;height:74px}
-  .map-list{gap:3.2vh;width:100%}
-  .map-item{justify-content:flex-start}
-  .map-title{font-size:15px;letter-spacing:7px}
-}
 
 /* ========= 内容页通用 ========= */
 #scr-page{background:var(--bg)}
@@ -299,6 +292,15 @@ function pad2(x){return ('0'+x).slice(-2)}
 function today(){var d=new Date();return d.getFullYear()+'-'+pad2(d.getMonth()+1)+'-'+pad2(d.getDate())}
 function todayCn(){var wd=['日','一','二','三','四','五','六'];var d=new Date();
   return d.getFullYear()+'.'+pad2(d.getMonth()+1)+'.'+pad2(d.getDate())+' 周'+wd[d.getDay()]}
+var MON_EN=['Jan.','Feb.','Mar.','Apr.','May','June','July','Aug.','Sept.','Oct.','Nov.','Dec.'];
+/* 归档章：2026｜Sept. */
+function archOf(dateStr){
+  if(!dateStr)return '';
+  var p=String(dateStr).split('-');
+  if(p.length<2)return dateStr;
+  var m=parseInt(p[1],10);var y=parseInt(p[0],10);
+  return (isNaN(m)?'':y+'｜'+(MON_EN[m-1]||''))||dateStr;
+}
 function nowHM(){var n=new Date();return pad2(n.getHours())+':'+pad2(n.getMinutes())}
 function weekTag(){var d=new Date(),x=new Date(d);x.setDate(x.getDate()-(x.getDay()+6)%7);
   var y=x.getFullYear();var w=Math.ceil((((x-new Date(y,0,1))/86400000)+x.getDay()+1)/7);return y+' 第'+w+'周'}
@@ -410,7 +412,7 @@ function renderQuote(){
   if(!q.length){document.getElementById('tdQuote').textContent='（还没有金句）';return}
   if(store.qi<0||store.qi>=q.length)store.qi=Math.floor(Math.random()*q.length);
   var it=q[store.qi];
-  document.getElementById('tdQuote').textContent=it.t+(it.src&&it.src!=='flomo'?'  —'+it.src:'');
+  document.getElementById('tdQuote').textContent=it.t;
 }
 function nextQuote(){var q=quotePool();if(!q.length)return;
   store.qi=(store.qi+1+Math.random()*q.length|0)%q.length;renderQuote()}
@@ -426,9 +428,8 @@ function renderDump(){
   document.getElementById('dumpCnt').textContent=store.dump.length+' 段 · 可移存';
   var h='';
   store.dump.forEach(function(d){
-    var dstr=(d.date||'').slice(5).replace('-','.');
     h+='<div class="row"><span class="no">·</span><div class="txt"><div class="nm">'+esc(d.text)+'</div>'+
-       '<div class="meta">'+esc(dstr)+'<button class="act" style="margin-left:10px" onclick="pickDump(\''+d.id+'\')">移存</button> · '+
+       '<div class="meta">'+esc(archOf(d.date))+'<button class="act" style="margin-left:10px" onclick="pickDump(\''+d.id+'\')">移存</button> · '+
        '<button class="act" onclick="delDump(\''+d.id+'\')">丢弃</button></div></div></div>'});
   el.innerHTML=h||'<div class="row" style="border-bottom:0"><span class="no">·</span><div class="txt"><div class="nm" style="color:var(--faint);font-size:13px">还没倒过。有什么堵着的，先写出来。</div></div></div>';
 }
@@ -454,17 +455,14 @@ window.pickTo=pickTo;
 /* ============ Wander ============ */
 function addRoam(){
   var i=document.getElementById('roamInput');var t=i.value.trim();if(!t){toast('先写点什么');return}
-  var now=new Date();var hour=now.getHours();
-  var seg=hour<5?'深夜':hour<11?'清晨':hour<14?'正午':hour<17?'午后':hour<21?'傍晚':'夜里';
-  store.roam.unshift({id:uid(),date:today(),text:t,seg:seg});i.value='';save();renderRoam();toast('记下了')
+  store.roam.unshift({id:uid(),date:today(),text:t});i.value='';save();renderRoam();toast('记下了')
 }
 function renderRoam(){
   var el=document.getElementById('roamList');
   var h='';
   store.roam.slice(0,60).forEach(function(r){
-    var d=(r.date||'').slice(5).replace('-','.');
     h+='<div class="row"><span class="no">·</span><div class="txt"><div class="nm">'+esc(r.text)+'</div>'+
-       '<div class="meta">'+esc(d+(r.seg?' · '+r.seg:''))+'<button class="act" style="margin-left:10px" onclick="delRoam(\''+r.id+'\')">删除</button></div></div></div>'});
+       '<div class="meta">'+esc(archOf(r.date))+'<button class="act" style="margin-left:10px" onclick="delRoam(\''+r.id+'\')">删除</button></div></div></div>'});
   el.innerHTML=h||'<div class="row" style="border-bottom:0"><span class="no">·</span><div class="txt"><div class="nm" style="color:var(--faint);font-size:13px">还没有漫游。随便写点什么，想到哪写到哪。</div></div></div>';
 }
 function delRoam(id){store.roam=store.roam.filter(function(r){return r.id!==id});save();renderRoam()}
@@ -479,7 +477,7 @@ function renderCollect(){
   var el=document.getElementById('collectList');var h='';
   store.collect.forEach(function(c){
     h+='<div class="row"><span class="no">·</span><div class="txt"><div class="nm">'+esc(c.text)+'</div>'+
-       '<div class="meta">'+(c.src?esc(c.src):'<span class="act" onclick="setSrc(\''+c.id+'\')">加来源</span>')+
+       '<div class="meta">'+esc(archOf(c.date))+
        '<button class="act" style="margin-left:10px" onclick="delCollect(\''+c.id+'\')">删除</button></div></div>'+
        '<button class="act" style="font-size:17px;text-decoration:none;line-height:1.2;color:'+(c.quote?'#b08968':'#d5d2ca')+'" onclick="toggleQuote(\''+c.id+'\')">'+(c.quote?'★':'☆')+'</button></div>'});
   el.innerHTML=h||'<div class="row" style="border-bottom:0"><span class="no">·</span><div class="txt"><div class="nm" style="color:var(--faint);font-size:13px">看到喜欢的话、有用的方法，收在这里。</div></div></div>';
@@ -491,9 +489,6 @@ function toggleQuote(id){var c=store.collect.find(function(x){return x.id===id})
   save();renderCollect();toast(c.quote?'已进今日一句':'移出金句池')
 }
 window.toggleQuote=toggleQuote;
-function setSrc(id){var c=store.collect.find(function(x){return x.id===id});if(!c)return;
-  var v=prompt('来源（可写作者/平台）',c.src||'');if(v!==null){c.src=v.trim();if(c.quote){var q=store.quotes.find(function(x){return x.t===c.text});if(q)q.src=c.src}save();renderCollect()}}
-window.setSrc=setSrc;
 function delCollect(id){var c=store.collect.find(function(x){return x.id===id});
   if(c&&c.quote)store.quotes=store.quotes.filter(function(q){return q.t!==c.text});
   store.collect=store.collect.filter(function(x){return x.id!==id});save();renderCollect()}
@@ -563,7 +558,7 @@ function exportMarkdown(){
   var wk=weekTag();var L=['# 漫游周报 · '+wk,'','> the map of me 本周导出',''];
   var cnt=0;
   function pushDump(){var arr=store.dump.filter(function(d){return withinWeek(d.date)});if(arr.length){L.push('## 倾倒');arr.forEach(function(d){L.push('- ('+d.date+') '+d.text);cnt++});L.push('')}}
-  function pushRoam(){var arr=store.roam.filter(function(r){return withinWeek(r.date)});if(arr.length){L.push('## 漫游 / 闪念');arr.forEach(function(r){L.push('- ('+r.date+' · '+(r.seg||'')+') '+r.text);cnt++});L.push('')}}
+  function pushRoam(){var arr=store.roam.filter(function(r){return withinWeek(r.date)});if(arr.length){L.push('## 漫游 / 闪念');arr.forEach(function(r){L.push('- ('+r.date+') '+r.text);cnt++});L.push('')}}
   function pushCollect(){var arr=store.collect.filter(function(c){return withinWeek(c.date)});if(arr.length){L.push('## 收集');arr.forEach(function(c){L.push('- '+(c.quote?'★':'')+' '+c.text+(c.src?' — '+c.src:''));cnt++});L.push('')}}
   function pushFive(){if(store.five.length){L.push('## 今年五件事');store.five.forEach(function(f){L.push('- '+f.t+(f.why?'（图：'+f.why+'）':''))});L.push('')}}
   function pushQuotes(){var mine=(store.quotes||[]).filter(function(q){return q.src&&q.src!=='flomo'});if(mine.length){L.push('## 新加入的金句');mine.forEach(function(q){L.push('- '+q.t+(q.src?' — '+q.src:''))});L.push('')}}
