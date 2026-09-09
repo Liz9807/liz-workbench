@@ -117,6 +117,14 @@ button:active{opacity:.6}
 .row .nm{font-size:14px;line-height:1.6;color:var(--ink);word-break:break-word}
 .row .meta{font-size:11.5px;color:var(--faint);margin-top:2px;line-height:1.5}
 .row .meta b{color:var(--sub);font-weight:400}
+.grp-h{display:flex;align-items:baseline;gap:8px;width:100%;text-align:left;
+  font-family:inherit;font-size:13px;color:var(--ink);font-weight:600;letter-spacing:.5px;
+  padding:12px 2px 8px;border:0;background:none;border-bottom:1px solid var(--line);cursor:pointer}
+.grp-h .tri{font-size:9px;color:var(--faint);width:12px;flex:0 0 auto;transform:translateY(-1px)}
+.grp-h .cnt{font-size:11px;color:var(--faint);font-weight:400;margin-left:auto;letter-spacing:0}
+.grp-b{overflow:hidden}
+.grp-b.collapsed{display:none}
+.grp-b .row:last-child{border-bottom:1px dashed var(--line)}
 .done-txt{text-decoration:line-through;text-decoration-color:#d5d2ca;color:var(--sub)}
 .btn-row{display:flex;gap:8px;align-items:center;margin-top:12px;flex-wrap:wrap;justify-content:flex-end}
 .act{color:var(--sub);font-size:12px;text-decoration:underline;white-space:nowrap}
@@ -302,6 +310,47 @@ function archOf(dateStr){
   return (isNaN(m)?'':y+'｜'+(MON_EN[m-1]||''))||dateStr;
 }
 function nowHM(){var n=new Date();return pad2(n.getHours())+':'+pad2(n.getMinutes())}
+/* ---- 按月分组 + 可折叠 ---- */
+function ymOf(dateStr){var p=String(dateStr||'').split('-');return (p[0]&&p[1])?p[0]+'-'+p[1]:''}
+function archTitle(ym){var p=ym.split('-');var m=parseInt(p[1],10);
+  return (p[0]+'｜'+(MON_EN[m-1]||''))||ym}
+function isCollapsed(grp,ym){
+  var f=store.fold||{};
+  if(f[grp]&&ym in f[grp])return f[grp][ym]; /* 用户选过则遵循 */
+  /* 没选过：最近的月份展开，其余收起 */
+  var cur=ymOf(today());
+  return ym!==cur;
+}
+function toggleGroup(grp,ym){
+  store.fold=store.fold||{};
+  store.fold[grp]=store.fold[grp]||{};
+  store.fold[grp][ym]=!isCollapsed(grp,ym);
+  save();
+  /* 重渲染当前所属页面 */
+  if(grp==='dump')renderDump();
+  if(grp==='roam')renderRoam();
+  if(grp==='collect')renderCollect();
+}
+window.toggleGroup=toggleGroup;
+/* arr 需含 date；itemHtml(it) 返回行 html */
+function groupedHtml(arr,grp,itemHtml){
+  if(!arr||!arr.length)return '';
+  var groups={},order=[];
+  arr.forEach(function(it){
+    var ym=ymOf(it.date)||'xxxx-xx';
+    if(!groups[ym]){groups[ym]=[];order.push(ym)}
+    groups[ym].push(it);
+  });
+  var h='';
+  order.forEach(function(ym){
+    var open=!isCollapsed(grp,ym);
+    h+='<button class="grp-h" onclick="toggleGroup(\''+grp+'\',\''+ym+'\')">'+
+       '<span class="tri">'+(open?'▾':'▸')+'</span><span>'+esc(archTitle(ym))+'</span>'+
+       '<span class="cnt">'+groups[ym].length+'</span></button>'+
+       '<div class="grp-b'+(open?'':' collapsed')+'">'+groups[ym].map(itemHtml).join('')+'</div>';
+  });
+  return h;
+}
 function weekTag(){var d=new Date(),x=new Date(d);x.setDate(x.getDate()-(x.getDay()+6)%7);
   var y=x.getFullYear();var w=Math.ceil((((x-new Date(y,0,1))/86400000)+x.getDay()+1)/7);return y+' 第'+w+'周'}
 function esc(s){return (s||'').replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
@@ -324,7 +373,7 @@ var SEEDS=[
   {t:'把"我不擅长"改成"我正在探索"。',src:'flomo'},
   {t:'别慌，你还在序章里。',src:'flomo'}
 ];
-var store={quotes:SEEDS.slice(),dump:[],roam:[],collect:[],five:[],avoid:[],qi:-1};
+var store={quotes:SEEDS.slice(),dump:[],roam:[],collect:[],five:[],avoid:[],qi:-1,fold:{}};
 load();
 
 /* ============ 视图切换 ============ */
@@ -426,11 +475,12 @@ function addDump(){
 function renderDump(){
   var el=document.getElementById('dumpList');
   document.getElementById('dumpCnt').textContent=store.dump.length+' 段 · 可移存';
-  var h='';
-  store.dump.forEach(function(d){
-    h+='<div class="row"><span class="no">·</span><div class="txt"><div class="nm">'+esc(d.text)+'</div>'+
-       '<div class="meta">'+esc(archOf(d.date))+'<button class="act" style="margin-left:10px" onclick="pickDump(\''+d.id+'\')">移存</button> · '+
-       '<button class="act" onclick="delDump(\''+d.id+'\')">丢弃</button></div></div></div>'});
+  function itemHtml(d){
+    return '<div class="row"><span class="no">·</span><div class="txt"><div class="nm">'+esc(d.text)+'</div>'+
+      '<div class="meta"><button class="act" onclick="pickDump(\''+d.id+'\')">移存</button> · '+
+      '<button class="act" onclick="delDump(\''+d.id+'\')">丢弃</button></div></div></div>';
+  }
+  var h=groupedHtml(store.dump,'dump',itemHtml);
   el.innerHTML=h||'<div class="row" style="border-bottom:0"><span class="no">·</span><div class="txt"><div class="nm" style="color:var(--faint);font-size:13px">还没倒过。有什么堵着的，先写出来。</div></div></div>';
 }
 function delDump(id){store.dump=store.dump.filter(function(d){return d.id!==id});save();renderDump();toast('已丢弃')}
@@ -459,10 +509,11 @@ function addRoam(){
 }
 function renderRoam(){
   var el=document.getElementById('roamList');
-  var h='';
-  store.roam.slice(0,60).forEach(function(r){
-    h+='<div class="row"><span class="no">·</span><div class="txt"><div class="nm">'+esc(r.text)+'</div>'+
-       '<div class="meta">'+esc(archOf(r.date))+'<button class="act" style="margin-left:10px" onclick="delRoam(\''+r.id+'\')">删除</button></div></div></div>'});
+  function itemHtml(r){
+    return '<div class="row"><span class="no">·</span><div class="txt"><div class="nm">'+esc(r.text)+'</div>'+
+      '<div class="meta"><button class="act" onclick="delRoam(\''+r.id+'\')">删除</button></div></div></div>';
+  }
+  var h=groupedHtml(store.roam.slice(0,60),'roam',itemHtml);
   el.innerHTML=h||'<div class="row" style="border-bottom:0"><span class="no">·</span><div class="txt"><div class="nm" style="color:var(--faint);font-size:13px">还没有漫游。随便写点什么，想到哪写到哪。</div></div></div>';
 }
 function delRoam(id){store.roam=store.roam.filter(function(r){return r.id!==id});save();renderRoam()}
@@ -474,12 +525,13 @@ function addCollect(){
   store.collect.unshift({id:uid(),date:today(),text:t,src:'',quote:false});i.value='';save();renderCollect();toast('收下了')
 }
 function renderCollect(){
-  var el=document.getElementById('collectList');var h='';
-  store.collect.forEach(function(c){
-    h+='<div class="row"><span class="no">·</span><div class="txt"><div class="nm">'+esc(c.text)+'</div>'+
-       '<div class="meta">'+esc(archOf(c.date))+
-       '<button class="act" style="margin-left:10px" onclick="delCollect(\''+c.id+'\')">删除</button></div></div>'+
-       '<button class="act" style="font-size:17px;text-decoration:none;line-height:1.2;color:'+(c.quote?'#b08968':'#d5d2ca')+'" onclick="toggleQuote(\''+c.id+'\')">'+(c.quote?'★':'☆')+'</button></div>'});
+  var el=document.getElementById('collectList');
+  function itemHtml(c){
+    return '<div class="row"><span class="no">·</span><div class="txt"><div class="nm">'+esc(c.text)+'</div>'+
+      '<div class="meta"><button class="act" onclick="delCollect(\''+c.id+'\')">删除</button></div></div>'+
+      '<button class="act" style="font-size:17px;text-decoration:none;line-height:1.2;color:'+(c.quote?'#b08968':'#d5d2ca')+'" onclick="toggleQuote(\''+c.id+'\')">'+(c.quote?'★':'☆')+'</button></div>';
+  }
+  var h=groupedHtml(store.collect,'collect',itemHtml);
   el.innerHTML=h||'<div class="row" style="border-bottom:0"><span class="no">·</span><div class="txt"><div class="nm" style="color:var(--faint);font-size:13px">看到喜欢的话、有用的方法，收在这里。</div></div></div>';
 }
 function toggleQuote(id){var c=store.collect.find(function(x){return x.id===id});if(!c)return;
