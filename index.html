@@ -5,255 +5,384 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#faf9f6">
-<title>清晰工作台</title>
+<title>Planet</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='28' fill='%239db4a0'/%3E%3C/svg%3E">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="manifest" href="manifest.json">
+<meta name="apple-mobile-web-app-title" content="Planet">
+<meta name="application-name" content="Planet">
+<meta name="theme-color" content="#f5f0e8">
 <style>
 :root{
-  --bg:#faf9f6; --card:#ffffff; --ink:#1a1a1a; --sub:#8a8a85; --faint:#c9c7c0;
-  --line:#eceae4; --fill:#f5f4f0; --inv:#1a1a1a;
-  --radius:18px;
+  --bg:#faf9f6; --ink:#1a1a1a; --sub:#8a8a85; --faint:#c9c7c0; --line:#ecebe4; --fill:#f0efeb;
+  --paper:#faf9f6; --brown:#3a3530; --brown-sub:#8a8275; --brown-faint:#b3ab9c;
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;margin:0}
-body{background:var(--bg);color:var(--ink);
+html,body{height:100%}
+body{background:#faf9f6;color:var(--ink);
   font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
   font-size:16px;line-height:1.65;-webkit-font-smoothing:antialiased;
-  padding-bottom:env(safe-area-inset-bottom)}
-.wrap{max-width:560px;margin:0 auto;padding:28px 22px 60px}
-
-/* 头 */
-.head-top{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:8px}
-header .app{font-size:11px;letter-spacing:2.5px;color:var(--faint);text-transform:uppercase}
-header .date{font-size:12px;color:var(--faint);font-weight:400}
-.time-hero{margin:0;display:flex;align-items:flex-end;gap:14px}
-.time-hero .big{font-size:44px;font-weight:600;letter-spacing:.5px;line-height:1.05;
-  font-variant-numeric:tabular-nums;color:var(--ink)}
-.time-side{display:flex;flex-direction:column;justify-content:flex-end;gap:2px;padding-bottom:2px}
-.time-side .greet{font-size:10.5px;color:var(--sub);letter-spacing:.3px;line-height:1.4;white-space:nowrap}
-.time-side .remain{font-size:10.5px;color:var(--sub);letter-spacing:.3px;line-height:1.4;white-space:nowrap}
-.day-bar{height:2px;background:var(--fill);border-radius:2px;margin-top:16px;overflow:hidden}
-.day-bar-fill{height:100%;background:var(--ink);width:0%;border-radius:3px;transition:width 1s ease}
-.motto{font-size:13px;color:var(--sub);font-style:italic;letter-spacing:.5px;margin:20px 0 26px;border:0;background:none;padding:0;font-family:inherit;cursor:pointer;display:block;text-align:left}
-.motto:hover{color:var(--ink)}
-.motto:hover{color:var(--ink)}
-
-/* 区 */
-.sec{background:var(--card);border-radius:var(--radius);padding:22px 20px 20px;margin-bottom:14px;
-  border:1px solid var(--line)}
-.sec-title{display:flex;align-items:center;gap:7px;font-size:13px;color:var(--ink);font-weight:600;
-  letter-spacing:.5px;margin-bottom:10px}
-.sec-title b{color:var(--ink);font-weight:600}
-.sec-title .side{margin-left:auto;font-size:11px;color:var(--faint);letter-spacing:0;font-weight:400}
-.hint{font-size:12px;color:var(--sub);line-height:1.85;margin:0 0 14px}
-.empty-state{margin:0 0 14px;font-size:12.5px;color:var(--sub);line-height:1.85}
-.guide{font-size:12.5px;color:var(--sub);line-height:1.85;margin:0 0 12px}
-.guide br{content:'';display:block;margin-top:4px}
-.hint b{color:var(--ink);font-weight:500}
-
-/* 今日一件 */
-.today-hero{font-size:26px;font-weight:600;letter-spacing:.5px;line-height:1.4;margin-bottom:6px}
-.today-empty{color:var(--sub);font-size:13.5px;padding:6px 0 2px;line-height:1.7}
-.today-hero.muted{font-size:20px;color:var(--faint);font-weight:500}
-.today-meta{margin-top:10px;font-size:13px;color:var(--sub)}
-.today-sub{display:flex;gap:7px;align-items:center;font-size:12px;color:var(--faint);margin-top:2px}
-
-.steps{display:flex;flex-direction:column;gap:9px;margin:14px 0 6px}
-.step{display:flex;align-items:center;gap:10px}
-.step .num{font-size:13px;color:var(--faint);width:14px}
-.step input{flex:1}
-input[type=text],textarea{font-family:inherit;font-size:14px;color:var(--ink);border:0;
-  border-bottom:1px solid var(--line);background:transparent;padding:6px 0;outline:none;border-radius:0}
-input:focus,textarea:focus{border-bottom-color:var(--ink)}
-textarea{resize:none;width:100%;line-height:1.7}
+  padding-bottom:env(safe-area-inset-bottom);overflow:hidden}
+.screen{position:fixed;inset:0;display:none;flex-direction:column;overflow-y:auto}
+.screen.on{display:flex}
+.serif{font-family:"Songti SC","Noto Serif SC","STSong",serif}
+input[type=text],textarea{font-family:inherit;font-size:14px;color:var(--ink);
+  border:1px solid var(--line);background:var(--fill);border-radius:10px;
+  padding:10px 12px;outline:none;width:100%}
+input[type=text]{padding:11px 12px}
+textarea{resize:none;line-height:1.7}
+input:focus,textarea:focus{border-color:var(--ink);background:#fff}
 ::placeholder{color:var(--faint)}
-input[type=time]{font-family:inherit;font-size:14px;color:var(--ink);border:1px solid var(--line);
-  background:var(--fill);padding:7px 10px;border-radius:8px;outline:none}
-
-.btn-row{display:flex;gap:10px;align-items:center;margin-top:16px;flex-wrap:wrap}
-button{font-family:inherit;border:0;border-radius:999px;cursor:pointer;font-size:14px;
-  padding:9px 18px;background:var(--fill);color:var(--ink);transition:opacity .15s;letter-spacing:.3px}
+button{font-family:inherit;border:0;cursor:pointer;background:none;color:inherit;font-size:14px;padding:0}
 button:active{opacity:.6}
-button.primary{background:var(--ink);color:#fff}
-button.ghost{background:transparent;border:1px solid var(--line);color:var(--sub)}
-button.link{background:none;padding:4px;font-size:12px;color:var(--sub);text-decoration:underline}
-
-.countdown{margin-top:14px;padding:12px 14px;background:var(--fill);border-radius:10px;
-  font-size:15px;display:none}
-.countdown.on{display:block}
-.countdown .big{font-size:24px;font-weight:600;letter-spacing:1px}
-.done-wrap{margin-top:14px;display:flex;align-items:center;gap:10px;font-size:14px;cursor:pointer}
-.done-wrap input{width:18px;height:18px;accent-color:var(--ink);cursor:pointer}
-.done-wrap.done{color:var(--sub);text-decoration:line-through}
-.done-wrap .yes{color:var(--ink);text-decoration:none;font-weight:500}
-
-/* 反馈 */
-#feedbackInput{height:46px;border:1px solid var(--line);background:var(--fill);border-radius:10px;
-  padding:10px 12px;font-size:14px}
-.feed-empty{margin:14px 0 4px;font-size:12px;color:var(--sub);line-height:1.7}
-#feedList{margin-top:16px}
-.feed-item{padding:12px 0;border-bottom:1px dashed var(--line);font-size:13.5px;color:var(--sub)}
-.feed-item:last-child{border-bottom:0}
-.feed-item .d{font-size:11px;color:var(--faint);margin-bottom:2px}
-.feed-item .t{color:var(--ink)}
-
-/* 清单 */
-.item{display:flex;align-items:flex-start;gap:10px;padding:11px 0;border-bottom:1px dashed var(--line)}
-.item:last-child{border-bottom:0}
-.item .no{font-size:13px;color:var(--faint);font-variant-numeric:tabular-nums;line-height:1.6}
-.item .txt{flex:1;min-width:0}
-.item .name{font-size:15px}
-.item .why{font-size:12px;color:var(--faint);margin-top:1px}
-.item button.act{background:none;border:0;color:var(--sub);font-size:12px;text-decoration:underline;
-  cursor:pointer;padding:2px;white-space:nowrap;line-height:1.8}
-.item button.del{background:none;border:0;color:var(--faint);font-size:16px;cursor:pointer;padding:0 2px;line-height:1}
-.item button.del:active{color:var(--ink)}
-
-.add{display:flex;gap:10px;align-items:center;margin-top:6px}
-.add input{flex:1}
-.add button{background:none;border:0;color:var(--ink);font-size:24px;cursor:pointer;padding:0 6px 4px;line-height:1;opacity:.45}
-.add button:active{opacity:1}
-.badge{font-size:11px;color:var(--faint);letter-spacing:1px}
-
-.footer{text-align:center;color:var(--faint);font-size:11px;margin-top:34px;letter-spacing:1px}
-.toast{position:fixed;left:50%;bottom:34px;transform:translateX(-50%);
+.pill{background:var(--ink);color:#fff;border-radius:999px;font-size:14px;letter-spacing:.5px;
+  padding:9px 18px;text-align:center}
+.btn-ghost{color:var(--sub);font-size:12px;text-decoration:underline}
+.btn-del{color:var(--faint);font-size:18px;line-height:1;padding:2px}
+.toast{position:fixed;left:50%;bottom:38px;transform:translateX(-50%);z-index:99;
   background:var(--ink);color:#fff;font-size:13px;padding:9px 18px;border-radius:999px;
-  opacity:0;transition:opacity .25s;pointer-events:none;z-index:9;white-space:nowrap}
+  opacity:0;transition:opacity .25s;pointer-events:none;white-space:nowrap;max-width:86vw}
 .toast.show{opacity:1}
-#exportOut{white-space:pre-wrap;font-size:12px;color:var(--sub);background:var(--fill);
-  border-radius:10px;padding:12px;margin-top:12px;max-height:260px;overflow:auto;display:none}
 
-/* 密码锁 */
-#lockScreen{position:fixed;inset:0;background:var(--bg);z-index:100;display:flex;
-  align-items:center;justify-content:center;padding:24px}
-#lockScreen .lock-box{width:100%;max-width:340px;text-align:center}
-#lockScreen .lock-title{font-size:18px;font-weight:600;letter-spacing:1px;color:var(--ink);margin-bottom:8px}
-#lockScreen .lock-sub{font-size:12px;color:var(--faint);margin-bottom:26px;line-height:1.7}
-#lockScreen input{width:100%;text-align:center;font-size:20px;letter-spacing:8px;padding:12px;
-  border:1px solid var(--line);background:var(--card);border-radius:12px;outline:none;color:var(--ink)}
-#lockScreen input:focus{border-color:var(--ink)}
-#lockScreen .lock-err{font-size:12px;color:#a32d2d;margin-top:10px;min-height:18px}
-#lockScreen .lock-btn{width:100%;margin-top:8px;background:var(--ink);color:#fff;border-radius:12px;
-  font-size:14px;padding:12px;letter-spacing:2px}
-.lock-hint{font-size:11px;color:var(--faint);margin-top:18px;line-height:1.6}
+/* ========= 屏0 开屏 ========= */
+#scr-splash{background:var(--paper);align-items:center;justify-content:center;font-family:"Songti SC",serif}
+.splash-in{position:relative;width:100%;max-width:420px;height:100dvh;display:flex;flex-direction:column;align-items:center}
+.splash-time{position:absolute;top:9%;left:0;right:0;text-align:center}
+.splash-time .d{font-size:13px;letter-spacing:6px;color:#a89070}
+.splash-time .t{font-family:"Times New Roman",serif;font-size:52px;font-weight:300;color:#3a3530;letter-spacing:2px;line-height:1.1;margin-top:8px}
+.splash-time .w{font-size:13px;letter-spacing:6px;color:#b89e7c;margin-top:8px}
+.splash-mid{flex:1;display:flex;align-items:center;justify-content:center;position:relative;width:100%}
+.planet-wrap{position:relative;cursor:pointer;width:210px;height:210px;display:flex;align-items:center;justify-content:center}
+.planet{position:relative;width:150px;height:150px;border-radius:50%;
+  background:radial-gradient(circle at 35% 30%, #fbfcf8 0%, #e6ede0 48%, #c8d3bf 78%, #9db4a0 100%);
+  box-shadow:inset -8px -12px 0 rgba(110,130,100,.25);overflow:hidden}
+.planet .arc{position:absolute;left:6%;width:88%;height:1px;background:#8fa284;opacity:.4;border-radius:50%}
+.planet .arc.a1{top:26%}.planet .arc.a2{top:50%;opacity:.3}.planet .arc.a3{top:74%;opacity:.3}
+.planet .blob{position:absolute;background:#fff;border-radius:50%}
+.planet .blob.b1{width:26px;height:16px;top:20%;left:58%;opacity:.75}
+.planet .blob.b2{width:16px;height:10px;top:55%;left:26%;opacity:.6}
+.planet .hi{position:absolute;top:-16%;left:-14%;width:62%;height:62%;border-radius:50%;
+  background:radial-gradient(circle at 40% 40%, rgba(255,255,255,.55) 0%, rgba(255,255,255,0) 62%)}
+.orbit{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);border:1px solid #c9a47f;border-radius:50%;pointer-events:none}
+.orbit.o1{width:178px;height:178px;opacity:.4}
+.orbit.o2{width:206px;height:206px;opacity:.22}
+.star{position:absolute;color:#8fae86;font-size:6px;line-height:1}
+.star.g{color:#c9a47f}
+.splash-star1{top:12%;left:22%}.splash-star2{top:16%;right:26%;font-size:5px}.splash-star3{bottom:24%;left:18%;font-size:5px}
+.splash-star4{bottom:26%;right:16%;color:#b89e7c}.splash-star5{bottom:16%;left:32%;font-size:5px;color:#8a8275}
+.splash-motto{position:absolute;bottom:13%;left:0;right:0;text-align:center;font-size:13px;color:#8a8275;letter-spacing:1px}
+.splash-hint{position:absolute;bottom:6%;left:0;right:0;text-align:center;font-size:10px;color:#c0b8a8;letter-spacing:4px}
+.splash-hint{animation:blink 2.4s infinite}
+@keyframes blink{0%,70%{opacity:.7}80%,100%{opacity:.25}}
+
+/* ========= 屏1 目录 ========= */
+#scr-map{background:var(--paper);font-family:"Songti SC","Noto Serif SC",serif}
+.map-in{position:relative;width:100%;max-width:420px;height:100dvh;margin:0 auto}
+.map-top{position:absolute;top:20px;left:18px}
+.map-back{width:30px;height:30px;border-radius:50%;border:1px solid var(--brown-faint);color:var(--brown-sub);
+  display:flex;align-items:center;justify-content:center;font-size:17px;line-height:1;font-family:-apple-system,sans-serif}
+.map-date{position:absolute;top:26px;right:24px;font-size:10px;letter-spacing:2px;color:var(--brown-faint)}
+.map-title{position:absolute;top:72px;left:0;right:0;text-align:center;font-size:16px;color:#6a6354;letter-spacing:9px;font-style:italic}
+.map-mid{position:absolute;top:112px;bottom:60px;left:0;right:0;display:flex;align-items:center;gap:clamp(16px,4.5vw,38px);padding:0 8%}
+.map-planet{position:relative;flex:0 0 auto}
+.map-planet .mini{position:relative;width:clamp(62px,17vw,84px);height:clamp(62px,17vw,84px);border-radius:50%;background:radial-gradient(circle at 35% 30%,#fbfcf8 0%,#e6ede0 50%,#c8d3bf 100%);box-shadow:inset -4px -6px 0 rgba(120,135,108,.2)}
+.map-planet .mini .a{position:absolute;left:6%;width:88%;height:1px;background:#8fa284;opacity:.4}
+.map-planet .mini .a1{top:28%}.map-planet .mini .a2{top:52%;opacity:.3}.map-planet .mini .a3{top:76%;opacity:.3}
+.map-planet .ring{position:absolute;inset:-9px;border:1px solid #c9a47f;opacity:.4;border-radius:50%}
+.map-list{flex:1;min-width:0;display:flex;flex-direction:column;gap:clamp(24px,4.6vh,40px)}
+.map-item{display:flex;align-items:center;gap:clamp(9px,2.4vw,14px);cursor:pointer;min-width:0}
+.map-item .dot{flex:0 0 auto;width:clamp(12px,3.4vw,15px);height:clamp(12px,3.4vw,15px);border-radius:50%;border:1.6px solid var(--brown);background:transparent;display:flex;align-items:center;justify-content:center}
+.map-item .dot i{width:6px;height:6px;border-radius:50%;background:var(--brown)}
+.map-item .tx{display:flex;flex-direction:column;gap:3px;min-width:0}
+.map-item .tx .en{font-size:clamp(14px,3.9vw,17px);color:var(--brown);letter-spacing:2.5px;line-height:1.15;white-space:nowrap}
+.map-item .tx .cn{font-size:11px;color:var(--brown-faint);letter-spacing:1.5px;line-height:1.3;white-space:nowrap}
+.map-item:hover .en{opacity:.7}
+.map-motto{position:absolute;bottom:26px;left:0;right:0;text-align:center;font-size:10.5px;color:var(--brown-sub);letter-spacing:3px;font-style:italic}
+@media (max-width:380px){
+  .map-mid{flex-direction:column;gap:4vh;padding:0 12%;justify-content:center}
+  .map-planet .mini{width:74px;height:74px}
+  .map-list{gap:3.2vh;width:100%}
+  .map-item{justify-content:flex-start}
+  .map-title{font-size:15px;letter-spacing:7px}
+}
+
+/* ========= 内容页通用 ========= */
+#scr-page{background:var(--bg)}
+.page-in{width:100%;max-width:560px;margin:0 auto;padding:calc(14px + env(safe-area-inset-top)) 24px 40px;flex:1;display:flex;flex-direction:column;min-height:100dvh}
+.pg-head{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+.pg-back{width:30px;height:30px;border-radius:50%;border:1px solid var(--line);color:var(--sub);display:flex;align-items:center;justify-content:center;font-size:17px;line-height:1;flex:0 0 auto}
+.pg-title{display:flex;align-items:baseline;gap:10px;min-width:0}
+.pg-title .en{font-size:11px;letter-spacing:2.5px;color:var(--faint);text-transform:uppercase}
+.pg-title .cn{font-size:15px;font-weight:600;color:var(--ink);letter-spacing:.5px}
+.pg-date{margin-left:auto;font-size:11px;color:var(--faint);white-space:nowrap}
+.sec-title{display:flex;align-items:baseline;gap:8px;font-size:13px;font-weight:600;color:var(--ink);letter-spacing:.5px;margin:22px 0 10px}
+.sec-title .side{margin-left:auto;font-size:11px;color:var(--faint);font-weight:400;letter-spacing:0}
+.row{display:flex;align-items:flex-start;gap:10px;padding:11px 0;border-bottom:1px dashed var(--line)}
+.row:last-child{border-bottom:0}
+.row .no{font-size:12px;color:var(--faint);font-variant-numeric:tabular-nums;line-height:1.6;flex:0 0 auto}
+.row .txt{flex:1;min-width:0}
+.row .nm{font-size:14px;line-height:1.6;color:var(--ink);word-break:break-word}
+.row .meta{font-size:11.5px;color:var(--faint);margin-top:2px;line-height:1.5}
+.row .meta b{color:var(--sub);font-weight:400}
+.done-txt{text-decoration:line-through;text-decoration-color:#d5d2ca;color:var(--sub)}
+.btn-row{display:flex;gap:8px;align-items:center;margin-top:12px;flex-wrap:wrap;justify-content:flex-end}
+.act{color:var(--sub);font-size:12px;text-decoration:underline;white-space:nowrap}
+.footnote{text-align:center;font-size:11px;color:var(--faint);letter-spacing:1px;margin-top:22px}
+.linkdim{color:var(--faint);font-size:11px;letter-spacing:1px;text-decoration:underline;background:none;padding:2px 6px}
+.free-zone{flex:1;min-height:12px}
+
+/* 下拉选项面板（伪弹出） */
+#picker{position:fixed;inset:0;z-index:90;display:none;align-items:center;justify-content:center;background:rgba(40,37,32,.22)}
+#picker.on{display:flex}
+#picker .panel{background:#fff;border-radius:16px;width:min(300px,86vw);padding:8px;box-shadow:0 10px 30px rgba(0,0,0,.15)}
+#picker .pi{display:block;width:100%;text-align:center;padding:13px;font-size:14px;color:var(--ink);border-radius:10px}
+#picker .pi:active{background:var(--fill)}
+#picker .pi.cancel{color:var(--faint);margin-top:4px;border-top:1px solid var(--line)}
 </style>
 </head>
 <body>
-<div id="lockScreen" style="display:none">
-  <div class="lock-box">
-    <div class="lock-title">清晰工作台</div>
-    <div class="lock-sub" id="lockSub">这是你的私人空间</div>
-    <input type="password" id="lockInput" placeholder="••••" autocomplete="current-password">
-    <div class="lock-err" id="lockErr"></div>
-    <button class="lock-btn" id="lockBtn">进入</button>
-    <div class="lock-hint" id="lockHint"></div>
+
+<!-- ===== 屏0 开屏 ===== -->
+<div id="scr-splash" class="screen on">
+  <div class="splash-in">
+    <span class="star splash-star1">·</span><span class="star splash-star2">·</span><span class="star splash-star3">·</span>
+    <span class="star splash-star4">·</span><span class="star splash-star5">·</span>
+    <div class="splash-time">
+      <div class="d" id="spDate"></div>
+      <div class="t" id="spClock">--:--</div>
+      <div class="w" id="spWeek"></div>
+    </div>
+    <div class="splash-mid">
+      <div class="planet-wrap" id="planetBtn">
+        <div class="orbit o1"></div><div class="orbit o2"></div>
+        <div class="planet">
+          <span class="arc a1"></span><span class="arc a2"></span><span class="arc a3"></span>
+          <span class="blob b1"></span><span class="blob b2"></span><span class="hi"></span>
+        </div>
+      </div>
+    </div>
+    <div class="splash-motto serif">我无限地爱着新的一日</div>
+    <div class="splash-hint serif">· 轻触星球 ·</div>
   </div>
 </div>
-<div class="wrap">
 
-  <header>
-    <div class="head-top">
-      <span class="app">清晰工作台</span>
-      <span class="date" id="todayLabel"></span>
-    </div>
-    <div class="time-hero">
-      <span id="clock" class="big">--:--</span>
-      <span class="time-side"><span class="greet" id="greet">新的一天，不急，慢慢来</span><span class="remain" id="dayProgress">今天还剩 0 小时 0 分</span></span>
-    </div>
-    <div class="day-bar"><div class="day-bar-fill" id="dayBar"></div></div>
-    <button class="motto" id="motto" title="点一下可以改这句话">"我无限地爱着新的一日。"</button>
-  </header>
-
-  <!-- 今日一件 -->
-  <section class="sec">
-    <div class="sec-title"><b>今日一件</b><span class="side">从 A 里挑一件，只做这一件</span></div>
-    <div id="todayEmpty" class="today-empty">今天还没定。<br>往下到 A 清单，点某一件右侧的"做它"。</div>
-    <div id="todayBody" style="display:none">
-      <div class="today-hero" id="todayAction"></div>
-      <div class="steps">
-        <div class="step"><span class="num">1</span><input type="text" id="s1" placeholder="第一步（2 分钟内能启动）" onchange="saveTodayNotes()"></div>
-        <div class="step"><span class="num">2</span><input type="text" id="s2" placeholder="第二步" onchange="saveTodayNotes()"></div>
-        <div class="step"><span class="num">3</span><input type="text" id="s3" placeholder="第三步（可选）" onchange="saveTodayNotes()"></div>
+<!-- ===== 屏1 目录 ===== -->
+<div id="scr-map" class="screen">
+  <div class="map-in">
+    <span class="map-top"><button class="map-back" onclick="go('splash')" aria-label="回开屏">‹</button></span><span class="map-date" id="mapDate"></span>
+    <div class="map-title">the map of me</div>
+    <div class="map-mid">
+      <div class="map-planet">
+        <div class="ring"></div>
+        <div class="mini"><span class="a a1"></span><span class="a a2"></span><span class="a a3"></span></div>
       </div>
-      <div class="btn-row">
-        <span class="hint" style="margin:0;flex:1">打算几点前做完？（可选）</span>
-        <input type="time" id="deadline" style="margin-right:2px" onchange="saveTodayNotes()">
-        <button class="link" onclick="changeToday()">换一件</button>
+      <div class="map-list" id="mapList"></div>
+    </div>
+    <div class="map-motto">我无限地爱着新的一日</div>
+  </div>
+</div>
+
+<!-- ===== 屏2+ 内容页 ===== -->
+<div id="scr-page" class="screen">
+  <div class="page-in">
+    <div class="pg-head">
+      <button class="pg-back" onclick="go('map')" aria-label="返回">‹</button>
+      <div class="pg-title"><span class="en" id="pgEn"></span><span class="cn" id="pgCn"></span></div>
+      <span class="pg-date" id="pgDate"></span>
+    </div>
+
+    <!-- Today -->
+    <div id="v-today" style="display:none;flex:1;flex-direction:column">
+      <div style="flex:1;display:flex;align-items:center">
+        <div style="width:100%;text-align:center">
+          <div style="font-size:64px;font-weight:600;line-height:1.12;color:var(--ink);font-variant-numeric:tabular-nums;letter-spacing:1px" id="tdClock">--:--</div>
+          <div style="font-size:12px;color:var(--sub);margin-top:10px" id="tdRemain">今天还剩 -- 小时 -- 分</div>
+          <div style="height:2px;background:var(--line);border-radius:2px;margin:20px 18% 0;overflow:hidden">
+            <div style="height:100%;width:0;background:var(--ink);border-radius:3px" id="tdBar"></div>
+          </div>
+          <div style="font-size:11.5px;color:var(--sub);letter-spacing:1.5px;margin-top:14px" id="tdHello">忙了一整天了，剩下的可以慢一点</div>
+        </div>
       </div>
-      <label class="done-wrap" id="doneWrap">
-        <input type="checkbox" id="doneChk" onchange="toggleDone()">
-        <span id="doneLabel">做完了，去写一行反馈</span>
-      </label>
+      <div style="text-align:center;margin-top:8px">
+        <div style="font-size:11px;color:var(--faint);letter-spacing:3px;margin-bottom:10px">· 今日一句 ·</div>
+        <div id="tdQuote" style="font-size:13.5px;color:var(--sub);line-height:1.9;min-height:26px;padding:0 14px">…</div>
+        <button class="act" style="font-size:12px;margin-top:4px" onclick="nextQuote()">换一句 ↻</button>
+      </div>
+      <div style="text-align:center;margin-top:20px">
+        <button class="linkdim" onclick="showExport()">导出 · 备份</button>
+      </div>
     </div>
-  </section>
 
-  <!-- 反馈一行 -->
-  <section class="sec">
-    <div class="sec-title"><b>反馈一行</b><span class="side">做了 X · 结果 Y · 感受 Z</span></div>
-    <textarea id="feedbackInput" placeholder="例：改完一版方案，被认可，心里定了。"></textarea>
-    <div class="btn-row"><button class="primary" onclick="saveFeedback()" style="padding:8px 18px">记下</button></div>
-    <div id="feedList" style="margin-top:10px"></div>
-  </section>
-
-  <!-- A 主轴 -->
-  <section class="sec">
-    <div class="sec-title"><b>A 主轴</b><span class="side">最多 5 件 · 每天从这挑</span></div>
-    <p class="hint">圈出你真正想推进的事。每件补一句"图的是什么"，写不出真话的，降级进 B。</p>
-    <div id="aList"></div>
-    <div class="add">
-      <input type="text" id="aInput" placeholder="写下一件…">
-      <button onclick="addA()" title="加入">＋</button>
+    <!-- Brain Dump -->
+    <div id="v-dump" style="display:none;flex-direction:column;flex:1">
+      <div class="sec-title">倾倒<span class="side">倒空 · 不整理</span></div>
+      <textarea id="dumpInput" rows="5" placeholder="此刻脑子里有什么？全部倒出来——乱，没关系。"></textarea>
+      <div class="btn-row"><button class="pill" onclick="addDump()">倒出去</button></div>
+      <div class="sec-title">倾倒记录<span class="side" id="dumpCnt"></span></div>
+      <div id="dumpList"></div>
+      <div class="free-zone"></div>
+      <div class="footnote">倒出来之后，有用的挑走，剩下的可以随时清掉</div>
     </div>
-  </section>
 
-  <!-- B 清单 -->
-  <section class="sec">
-    <div class="sec-title"><b>不关注清单</b><span class="side">丢进来 = 安心放下</span></div>
-    <p class="hint">收藏前先问："我具体会在哪天、哪件事上用？"答不出 → 丢进来。</p>
-    <div id="bList"></div>
-    <div class="add">
-      <input type="text" id="bInput" placeholder="放下一件现在不该管的…">
-      <button onclick="addB()" title="放下">＋</button>
+    <!-- Wander -->
+    <div id="v-wander" style="display:none;flex-direction:column;flex:1">
+      <div class="sec-title">写下一念<span class="side">任思绪漫游 · 我的日记本</span></div>
+      <textarea id="roamInput" rows="4" placeholder="此刻有什么闪过，就记下什么…"></textarea>
+      <div class="btn-row"><button class="pill" onclick="addRoam()">记下</button></div>
+      <div class="sec-title">走过的日子<span class="side">倒序 · 最近在上</span></div>
+      <div id="roamList"></div>
+      <div class="free-zone"></div>
+      <div class="footnote">想到哪写到哪，不用成文</div>
     </div>
-  </section>
 
-  <!-- 导出 -->
-  <section class="sec">
-    <div class="sec-title"><b>备份 / 导出</b><span class="side">每周日一次</span></div>
-    <div class="btn-row">
-      <button onclick="exportMarkdown()">导出本周反馈</button>
-      <button class="ghost" onclick="backupJSON()">完整备份</button>
+    <!-- Collect -->
+    <div id="v-collect" style="display:none;flex-direction:column;flex:1">
+      <div class="sec-title">收下<span class="side">★ 送进今日一句</span></div>
+      <textarea id="collectInput" rows="2" placeholder="收下一句喜欢的话…" style="height:auto"></textarea>
+      <div class="btn-row"><button class="pill" onclick="addCollect()">收下</button></div>
+      <div class="sec-title">收下的句子<span class="side">★ = 金句池</span></div>
+      <div id="collectList"></div>
+      <div class="free-zone"></div>
+      <div class="footnote">★ 点亮后，会出现在 Today 的「今日一句」里</div>
     </div>
-    <div id="exportOut"></div>
-  </section>
 
-  <div class="footer">先跑两周 · 数据只存本机</div>
+    <!-- Direction -->
+    <div id="v-direction" style="display:none;flex-direction:column;flex:1">
+      <div class="sec-title">今年五件事<span class="side" id="fiveMeta"></span></div>
+      <textarea id="fiveInput" rows="2" placeholder="写下一件今年真想推进的…" style="height:auto"></textarea>
+      <div class="btn-row"><button class="pill" onclick="addFive()">＋</button></div>
+      <div id="fiveList"></div>
+      <div class="sec-title" style="margin-top:26px">不做什么<span class="side">丢进来 = 安心放下</span></div>
+      <textarea id="avoidInput" rows="2" placeholder="放下一件现在不该管的…" style="height:auto"></textarea>
+      <div class="btn-row"><button class="pill" onclick="addAvoid()">＋</button></div>
+      <div id="avoidList"></div>
+      <div class="free-zone"></div>
+      <div class="footnote" id="fiveNote"></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- 移存目标选择 -->
+<div id="picker">
+  <div class="panel">
+    <button class="pi" onclick="pickTo('roam')">移到 漫游手记</button>
+    <button class="pi" onclick="pickTo('collect')">移到 收集</button>
+    <button class="pi" onclick="pickTo('five')">移到 五件事</button>
+    <button class="pi" onclick="pickTo('avoid')">移到 不做什么</button>
+    <button class="pi cancel" onclick="hidePicker()">取消</button>
+  </div>
+</div>
+
+<!-- 导出面板 -->
+<div id="exportPanel" style="display:none;position:fixed;inset:0;z-index:90;align-items:center;justify-content:center;background:rgba(40,37,32,.22)">
+  <div style="background:#fff;border-radius:16px;width:min(320px,88vw);padding:20px 18px">
+    <div style="font-size:15px;font-weight:600;margin-bottom:6px">导出 / 备份</div>
+    <div style="font-size:11.5px;color:var(--faint);margin-bottom:14px;line-height:1.6">数据只存在这台设备。每周导一次 Markdown，丢进知识库收件箱，由帮手帮你提炼。</div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <button class="pill" onclick="exportMarkdown()">导出本周 Markdown</button>
+      <button class="pill" style="background:#f1efe9;color:var(--ink)" onclick="backupJSON()">完整备份 JSON</button>
+      <button class="pill" style="background:transparent;border:1px solid var(--line);color:var(--faint);padding:7px" onclick="hideExport()">关闭</button>
+    </div>
+  </div>
 </div>
 
 <div class="toast" id="toast"></div>
 
 <script>
 (function(){
-var KEY='liz-workbench-v1';
-function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,6)}
-function today(){var d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
-function todayCn(){var wd=['日','一','二','三','四','五','六'];var d=new Date();
-  return d.getFullYear()+'.'+String(d.getMonth()+1).padStart(2,'0')+'.'+String(d.getDate()).padStart(2,'0')+' 周'+wd[d.getDay()]}
-var store={a:[],b:[],today:{},history:{},motto:''};
+/* ============ 基础 ============ */
+var KEY='liz-workbench-v2';
 var storageFail=false,storageWarned=false;
-function load(){try{var s=localStorage.getItem(KEY);if(s){var o=JSON.parse(s);
-  store.a=o.a||[];store.b=o.b||[];store.today=o.today||{};store.history=o.history||{};store.motto=o.motto||''}}catch(e){storageFail=true}}
-function save(){
-  if(storageFail){warnStorage();return}
-  try{localStorage.setItem(KEY,JSON.stringify(store))}catch(e){
-    storageFail=true;warnStorage()}
-}
-function warnStorage(){
-  if(storageWarned)return;storageWarned=true;
-  setTimeout(function(){toast('此预览环境无法本地存储，数据仅本次有效；正式部署后即可保存')},400)
-}
+function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,6)}
+function pad2(x){return ('0'+x).slice(-2)}
+function today(){var d=new Date();return d.getFullYear()+'-'+pad2(d.getMonth()+1)+'-'+pad2(d.getDate())}
+function todayCn(){var wd=['日','一','二','三','四','五','六'];var d=new Date();
+  return d.getFullYear()+'.'+pad2(d.getMonth()+1)+'.'+pad2(d.getDate())+' 周'+wd[d.getDay()]}
+function nowHM(){var n=new Date();return pad2(n.getHours())+':'+pad2(n.getMinutes())}
+function weekTag(){var d=new Date(),x=new Date(d);x.setDate(x.getDate()-(x.getDay()+6)%7);
+  var y=x.getFullYear();var w=Math.ceil((((x-new Date(y,0,1))/86400000)+x.getDay()+1)/7);return y+' 第'+w+'周'}
 function esc(s){return (s||'').replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
 function toast(msg){var t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');
-  clearTimeout(t._h);t._h=setTimeout(function(){t.classList.remove('show')},1800)}
+  clearTimeout(t._h);t._h=setTimeout(function(){t.classList.remove('show')},1900)}
+function warnStorage(){if(storageWarned)return;storageWarned=true;
+  setTimeout(function(){toast('此预览环境无法本地存储，数据仅本次有效；部署后即可保存')},400)}
+function save(){if(storageFail){warnStorage();return}
+  try{localStorage.setItem(KEY,JSON.stringify(store))}catch(e){storageFail=true;warnStorage()}}
+function load(){try{var s=localStorage.getItem(KEY);if(s){var o=JSON.parse(s);store=Object.assign(store,o)}}catch(e){storageFail=true}}
 
-/* motto */
+/* 种子金句 */
+var SEEDS=[
+  {t:'野心、执行力、坚持，这三样东西会无限托举你到命运之上。',src:'flomo'},
+  {t:'自我是做出来的，不是想出来的。',src:'flomo'},
+  {t:'情绪得砸出去，让局面改变。',src:'flomo'},
+  {t:'先潦草开始，再慢慢修正。',src:'flomo'},
+  {t:'我不是好胜，我是要强。',src:'flomo'},
+  {t:'思想要通透，行为不让步。',src:'flomo'},
+  {t:'把"我不擅长"改成"我正在探索"。',src:'flomo'},
+  {t:'别慌，你还在序章里。',src:'flomo'}
+];
+var store={quotes:SEEDS.slice(),dump:[],roam:[],collect:[],five:[],avoid:[],qi:-1};
+load();
+
+/* ============ 视图切换 ============ */
+function go(v){
+  var screens={splash:document.getElementById('scr-splash'),map:document.getElementById('scr-map'),page:document.getElementById('scr-page')};
+  Object.keys(screens).forEach(function(k){screens[k].classList.remove('on')});
+  if(v==='map'){renderMap();screens.map.classList.add('on');document.getElementById('scr-map').scrollTop=0;return}
+  if(v==='splash'){screens.splash.classList.add('on');return}
+  /* page */
+  var name=v.replace('page-','');
+  screens.page.classList.add('on');
+  setPageMeta(name);renderAll(name);
+  document.getElementById('scr-page').scrollTop=0;
+}
+window.go=go;
+
+var PAGES={
+  today:['Today','今天慢慢翻'],
+  dump:['Brain Dump','先倒空脑子'],
+  wander:['Wander','任思绪漫游'],
+  collect:['Collect','看上的就收下'],
+  direction:['Direction','只圈这五件']
+};
+function setPageMeta(name){
+  document.getElementById('pgEn').textContent=PAGES[name][0];
+  document.getElementById('pgCn').textContent=PAGES[name][1];
+  document.getElementById('pgDate').textContent=todayCn();
+  ['today','dump','wander','collect','direction'].forEach(function(k){
+    var el=document.getElementById('v-'+k);el.style.display=(k===name)?'flex':'none'});
+}
+function renderAll(name){
+  if(name==='today'){startClock();renderQuote()}
+  if(name==='dump')renderDump();
+  if(name==='wander')renderRoam();
+  if(name==='collect')renderCollect();
+  if(name==='direction')renderDirection();
+}
+
+/* ============ 开屏 ============ */
+function fillSplash(){
+  var d=new Date();var wd=['日','一','二','三','四','五','六'];
+  document.getElementById('spDate').textContent=d.getFullYear()+'.'+pad2(d.getMonth()+1)+'.'+pad2(d.getDate());
+  document.getElementById('spClock').textContent=nowHM();
+  document.getElementById('spWeek').textContent='星期'+wd[d.getDay()];
+}
+setInterval(fillSplash,30000);
+document.getElementById('planetBtn').addEventListener('click',function(){go('map')});
+
+/* ============ 目录 ============ */
+function renderMap(){
+  document.getElementById('mapDate').textContent=todayCn();
+  var h='';var order=['today','dump','wander','collect','direction'];
+  order.forEach(function(k){var p=PAGES[k];
+    h+='<div class="map-item" onclick="go(\'page-'+k+'\')">'+
+       '<span class="dot"><i></i></span>'+
+       '<span class="tx"><span class="en">'+p[0]+'</span><span class="cn">'+p[1]+'</span></span></div>'});
+  document.getElementById('mapList').innerHTML=h;
+}
+
+/* ============ 时钟 ============ */
 function getGreeting(){
   var h=new Date().getHours();
   if(h>=5&&h<11)return '新的一天，不急，慢慢来';
@@ -264,218 +393,197 @@ function getGreeting(){
 function startClock(){
   function tick(){
     var n=new Date();
-    var pad=function(x){return ('0'+x).slice(-2)};
-    document.getElementById('clock').textContent=pad(n.getHours())+':'+pad(n.getMinutes());
-    document.getElementById('greet').textContent=getGreeting();
+    document.getElementById('tdClock').textContent=nowHM();
+    document.getElementById('tdHello').textContent=getGreeting();
     var passed=n.getHours()*60+n.getMinutes();
-    var pct=(passed/(24*60)*100).toFixed(1);
-    document.getElementById('dayBar').style.width=pct+'%';
-    var left=24*60-passed;
-    var lH=Math.floor(left/60),lM=left%60;
-    document.getElementById('dayProgress').textContent='今天还剩 '+lH+' 小时 '+lM+' 分'
+    document.getElementById('tdBar').style.width=(passed/1440*100).toFixed(2)+'%';
+    var left=1440-passed;
+    document.getElementById('tdRemain').textContent='今天还剩 '+Math.floor(left/60)+' 小时 '+(left%60)+' 分';
   }
-  tick();setInterval(tick,15000)
-}
-function initMotto(){
-  var m=document.getElementById('motto');
-  if(store.motto) m.textContent='"'+store.motto+'。"';
-  m.onclick=function(){var v=prompt('你的座右铭（显示在顶部）：',store.motto||'我无限地爱着新的一日');
-    if(v!==null&&v.trim()){store.motto=v.trim();m.textContent='"'+store.motto+'。"';save()}}
+  tick();clearInterval(window._tick);window._tick=setInterval(tick,15000);
 }
 
-/* A */
-function renderA(){
-  var el=document.getElementById('aList'),h='';
-  store.a.forEach(function(it,i){
-    h+='<div class="item"><span class="no">'+(i+1)+'</span><div class="txt"><div class="name">'+esc(it.t)+'</div>'+
-      (it.why?'<div class="why">图的是：'+esc(it.why)+'</div>':'')+'</div>'+
-      '<button class="act" onclick="pickA('+i+')">做它</button>'+
-      '<button class="del" onclick="delA('+i+')">×</button></div>';
-  });
-  el.innerHTML=h||'<p class="empty-state">还没有 A。能写出一件就够了。</p>';
-  var add=document.querySelector('#aList').parentNode.querySelector('.add');
-  if(add)add.style.display=store.a.length>=5?'none':'flex';
+/* ============ Today 今日一句 ============ */
+function quotePool(){return (store.quotes&&store.quotes.length)?store.quotes:SEEDS}
+function renderQuote(){
+  var q=quotePool();
+  if(!q.length){document.getElementById('tdQuote').textContent='（还没有金句）';return}
+  if(store.qi<0||store.qi>=q.length)store.qi=Math.floor(Math.random()*q.length);
+  var it=q[store.qi];
+  document.getElementById('tdQuote').textContent=it.t+(it.src&&it.src!=='flomo'?'  —'+it.src:'');
 }
+function nextQuote(){var q=quotePool();if(!q.length)return;
+  store.qi=(store.qi+1+Math.random()*q.length|0)%q.length;renderQuote()}
+window.nextQuote=nextQuote;
 
-/* B */
-function renderB(){
-  var el=document.getElementById('bList'),h='';
-  store.b.forEach(function(it,i){
-    h+='<div class="item"><span class="no">·</span><div class="txt"><div class="name">'+esc(it)+'</div></div>'+
-      '<button class="act" onclick="reviveB('+i+')">转正</button>'+
-      '<button class="del" onclick="delB('+i+')">×</button></div>';
-  });
-  el.innerHTML=h||'<p class="empty-state">还没有放下的东西。想到一件现在不该管的，丢进来。</p>';
+/* ============ Brain Dump ============ */
+function addDump(){
+  var i=document.getElementById('dumpInput');var t=i.value.trim();if(!t){toast('先写点什么');return}
+  store.dump.unshift({id:uid(),date:today(),text:t});i.value='';save();renderDump();toast('倒出来了，轻了一点')
 }
+function renderDump(){
+  var el=document.getElementById('dumpList');
+  document.getElementById('dumpCnt').textContent=store.dump.length+' 段 · 可移存';
+  var h='';
+  store.dump.forEach(function(d){
+    var dstr=(d.date||'').slice(5).replace('-','.');
+    h+='<div class="row"><span class="no">·</span><div class="txt"><div class="nm">'+esc(d.text)+'</div>'+
+       '<div class="meta">'+esc(dstr)+'<button class="act" style="margin-left:10px" onclick="pickDump(\''+d.id+'\')">移存</button> · '+
+       '<button class="act" onclick="delDump(\''+d.id+'\')">丢弃</button></div></div></div>'});
+  el.innerHTML=h||'<div class="row" style="border-bottom:0"><span class="no">·</span><div class="txt"><div class="nm" style="color:var(--faint);font-size:13px">还没倒过。有什么堵着的，先写出来。</div></div></div>';
+}
+function delDump(id){store.dump=store.dump.filter(function(d){return d.id!==id});save();renderDump();toast('已丢弃')}
+window.delDump=delDump;
+var pickingId=null;
+function pickDump(id){pickingId=id;document.getElementById('picker').classList.add('on')}
+window.pickDump=pickDump;
+function hidePicker(){document.getElementById('picker').classList.remove('on')}
+window.hidePicker=hidePicker;
+function pickTo(target){
+  var d=store.dump.find(function(x){return x.id===pickingId});if(!d){hidePicker();return}
+  var t=d.text;var date=d.date;
+  store.dump=store.dump.filter(function(x){return x.id!==pickingId});
+  if(target==='roam')store.roam.unshift({id:uid(),date:date,text:t});
+  if(target==='collect')store.collect.unshift({id:uid(),date:date,text:t,src:'',quote:false});
+  if(target==='five'){if(store.five.length>=5){toast('五件事已满');store.dump.unshift(d);save();renderDump();hidePicker();return}store.five.push({t:t,why:'',year:new Date().getFullYear()})}
+  if(target==='avoid')store.avoid.unshift(t);
+  save();hidePicker();renderDump();toast('已移存')
+}
+window.pickTo=pickTo;
 
-/* today */
-function renderToday(){
-  var t=store.today,d=today();
-  if(!t.date||t.date!==d){store.today={date:d,item:null,steps:['','',''],deadline:'',done:false};save()}
-  t=store.today;
-  var empty=document.getElementById('todayEmpty'),body=document.getElementById('todayBody');
-  if(!t.item){empty.style.display='block';body.style.display='none';return}
-  empty.style.display='none';body.style.display='block';
-  document.getElementById('todayAction').textContent=t.item.t;
-  document.getElementById('s1').value=t.steps[0]||'';document.getElementById('s2').value=t.steps[1]||'';
-  document.getElementById('s3').value=t.steps[2]||'';document.getElementById('deadline').value=t.deadline||'';
-  var done=document.getElementById('doneWrap');
-  done.classList.toggle('done',!!t.done);
-  var lb=document.getElementById('doneLabel');
-  lb.innerHTML=t.done?'<span class="yes">已完成</span> · 记得去写反馈':'做完了，去写一行反馈';
-  document.getElementById('doneChk').checked=!!t.done;
+/* ============ Wander ============ */
+function addRoam(){
+  var i=document.getElementById('roamInput');var t=i.value.trim();if(!t){toast('先写点什么');return}
+  var now=new Date();var hour=now.getHours();
+  var seg=hour<5?'深夜':hour<11?'清晨':hour<14?'正午':hour<17?'午后':hour<21?'傍晚':'夜里';
+  store.roam.unshift({id:uid(),date:today(),text:t,seg:seg});i.value='';save();renderRoam();toast('记下了')
 }
-function pickA(i){
-  var it=store.a[i];
-  store.today={date:today(),item:{t:it.t},steps:['','',''],deadline:'',done:false};
-  save();renderToday();window.scrollTo({top:0,behavior:'smooth'});
-  toast('已定为今日一件');
+function renderRoam(){
+  var el=document.getElementById('roamList');
+  var h='';
+  store.roam.slice(0,60).forEach(function(r){
+    var d=(r.date||'').slice(5).replace('-','.');
+    h+='<div class="row"><span class="no">·</span><div class="txt"><div class="nm">'+esc(r.text)+'</div>'+
+       '<div class="meta">'+esc(d+(r.seg?' · '+r.seg:''))+'<button class="act" style="margin-left:10px" onclick="delRoam(\''+r.id+'\')">删除</button></div></div></div>'});
+  el.innerHTML=h||'<div class="row" style="border-bottom:0"><span class="no">·</span><div class="txt"><div class="nm" style="color:var(--faint);font-size:13px">还没有漫游。随便写点什么，想到哪写到哪。</div></div></div>';
 }
-function changeToday(){store.today.item=null;save();renderToday()}
-function saveTodayNotes(){
-  var t=store.today;if(!t)return;
-  t.steps=[document.getElementById('s1').value,document.getElementById('s2').value,document.getElementById('s3').value];
-  t.deadline=document.getElementById('deadline').value;save()
-}
-function toggleDone(){
-  var t=store.today;t.done=document.getElementById('doneChk').checked;save();renderToday();
-  if(t.done){toast('收工。写一行反馈吧');var f=document.getElementById('feedbackInput');
-    setTimeout(function(){f.focus();f.scrollIntoView({behavior:'smooth'})},250)}
-}
+function delRoam(id){store.roam=store.roam.filter(function(r){return r.id!==id});save();renderRoam()}
+window.delRoam=delRoam;
 
-/* feed */
-function renderFeed(){
-  var ks=Object.keys(store.history).sort().reverse().slice(0,12),h='';
-  ks.forEach(function(k){var f=store.history[k];
-    h+='<div class="feed-item"><div class="d">'+esc(f.date)+' · '+esc(f.action||'')+'</div><div class="t">'+esc(f.doing)+(f.feeling?' · '+esc(f.feeling):'')+'</div></div>'});
-  document.getElementById('feedList').innerHTML=h||'<p class="feed-empty">完成第一件后，这里会出现第一行。</p>';
+/* ============ Collect ============ */
+function addCollect(){
+  var i=document.getElementById('collectInput');var t=i.value.trim();if(!t){toast('先输入内容');return}
+  store.collect.unshift({id:uid(),date:today(),text:t,src:'',quote:false});i.value='';save();renderCollect();toast('收下了')
 }
-function saveFeedback(){
-  var v=document.getElementById('feedbackInput').value.trim();if(!v)return;
-  var t=store.today;
-  var parts=v.split(/[·・]/);
-  store.history[today()+'-'+uid()]={date:today(),action:(t&&t.item)?t.item.t:'',
-    doing:parts[0].trim(),feeling:parts.slice(1).join('·').trim()};
-  save();document.getElementById('feedbackInput').value='';renderFeed();toast('已记下 — 你的说明书原料')
+function renderCollect(){
+  var el=document.getElementById('collectList');var h='';
+  store.collect.forEach(function(c){
+    h+='<div class="row"><span class="no">·</span><div class="txt"><div class="nm">'+esc(c.text)+'</div>'+
+       '<div class="meta">'+(c.src?esc(c.src):'<span class="act" onclick="setSrc(\''+c.id+'\')">加来源</span>')+
+       '<button class="act" style="margin-left:10px" onclick="delCollect(\''+c.id+'\')">删除</button></div></div>'+
+       '<button class="act" style="font-size:17px;text-decoration:none;line-height:1.2;color:'+(c.quote?'#b08968':'#d5d2ca')+'" onclick="toggleQuote(\''+c.id+'\')">'+(c.quote?'★':'☆')+'</button></div>'});
+  el.innerHTML=h||'<div class="row" style="border-bottom:0"><span class="no">·</span><div class="txt"><div class="nm" style="color:var(--faint);font-size:13px">看到喜欢的话、有用的方法，收在这里。</div></div></div>';
 }
+function toggleQuote(id){var c=store.collect.find(function(x){return x.id===id});if(!c)return;
+  c.quote=!c.quote;
+  if(c.quote){store.quotes=store.quotes.filter(function(q){return q.t!==c.text});store.quotes.push({t:c.text,src:c.src||''})}
+  else{store.quotes=store.quotes.filter(function(q){return q.t!==c.text})}
+  save();renderCollect();toast(c.quote?'已进今日一句':'移出金句池')
+}
+window.toggleQuote=toggleQuote;
+function setSrc(id){var c=store.collect.find(function(x){return x.id===id});if(!c)return;
+  var v=prompt('来源（可写作者/平台）',c.src||'');if(v!==null){c.src=v.trim();if(c.quote){var q=store.quotes.find(function(x){return x.t===c.text});if(q)q.src=c.src}save();renderCollect()}}
+window.setSrc=setSrc;
+function delCollect(id){var c=store.collect.find(function(x){return x.id===id});
+  if(c&&c.quote)store.quotes=store.quotes.filter(function(q){return q.t!==c.text});
+  store.collect=store.collect.filter(function(x){return x.id!==id});save();renderCollect()}
+window.delCollect=delCollect;
 
-/* add/remove */
-function addA(){
-  var i=document.getElementById('aInput'),t=i.value.trim();
-  if(!t)return;
-  if(store.a.length>=5){toast('A 最多 5 件，想换先移除一件');return}
+/* ============ Direction ============ */
+function addFive(){
+  if(store.five.length>=5){toast('五件事已满，先放下一件');return}
+  var i=document.getElementById('fiveInput');var t=i.value.trim();if(!t)return;
   var why=prompt('它图什么？（一句话真话，可跳过）')||'';
-  store.a.push({t:t,why:why});i.value='';save();renderA()
+  store.five.push({t:t,why:why,year:new Date().getFullYear()});i.value='';save();renderDirection();toast('圈下了')
 }
-function delA(i){store.a.splice(i,1);save();renderA()}
-function addB(){
-  var i=document.getElementById('bInput'),t=i.value.trim();if(!t)return;
-  store.b.push(t);i.value='';save();renderB();toast('放下了')
+function delFive(idx){store.five.splice(idx,1);save();renderDirection()}
+window.delFive=delFive;
+function renderFive(){
+  var el=document.getElementById('fiveList');var h='';
+  store.five.forEach(function(f,idx){
+    h+='<div class="row"><span class="no">'+String(idx+1).padStart(2,'0')+'</span>'+
+       '<div class="txt"><div class="nm">'+esc(f.t)+(f.why?'<span style="color:var(--faint);font-size:12px"> · '+esc(f.why)+'</span>':'')+'</div>'+
+       '<div class="meta">'+(f.year?f.year+' 年圈下':'')+'</div></div>'+
+       '<button class="btn-del" onclick="delFive('+idx+')">×</button></div>'});
+  if(store.five.length<5){
+    var slots=5-store.five.length;
+    for(var i=0;i<Math.min(slots,2);i++){
+      h+='<div class="row" style="border-bottom:0"><span class="no" style="color:var(--line)">'+String(store.five.length+i+1).padStart(2,'0')+'</span>'+
+         '<div class="txt"><div class="nm" style="color:var(--faint);font-size:13px">'+(i===0?'空位——从倾倒 / 漫游里长出来':'')+'</div></div></div>'}}
+  el.innerHTML=h;
 }
-function delB(i){store.b.splice(i,1);save();renderB()}
-function reviveB(i){
-  var t=store.b[i];
-  if(store.a.length>=5){toast('A 已满，先移除一件 A');return}
-  store.b.splice(i,1);
-  var why=prompt('它图什么？')||'';store.a.push({t:t,why:why});save();renderA();renderB();toast('已转正进 A')
+function addAvoid(){var i=document.getElementById('avoidInput');var t=i.value.trim();if(!t)return;
+  store.avoid.unshift(t);i.value='';save();renderDirection();toast('放下了')}
+function delAvoid(idx){store.avoid.splice(idx,1);save();renderDirection()}
+window.delAvoid=delAvoid;
+function reviveAvoid(idx){
+  if(store.five.length>=5){toast('五件事已满，先放下一件');return}
+  var t=store.avoid[idx];store.avoid.splice(idx,1);
+  var why=prompt('它图什么？')||'';store.five.push({t:t,why:why,year:new Date().getFullYear()});
+  save();renderDirection();toast('转正进五件事')
+}
+window.reviveAvoid=reviveAvoid;
+function renderDirection(){
+  document.getElementById('fiveMeta').textContent=store.five.length+' / 5 · '+(store.five.length===5?'满':'一年一次');
+  var yr=store.five.length?store.five[0].year:null;
+  document.getElementById('fiveNote').textContent=(yr&&yr<new Date().getFullYear())?'新的一年了——重新圈一次这五件':'只圈五件 · 其余先放下';
+  renderFive();
+  var al=document.getElementById('avoidList');var h='';
+  store.avoid.forEach(function(t,idx){
+    h+='<div class="row"><span class="no">·</span><div class="txt"><div class="nm done-txt">'+esc(t)+'</div></div>'+
+       '<button class="act" onclick="reviveAvoid('+idx+')">转正</button>'+
+       '<button class="btn-del" onclick="delAvoid('+idx+')">×</button></div>'});
+  al.innerHTML=h||'<div class="row" style="border-bottom:0"><span class="no">·</span><div class="txt"><div class="nm" style="color:var(--faint);font-size:13px">想到一件现在不该管的，丢进来。</div></div></div>';
 }
 
-/* export */
-function weekOf(d){var x=new Date(d);x.setDate(x.getDate()-(x.getDay()+6)%7);
-  var y=x.getFullYear();var w=Math.ceil((((x-new Date(y,0,1))/86400000)+x.getDay()+1)/7);
-  return y+' 第'+w+'周'}
-function exportMarkdown(){
-  var now=new Date(),wk=weekOf(now);
-  var ks=Object.keys(store.history).filter(function(k){return weekOf(new Date(store.history[k].date))===wk}).sort();
-  var L=['# 反馈 · '+wk,'','> 来源：清晰工作台',''];
-  ks.forEach(function(k){var f=store.history[k];
-    L.push('## '+f.date+' · '+(f.action||'一件小事'));L.push('- '+f.doing);
-    if(f.feeling)L.push('- 感受：'+f.feeling);L.push('')});
-  if(!ks.length)L.push('（本周还没有反馈）');
-  var txt=L.join('\n'),box=document.getElementById('exportOut');
-  box.textContent=txt;box.style.display='block';
-  copyText(txt)
+/* ============ 导出 ============ */
+function showExport(){document.getElementById('exportPanel').style.display='flex'}
+function hideExport(){document.getElementById('exportPanel').style.display='none'}
+window.showExport=showExport;window.hideExport=hideExport;
+window.addDump=addDump;window.addRoam=addRoam;window.addCollect=addCollect;
+window.addFive=addFive;window.addAvoid=addAvoid;
+function copyText(t){
+  if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(t).then(function(){toast('已复制')},function(){toast('复制失败，见下方文本')})}
+  else{var x=document.createElement('textarea');x.value=t;document.body.appendChild(x);x.select();try{document.execCommand('copy')}catch(e){}document.body.removeChild(x);toast('已复制')}
 }
+function withinWeek(dateStr){var now=new Date(),x=new Date(dateStr);if(isNaN(x))return false;
+  var a=new Date(now.getFullYear(),now.getMonth(),now.getDate());var b=new Date(x.getFullYear(),x.getMonth(),x.getDate());
+  return Math.round((a-b)/86400000)>=0&&Math.round((a-b)/86400000)<7}
+function exportMarkdown(){
+  var wk=weekTag();var L=['# 漫游周报 · '+wk,'','> the map of me 本周导出',''];
+  var cnt=0;
+  function pushDump(){var arr=store.dump.filter(function(d){return withinWeek(d.date)});if(arr.length){L.push('## 倾倒');arr.forEach(function(d){L.push('- ('+d.date+') '+d.text);cnt++});L.push('')}}
+  function pushRoam(){var arr=store.roam.filter(function(r){return withinWeek(r.date)});if(arr.length){L.push('## 漫游 / 闪念');arr.forEach(function(r){L.push('- ('+r.date+' · '+(r.seg||'')+') '+r.text);cnt++});L.push('')}}
+  function pushCollect(){var arr=store.collect.filter(function(c){return withinWeek(c.date)});if(arr.length){L.push('## 收集');arr.forEach(function(c){L.push('- '+(c.quote?'★':'')+' '+c.text+(c.src?' — '+c.src:''));cnt++});L.push('')}}
+  function pushFive(){if(store.five.length){L.push('## 今年五件事');store.five.forEach(function(f){L.push('- '+f.t+(f.why?'（图：'+f.why+'）':''))});L.push('')}}
+  function pushQuotes(){var mine=(store.quotes||[]).filter(function(q){return q.src&&q.src!=='flomo'});if(mine.length){L.push('## 新加入的金句');mine.forEach(function(q){L.push('- '+q.t+(q.src?' — '+q.src:''))});L.push('')}}
+  pushDump();pushRoam();pushCollect();pushFive();pushQuotes();
+  if(!cnt)L.push('（本周还没有内容）');
+  L.push('', '---', '', '> 请帮手提炼：找出本周反复出现的卡点 / 念头，建议下周观察什么。');
+  copyText(L.join('\n'));
+  toast('已复制 — 贴进收件箱或发我')
+}
+window.exportMarkdown=exportMarkdown;
 function backupJSON(){
   var b=new Blob([JSON.stringify(store,null,2)],{type:'application/json'});
-  var a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='工作台备份-'+today()+'.json';a.click()
+  var a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='mapofme-backup-'+today()+'.json';a.click();
+  toast('备份已下载')
 }
-function copyText(t){
-  if(navigator.clipboard&&navigator.clipboard.writeText){
-    navigator.clipboard.writeText(t).then(function(){toast('已复制，可直接粘贴保存')},function(){})
-  }else{var x=document.createElement('textarea');x.value=t;document.body.appendChild(x);x.select();
-    try{document.execCommand('copy')}catch(e){}document.body.removeChild(x)}
-}
+window.backupJSON=backupJSON;
 
-window.addA=addA;window.delA=delA;window.addB=addB;window.delB=delB;
-window.reviveB=reviveB;window.pickA=pickA;window.changeToday=changeToday;
-window.saveTodayNotes=saveTodayNotes;window.toggleDone=toggleDone;
-window.saveFeedback=saveFeedback;window.exportMarkdown=exportMarkdown;window.backupJSON=backupJSON;
-
-/* ---- 密码锁 ---- */
-var LOCK_KEY='liz-workbench-lock';
-function lockHash(s){var h=5381;for(var i=0;i<s.length;i++){h=((h<<5)+h+s.charCodeAt(i))>>>0}
-  return 'l'+h.toString(36)+'_'+s.length.toString(36)}
-function lockRead(){try{return localStorage.getItem(LOCK_KEY)}catch(e){return undefined}}
-function initAll(){
-  document.getElementById('todayLabel').textContent=todayCn();
-  startClock();initMotto();renderA();renderB();renderToday();renderFeed();
-}
-function setupFirstLock(){
-  var sc=document.getElementById('lockScreen');
-  if(lockRead()!==undefined&&lockRead()!==null){showUnlock();return}
-  if(storageFail){sc.style.display='none';initAll();return} /* 预览环境无存储 → 不锁 */
-  sc.style.display='flex';
-  var sub=document.getElementById('lockSub'),btn=document.getElementById('lockBtn'),
-      inp=document.getElementById('lockInput'),err=document.getElementById('lockErr'),
-      hint=document.getElementById('lockHint');
-  var temp='',step=1;
-  function renderStep(){
-    inp.value='';err.textContent='';
-    if(step===1){sub.textContent='欢迎使用，先设一个密码';btn.textContent='下一步';
-      hint.textContent='之后每次打开都需要它，请记好'}
-    else{sub.textContent='再输入一次，确认密码';btn.textContent='完成';
-      hint.textContent='两次一致才生效'}
-  }
-  renderStep();inp.focus();
-  btn.onclick=function(){
-    var v=inp.value;
-    if(!v){err.textContent='先输入密码';return}
-    if(step===1){temp=v;step=2;renderStep()}
-    else{
-      if(v!==temp){err.textContent='两次不一致，重新来';step=1;temp='';renderStep();return}
-      try{localStorage.setItem(LOCK_KEY,lockHash(v))}catch(e){}
-      sc.style.display='none';initAll();toast('密码已设置')
-    }
-  };
-  inp.onkeydown=function(e){if(e.key==='Enter')btn.click()};
-}
-function showUnlock(){
-  var sc=document.getElementById('lockScreen');
-  if(storageFail||lockRead()===null||lockRead()===undefined){sc.style.display='none';initAll();return}
-  sc.style.display='flex';
-  var sub=document.getElementById('lockSub'),btn=document.getElementById('lockBtn'),
-      inp=document.getElementById('lockInput'),err=document.getElementById('lockErr'),
-      hint=document.getElementById('lockHint');
-  inp.value='';err.textContent='';
-  sub.textContent='输入密码，进入你的空间';btn.textContent='进入';
-  hint.textContent='你的数据只存在这台设备的浏览器里';
-  inp.focus();
-  function go(){
-    var v=inp.value;
-    if(!v){err.textContent='请输入密码';return}
-    if(lockRead()===lockHash(v)){sc.style.display='none';initAll()}
-    else{err.textContent='密码不对，再试一次';inp.value='';inp.focus()}
-  }
-  btn.onclick=go;
-  inp.onkeydown=function(e){if(e.key==='Enter')go()};
-}
-/* 入口 */
-load();
-if(lockRead()===null||lockRead()===undefined){setupFirstLock()}
-else{showUnlock()}
-
-
+/* ============ 启动 ============ */
+fillSplash();
+go('splash');
 })();
 </script>
 </body>
