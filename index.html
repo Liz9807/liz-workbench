@@ -935,8 +935,26 @@ function parseMarkdown(text){
       else curSection='';
       continue;
     }
-    if(line.indexOf('- ')===0){
-      records.push({section:curSection,firstLine:line.slice(2).trim(),restLines:[]});
+    if(/^-\s+/.test(line)){
+      var fline=line.replace(/^-\s+/,'').trim();
+      /* 容错：没标题时按内容自动分类 */
+      var sec=curSection;
+      if(!sec){
+        if(fline.match(/^\(\d{4}-\d{2}-\d{2}\)/)||/^20\d{2}\.\d{2}\.\d{2}/.test(fline)){
+          sec='roam';
+        }else if(fline.indexOf('@')===0||/@\S+[｜|]\S+/.test(fline)){
+          sec='collect';
+        }else{
+          /* 没有 @ 也没有日期 → 默认按 collect（更通用的容器） */
+          sec='collect';
+        }
+      }
+      records.push({section:sec,firstLine:fline,restLines:[]});
+      continue;
+    }
+    /* 容错：@作者｜平台 也可能没有 `- ` 前缀（用户复制时漏了） */
+    if(!curSection && /^@\S+[｜|]\S+/.test(trimmed) && records.length>0 && records[records.length-1].section==='collect'){
+      records[records.length-1].restLines.push(trimmed);
       continue;
     }
     if(records.length>0 && trimmed){
