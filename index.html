@@ -114,7 +114,7 @@ button:active{opacity:.6}
 .row:last-child{border-bottom:0}
 .row .no{font-size:12px;color:var(--faint);font-variant-numeric:tabular-nums;line-height:1.6;flex:0 0 auto}
 .row .txt{flex:1;min-width:0}
-.row .nm{font-size:14px;line-height:1.6;color:var(--ink);word-break:break-word}
+.row .nm{font-size:14px;line-height:1.6;color:var(--ink);word-break:break-word;white-space:pre-wrap}
 .row .meta{font-size:11.5px;color:var(--faint);margin-top:2px;line-height:1.5}
 .row .meta b{color:var(--sub);font-weight:400}
 .grp-h{display:flex;align-items:baseline;gap:8px;width:100%;text-align:left;
@@ -301,6 +301,22 @@ button:active{opacity:.6}
     <button class="pi" onclick="pickTo('five')">移到 五件事</button>
     <button class="pi" onclick="pickTo('avoid')">移到 不做什么</button>
     <button class="pi cancel" onclick="hidePicker()">取消</button>
+  </div>
+</div>
+
+<!-- 编辑面板 -->
+<div id="editPanel" style="display:none;position:fixed;inset:0;z-index:90;align-items:center;justify-content:center;background:rgba(40,37,32,.22)">
+  <div style="background:#fff;border-radius:16px;width:min(380px,92vw);padding:18px 16px 16px;max-height:86vh;display:flex;flex-direction:column">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+      <div style="font-size:15px;font-weight:600">编辑</div>
+      <button class="linkdim" style="font-size:11px" onclick="hideEdit()">关闭</button>
+    </div>
+    <div id="editDate" style="font-size:11.5px;color:var(--faint);margin-bottom:8px"></div>
+    <textarea id="editTextarea" style="width:100%;flex:1;min-height:30vh;font-size:16px;line-height:1.55;color:var(--ink);border:1px solid var(--line);background:var(--fill);border-radius:10px;padding:10px;outline:none;resize:vertical"></textarea>
+    <div style="display:flex;gap:8px;margin-top:12px">
+      <button class="s-pill alt" style="margin-top:0;flex:1" onclick="hideEdit()">取消</button>
+      <button class="s-pill" style="margin-top:0;flex:1" onclick="saveEdit()">保存</button>
+    </div>
   </div>
 </div>
 
@@ -758,7 +774,8 @@ function renderDump(){
   document.getElementById('dumpCnt').textContent=store.dump.length+' 段 · 可移存';
   function itemHtml(d){
     return '<div class="row"><span class="no">·</span><div class="txt"><div class="nm">'+esc(d.text)+'</div>'+
-      '<div class="meta">'+archDay(d.date)+' · <button class="act" onclick="pickDump(\''+d.id+'\')">移存</button> · '+
+      '<div class="meta">'+archDay(d.date)+' · <button class="act" onclick="editItem(\''+d.id+'\',\'dump\')">编辑</button> · '+
+      '<button class="act" onclick="pickDump(\''+d.id+'\')">移存</button> · '+
       '<button class="act" onclick="delDump(\''+d.id+'\')">丢弃</button></div></div></div>';
   }
   var h=groupedHtml(store.dump,'dump',itemHtml);
@@ -792,7 +809,8 @@ function renderRoam(){
   var el=document.getElementById('roamList');
   function itemHtml(r){
     return '<div class="row"><span class="no">·</span><div class="txt"><div class="nm">'+esc(r.text)+'</div>'+
-      '<div class="meta">'+archDay(r.date)+' · <button class="act" onclick="delRoam(\''+r.id+'\')">删除</button></div></div></div>';
+      '<div class="meta">'+archDay(r.date)+' · <button class="act" onclick="editItem(\''+r.id+'\',\'roam\')">编辑</button> · '+
+      '<button class="act" onclick="delRoam(\''+r.id+'\')">删除</button></div></div></div>';
   }
   var h=groupedHtml(store.roam.slice(0,60),'roam',itemHtml);
   el.innerHTML=h||'<div class="row" style="border-bottom:0"><span class="no">·</span><div class="txt"><div class="nm" style="color:var(--faint);font-size:13px">还没有漫游。随便写点什么，想到哪写到哪。</div></div></div>';
@@ -809,7 +827,8 @@ function renderCollect(){
   var el=document.getElementById('collectList');
   function itemHtml(c){
     return '<div class="row"><span class="no">·</span><div class="txt"><div class="nm">'+esc(c.text)+'</div>'+
-      '<div class="meta">'+archDay(c.date)+' · <button class="act" onclick="delCollect(\''+c.id+'\')">删除</button></div></div>'+
+      '<div class="meta">'+archDay(c.date)+' · <button class="act" onclick="editItem(\''+c.id+'\',\'collect\')">编辑</button> · '+
+      '<button class="act" onclick="delCollect(\''+c.id+'\')">删除</button></div></div>'+
       '<button class="act" style="font-size:17px;text-decoration:none;line-height:1.2;color:'+(c.quote?'#b08968':'#d5d2ca')+'" onclick="toggleQuote(\''+c.id+'\')">'+(c.quote?'★':'☆')+'</button></div>';
   }
   var h=groupedHtml(store.collect,'collect',itemHtml);
@@ -826,6 +845,59 @@ function delCollect(id){var c=store.collect.find(function(x){return x.id===id});
   if(c&&c.quote)store.quotes=store.quotes.filter(function(q){return q.t!==c.text});
   store.collect=store.collect.filter(function(x){return x.id!==id});save();renderCollect()}
 window.delCollect=delCollect;
+
+/* ============ 编辑（dump/roam/collect 共用） ============ */
+var editingId=null,editingType=null;
+function editItem(id,type){
+  if(!store[type])return;
+  var item=store[type].find(function(x){return x.id===id});
+  if(!item)return;
+  editingId=id;editingType=type;
+  var ta=document.getElementById('editTextarea');
+  ta.value=item.text||'';
+  /* 同步 textarea 高度到内容 */
+  ta.style.height='auto';
+  ta.style.height=Math.max(ta.scrollHeight,180)+'px';
+  /* 显示日期作为辅助信息 */
+  var dateEl=document.getElementById('editDate');
+  if(dateEl)dateEl.textContent=archDay(item.date);
+  document.getElementById('editPanel').style.display='flex';
+  /* 延迟聚焦并把光标移到末尾 */
+  setTimeout(function(){
+    ta.focus();
+    ta.setSelectionRange(ta.value.length,ta.value.length);
+  },80);
+}
+function hideEdit(){
+  document.getElementById('editPanel').style.display='none';
+  editingId=null;editingType=null;
+}
+function saveEdit(){
+  if(!editingId||!editingType)return;
+  var ta=document.getElementById('editTextarea');
+  var t=ta.value;
+  /* 编辑时允许空内容 = 删除 */
+  if(!t.trim()){
+    if(!confirm('内容为空，确认删除这条？'))return;
+    store[editingType]=store[editingType].filter(function(x){return x.id!==editingId});
+  }else{
+    var item=store[editingType].find(function(x){return x.id===editingId});
+    if(!item){hideEdit();return}
+    /* 收集的 ★ 标记：如果文本变了，从金句池清理旧文本 */
+    if(editingType==='collect' && item.quote && item.text!==t){
+      store.quotes=store.quotes.filter(function(q){return q.t!==item.text});
+      item.quote=false;
+    }
+    item.text=t;
+  }
+  save();
+  if(editingType==='dump')renderDump();
+  if(editingType==='roam')renderRoam();
+  if(editingType==='collect')renderCollect();
+  hideEdit();
+  toast('已保存');
+}
+window.editItem=editItem;window.hideEdit=hideEdit;window.saveEdit=saveEdit;
 
 /* ============ Direction ============ */
 function addFive(){
