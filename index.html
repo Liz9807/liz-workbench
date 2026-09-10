@@ -155,7 +155,7 @@ button:active{opacity:.6}
 .s-key{color:var(--sub)}
 .s-val{color:var(--ink);font-variant-numeric:tabular-nums}
 .s-val.muted{color:var(--faint)}
-.s-input{width:100%;font-family:ui-monospace,monospace;font-size:12px;letter-spacing:.3px;color:var(--ink);border:1px solid var(--line);background:var(--fill);border-radius:8px;padding:9px 10px;outline:none;margin-top:8px}
+.s-input{width:100%;font-family:ui-monospace,monospace;font-size:16px;line-height:1.4;letter-spacing:.3px;color:var(--ink);border:1px solid var(--line);background:var(--fill);border-radius:8px;padding:8px 11px;outline:none;margin-top:8px}
 .s-input:focus{border-color:var(--ink);background:#fff}
 .s-help{font-size:11.5px;color:var(--faint);line-height:1.6;margin-top:8px;letter-spacing:.3px}
 .s-pill{display:block;width:100%;background:var(--ink);color:#fff;border-radius:999px;font-size:13px;padding:10px 18px;margin-top:12px;border:0;cursor:pointer}
@@ -308,7 +308,7 @@ button:active{opacity:.6}
       <button class="linkdim" style="font-size:11px" onclick="hideImport()">关闭</button>
     </div>
     <div style="font-size:11.5px;color:var(--faint);line-height:1.6;margin-bottom:10px">把之前导出的 Markdown 整段粘进来，自动识别「漫游 / 闪念」「倾倒」「收集」三个区。带 ★ 的会自动进金句池。</div>
-    <textarea id="importInput" style="width:100%;height:36vh;font-size:12px;font-family:ui-monospace,monospace;color:var(--ink);border:1px solid var(--line);background:var(--fill);border-radius:10px;padding:10px;outline:none;line-height:1.6;resize:vertical" placeholder="把 Markdown 内容粘在这里……"></textarea>
+    <textarea id="importInput" style="width:100%;height:36vh;font-size:16px;font-family:ui-monospace,monospace;line-height:1.5;color:var(--ink);border:1px solid var(--line);background:var(--fill);border-radius:10px;padding:10px;outline:none;resize:vertical" placeholder="把 Markdown 内容粘在这里……"></textarea>
     <div id="importPreview" style="font-size:11.5px;color:var(--sub);margin-top:8px;line-height:1.5;min-height:14px"></div>
     <button class="s-pill" style="margin-top:10px" onclick="doImport()">解析并导入</button>
   </div>
