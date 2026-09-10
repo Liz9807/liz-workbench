@@ -125,6 +125,11 @@ button:active{opacity:.6}
 .grp-b{overflow:hidden}
 .grp-b.collapsed{display:none}
 .grp-b .row:last-child{border-bottom:1px dashed var(--line)}
+.grp-sub{display:flex;align-items:baseline;gap:8px;width:100%;text-align:left;
+  font-family:inherit;font-size:12px;color:var(--sub);font-weight:400;letter-spacing:.5px;
+  padding:8px 2px 6px 14px;border:0;background:none;cursor:pointer}
+.grp-sub .tri{font-size:8px;color:var(--faint);width:12px;flex:0 0 auto;transform:translateY(-1px)}
+.grp-sub .cnt{font-size:11px;color:var(--faint);font-weight:400;margin-left:auto;letter-spacing:0}
 .done-txt{text-decoration:line-through;text-decoration-color:#d5d2ca;color:var(--sub)}
 .btn-row{display:flex;gap:8px;align-items:center;margin-top:12px;flex-wrap:wrap;justify-content:flex-end}
 .act{color:var(--sub);font-size:12px;text-decoration:underline;white-space:nowrap}
@@ -345,13 +350,40 @@ button:active{opacity:.6}
   </div>
 </div>
 
+<!-- 日期范围面板（自定义导出） -->
+<div id="dateRangePanel" style="display:none;position:fixed;inset:0;z-index:91;align-items:center;justify-content:center;background:rgba(40,37,32,.22)">
+  <div style="background:#fff;border-radius:16px;width:min(360px,90vw);padding:20px 18px 16px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+      <div style="font-size:15px;font-weight:600">自定义时间范围</div>
+      <button class="linkdim" style="font-size:11px" onclick="hideDateRange()">关闭</button>
+    </div>
+    <div style="font-size:11.5px;color:var(--faint);margin:6px 0 14px;line-height:1.6">留空表示不限制那一边（默认填上个月到今天）。</div>
+    <div style="font-size:11.5px;color:var(--sub);margin-bottom:6px;letter-spacing:.5px">从</div>
+    <input type="date" id="rangeFrom" style="width:100%;font-size:16px;line-height:1.4;padding:9px 11px;border:1px solid var(--line);background:var(--fill);border-radius:8px;outline:none;margin-bottom:12px;color:var(--ink)">
+    <div style="font-size:11.5px;color:var(--sub);margin-bottom:6px;letter-spacing:.5px">到</div>
+    <input type="date" id="rangeTo" style="width:100%;font-size:16px;line-height:1.4;padding:9px 11px;border:1px solid var(--line);background:var(--fill);border-radius:8px;outline:none;margin-bottom:14px;color:var(--ink)">
+    <div style="display:flex;gap:8px;margin-top:4px">
+      <button class="s-pill alt" style="margin-top:0;flex:1" onclick="hideDateRange()">取消</button>
+      <button class="s-pill" style="margin-top:0;flex:1" onclick="doCustomExport()">导出</button>
+    </div>
+  </div>
+</div>
+
 <!-- 导出面板 -->
 <div id="exportPanel" style="display:none;position:fixed;inset:0;z-index:90;align-items:center;justify-content:center;background:rgba(40,37,32,.22)">
-  <div style="background:#fff;border-radius:16px;width:min(320px,88vw);padding:20px 18px">
+  <div style="background:#fff;border-radius:16px;width:min(360px,90vw);padding:20px 18px;max-height:88vh;overflow-y:auto">
     <div style="font-size:15px;font-weight:600;margin-bottom:6px">导出 / 备份</div>
-    <div style="font-size:11.5px;color:var(--faint);margin-bottom:14px;line-height:1.6">数据只存在这台设备。每周导一次 Markdown，丢进知识库收件箱，由帮手帮你提炼。</div>
+    <div style="font-size:11.5px;color:var(--faint);margin-bottom:14px;line-height:1.6">导出 Markdown 按时间段筛选（ISO 周 · 周一为首）。</div>
+    <div style="font-size:11.5px;color:var(--sub);margin-bottom:6px;letter-spacing:.5px">导出 Markdown</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
+      <button class="s-pill" style="margin-top:0" onclick="exportMarkdown('week')">本周</button>
+      <button class="s-pill alt" style="margin-top:0" onclick="exportMarkdown('lastWeek')">上周</button>
+      <button class="s-pill alt" style="margin-top:0" onclick="exportMarkdown('month')">本月</button>
+      <button class="s-pill alt" style="margin-top:0" onclick="exportMarkdown('all')">全部</button>
+    </div>
+    <button class="s-pill alt" style="margin-top:0;width:100%" onclick="showDateRange()">自定义范围 · 年月日</button>
+    <div style="font-size:11.5px;color:var(--sub);margin:14px 0 6px;letter-spacing:.5px">备份</div>
     <div style="display:flex;flex-direction:column;gap:8px">
-      <button class="pill" onclick="exportMarkdown()">导出本周 Markdown</button>
       <button class="pill" style="background:#f1efe9;color:var(--ink)" onclick="backupJSON()">完整备份 JSON</button>
       <button class="pill" style="background:transparent;border:1px solid var(--line);color:var(--faint);padding:7px" onclick="hideExport()">关闭</button>
     </div>
@@ -406,6 +438,25 @@ function archWeek(dateStr){
 function nowHM(){var n=new Date();return pad2(n.getHours())+':'+pad2(n.getMinutes())}
 /* ---- 按月分组 + 可折叠 ---- */
 function ymOf(dateStr){var p=String(dateStr||'').split('-');return (p[0]&&p[1])?p[0]+'-'+p[1]:''}
+/* ywOf: yyyy-Wxx 格式（ISO 周 · 用 Thursday 决定年份归属） */
+function ywOf(dateStr){
+  var d=new Date(dateStr);if(isNaN(d))return '';
+  var off=(d.getDay()+6)%7;
+  var mon=new Date(d.getFullYear(),d.getMonth(),d.getDate()-off);
+  var thu=new Date(mon.getFullYear(),mon.getMonth(),mon.getDate()+3);
+  var jan1=new Date(thu.getFullYear(),0,1);
+  var w=Math.ceil(((mon-jan1)/86400000+jan1.getDay()+1)/7);
+  return thu.getFullYear()+'-W'+pad2(w);
+}
+/* weekTitle: yyyy-Wxx → "Week 37 · Sept. 7-13" */
+function weekTitle(yw){
+  var m=String(yw||'').match(/^(\d{4})-W(\d{2})$/);if(!m)return yw;
+  var y=parseInt(m[1],10),w=parseInt(m[2],10);
+  var jan1=new Date(y,0,1);
+  var mon=new Date(jan1.getFullYear(),jan1.getMonth(),jan1.getDate()+(w-1)*7-(jan1.getDay()+6)%7);
+  var sun=new Date(mon.getFullYear(),mon.getMonth(),mon.getDate()+6);
+  return 'Week '+w+' · '+MON_EN[mon.getMonth()]+' '+mon.getDate()+'-'+sun.getDate();
+}
 function archTitle(ym){var p=ym.split('-');var m=parseInt(p[1],10);
   return (p[0]+'｜'+(MON_EN[m-1]||''))||ym}
 function isCollapsed(grp,ym){
@@ -415,33 +466,74 @@ function isCollapsed(grp,ym){
   var cur=ymOf(today());
   return ym!==cur;
 }
+function isCollapsedWeek(grp,yw){
+  var f=store.foldWeek||{};
+  if(f[grp]&&yw in f[grp])return f[grp][yw];
+  var cur=ywOf(today());
+  return yw!==cur;
+}
 function toggleGroup(grp,ym){
   store.fold=store.fold||{};
   store.fold[grp]=store.fold[grp]||{};
   store.fold[grp][ym]=!isCollapsed(grp,ym);
   save();
-  /* 重渲染当前所属页面 */
   if(grp==='dump')renderDump();
   if(grp==='roam')renderRoam();
   if(grp==='collect')renderCollect();
 }
-window.toggleGroup=toggleGroup;
-/* arr 需含 date；itemHtml(it) 返回行 html */
-function groupedHtml(arr,grp,itemHtml){
+function toggleWeek(grp,yw){
+  store.foldWeek=store.foldWeek||{};
+  store.foldWeek[grp]=store.foldWeek[grp]||{};
+  store.foldWeek[grp][yw]=!isCollapsedWeek(grp,yw);
+  save();
+  if(grp==='dump')renderDump();
+  if(grp==='roam')renderRoam();
+  if(grp==='collect')renderCollect();
+}
+window.toggleGroup=toggleGroup;window.toggleWeek=toggleWeek;
+/* arr 需含 date；itemHtml(it) 返回行 html；opts.subGroup='week' 加周子分组 */
+function groupedHtml(arr,grp,itemHtml,opts){
+  opts=opts||{};
   if(!arr||!arr.length)return '';
-  var groups={},order=[];
+  var sub=opts.subGroup==='week';
+  /* 第一层：ym 月份 */
+  var months={},mOrder=[];
   arr.forEach(function(it){
     var ym=ymOf(it.date)||'xxxx-xx';
-    if(!groups[ym]){groups[ym]=[];order.push(ym)}
-    groups[ym].push(it);
+    if(!months[ym]){months[ym]={};mOrder.push(ym)}
+    if(sub){
+      var yw=ywOf(it.date)||'xxxx-W00';
+      if(!months[ym][yw])months[ym][yw]=[];
+      months[ym][yw].push(it);
+    }else{
+      if(!months[ym].list)months[ym].list=[];
+      months[ym].list.push(it);
+    }
   });
+  function countMonth(g){
+    if(g.list)return g.list.length;
+    var n=0;Object.keys(g).forEach(function(k){n+=g[k].length});return n;
+  }
+  function renderMonthBody(g){
+    if(!sub)return (g.list||[]).map(itemHtml).join('');
+    var yws=Object.keys(g).sort().reverse();
+    var h='';
+    yws.forEach(function(yw){
+      var open=!isCollapsedWeek(grp,yw);
+      h+='<button class="grp-sub" onclick="toggleWeek(\''+grp+'\',\''+yw+'\')">'+
+         '<span class="tri">'+(open?'▾':'▸')+'</span><span>'+esc(weekTitle(yw))+'</span>'+
+         '<span class="cnt">'+g[yw].length+'</span></button>'+
+         '<div class="grp-b'+(open?'':' collapsed')+'">'+g[yw].map(itemHtml).join('')+'</div>';
+    });
+    return h;
+  }
   var h='';
-  order.forEach(function(ym){
+  mOrder.forEach(function(ym){
     var open=!isCollapsed(grp,ym);
     h+='<button class="grp-h" onclick="toggleGroup(\''+grp+'\',\''+ym+'\')">'+
        '<span class="tri">'+(open?'▾':'▸')+'</span><span>'+esc(archTitle(ym))+'</span>'+
-       '<span class="cnt">'+groups[ym].length+'</span></button>'+
-       '<div class="grp-b'+(open?'':' collapsed')+'">'+groups[ym].map(itemHtml).join('')+'</div>';
+       '<span class="cnt">'+countMonth(months[ym])+'</span></button>'+
+       '<div class="grp-b'+(open?'':' collapsed')+'">'+renderMonthBody(months[ym])+'</div>';
   });
   return h;
 }
@@ -778,7 +870,7 @@ function renderDump(){
       '<button class="act" onclick="pickDump(\''+d.id+'\')">移存</button> · '+
       '<button class="act" onclick="delDump(\''+d.id+'\')">丢弃</button></div></div></div>';
   }
-  var h=groupedHtml(store.dump,'dump',itemHtml);
+  var h=groupedHtml(store.dump,'dump',itemHtml,{subGroup:'week'});
   el.innerHTML=h||'<div class="row" style="border-bottom:0"><span class="no">·</span><div class="txt"><div class="nm" style="color:var(--faint);font-size:13px">还没倒过。有什么堵着的，先写出来。</div></div></div>';
 }
 function delDump(id){store.dump=store.dump.filter(function(d){return d.id!==id});save();renderDump();toast('已丢弃')}
@@ -812,7 +904,7 @@ function renderRoam(){
       '<div class="meta">'+archDay(r.date)+' · <button class="act" onclick="editItem(\''+r.id+'\',\'roam\')">编辑</button> · '+
       '<button class="act" onclick="delRoam(\''+r.id+'\')">删除</button></div></div></div>';
   }
-  var h=groupedHtml(store.roam.slice(0,60),'roam',itemHtml);
+  var h=groupedHtml(store.roam.slice(0,60),'roam',itemHtml,{subGroup:'week'});
   el.innerHTML=h||'<div class="row" style="border-bottom:0"><span class="no">·</span><div class="txt"><div class="nm" style="color:var(--faint);font-size:13px">还没有漫游。随便写点什么，想到哪写到哪。</div></div></div>';
 }
 function delRoam(id){store.roam=store.roam.filter(function(r){return r.id!==id});save();renderRoam()}
@@ -831,7 +923,7 @@ function renderCollect(){
       '<button class="act" onclick="delCollect(\''+c.id+'\')">删除</button></div></div>'+
       '<button class="act" style="font-size:17px;text-decoration:none;line-height:1.2;color:'+(c.quote?'#b08968':'#d5d2ca')+'" onclick="toggleQuote(\''+c.id+'\')">'+(c.quote?'★':'☆')+'</button></div>';
   }
-  var h=groupedHtml(store.collect,'collect',itemHtml);
+  var h=groupedHtml(store.collect,'collect',itemHtml,{subGroup:'week'});
   el.innerHTML=h||'<div class="row" style="border-bottom:0"><span class="no">·</span><div class="txt"><div class="nm" style="color:var(--faint);font-size:13px">看到喜欢的话、有用的方法，收在这里。</div></div></div>';
 }
 function toggleQuote(id){var c=store.collect.find(function(x){return x.id===id});if(!c)return;
@@ -959,21 +1051,89 @@ function copyText(t){
 function withinWeek(dateStr){var now=new Date(),x=new Date(dateStr);if(isNaN(x))return false;
   var a=new Date(now.getFullYear(),now.getMonth(),now.getDate());var b=new Date(x.getFullYear(),x.getMonth(),x.getDate());
   return Math.round((a-b)/86400000)>=0&&Math.round((a-b)/86400000)<7}
-function exportMarkdown(){
-  var wk=weekTag();var L=['# 漫游周报 · '+wk,'','> the map of me 本周导出',''];
+/* 时间范围（按 ISO 周） */
+function rangeOf(type){
+  var now=new Date();
+  var td=new Date(now.getFullYear(),now.getMonth(),now.getDate());
+  if(type==='week'||type==='lastWeek'){
+    var off=(td.getDay()+6)%7;
+    var thisMon=new Date(td.getFullYear(),td.getMonth(),td.getDate()-off);
+    if(type==='lastWeek'){
+      var lm=new Date(thisMon.getFullYear(),thisMon.getMonth(),thisMon.getDate()-7);
+      var ls=new Date(thisMon.getFullYear(),thisMon.getMonth(),thisMon.getDate()-1);
+      return {from:lm,to:ls};
+    }
+    var su=new Date(thisMon.getFullYear(),thisMon.getMonth(),thisMon.getDate()+6);
+    return {from:thisMon,to:su};
+  }
+  if(type==='month'){
+    var f=new Date(td.getFullYear(),td.getMonth(),1);
+    var l=new Date(td.getFullYear(),td.getMonth()+1,0);
+    return {from:f,to:l};
+  }
+  return null; /* all */
+}
+function withinRange(dateStr,range){
+  if(!range)return true;
+  var d=new Date(dateStr);if(isNaN(d))return false;
+  var x=new Date(d.getFullYear(),d.getMonth(),d.getDate());
+  return x>=range.from && x<=range.to;
+}
+function rangeLabel(type){
+  return {week:'本周（周一-周日）',lastWeek:'上周',month:'本月',all:'全部'}[type]||'全部';
+}
+function exportMarkdown(type){
+  type=type||'week';
+  doExport(rangeOf(type),rangeLabel(type));
+}
+window.exportMarkdown=exportMarkdown;
+function doExport(range,label){
+  var wk=archWeek();
+  var L=['# 漫游导出 · '+label,'','> the map of me 导出',''];
   var cnt=0;
-  function pushDump(){var arr=store.dump.filter(function(d){return withinWeek(d.date)});if(arr.length){L.push('## 倾倒');arr.forEach(function(d){L.push('- ('+d.date+') '+d.text);cnt++});L.push('')}}
-  function pushRoam(){var arr=store.roam.filter(function(r){return withinWeek(r.date)});if(arr.length){L.push('## 漫游 / 闪念');arr.forEach(function(r){L.push('- ('+r.date+') '+r.text);cnt++});L.push('')}}
-  function pushCollect(){var arr=store.collect.filter(function(c){return withinWeek(c.date)});if(arr.length){L.push('## 收集');arr.forEach(function(c){L.push('- '+(c.quote?'★':'')+' '+c.text+(c.src?' — '+c.src:''));cnt++});L.push('')}}
+  function inRange(d){
+    if(!range)return true;
+    var x=new Date(d.date);
+    if(range.from && x<range.from)return false;
+    if(range.to && x>range.to)return false;
+    return true;
+  }
+  function pushDump(){var arr=store.dump.filter(inRange);if(arr.length){L.push('## 倾倒');arr.forEach(function(d){L.push('- ('+d.date+') '+d.text);cnt++});L.push('')}}
+  function pushRoam(){var arr=store.roam.filter(inRange);if(arr.length){L.push('## 漫游 / 闪念');arr.forEach(function(r){L.push('- ('+r.date+') '+r.text);cnt++});L.push('')}}
+  function pushCollect(){var arr=store.collect.filter(inRange);if(arr.length){L.push('## 收集');arr.forEach(function(c){L.push('- '+(c.quote?'★':'')+' '+c.text+(c.src?' — '+c.src:''));cnt++});L.push('')}}
   function pushFive(){if(store.five.length){L.push('## 今年五件事');store.five.forEach(function(f){L.push('- '+f.t+(f.why?'（图：'+f.why+'）':''))});L.push('')}}
   function pushQuotes(){var mine=(store.quotes||[]).filter(function(q){return q.src&&q.src!=='flomo'});if(mine.length){L.push('## 新加入的金句');mine.forEach(function(q){L.push('- '+q.t+(q.src?' — '+q.src:''))});L.push('')}}
   pushDump();pushRoam();pushCollect();pushFive();pushQuotes();
-  if(!cnt)L.push('（本周还没有内容）');
-  L.push('', '---', '', '> 请帮手提炼：找出本周反复出现的卡点 / 念头，建议下周观察什么。');
+  if(!cnt)L.push('（这个时间段还没有内容）');
+  L.push('', '---', '', '> 请帮手提炼：找出反复出现的卡点 / 念头，建议下周观察什么。');
   copyText(L.join('\n'));
-  toast('已复制 — 贴进收件箱或发我')
+  toast('已复制 '+label+' — 贴进收件箱或发我')
 }
-window.exportMarkdown=exportMarkdown;
+
+/* ============ 自定义日期范围导出 ============ */
+function showDateRange(){
+  var now=new Date();
+  var monthAgo=new Date(now.getFullYear(),now.getMonth()-1,now.getDate());
+  var fEl=document.getElementById('rangeFrom');var tEl=document.getElementById('rangeTo');
+  if(fEl)fEl.value=monthAgo.getFullYear()+'-'+pad2(monthAgo.getMonth()+1)+'-'+pad2(monthAgo.getDate());
+  if(tEl)tEl.value=now.getFullYear()+'-'+pad2(now.getMonth()+1)+'-'+pad2(now.getDate());
+  document.getElementById('dateRangePanel').style.display='flex';
+}
+function hideDateRange(){document.getElementById('dateRangePanel').style.display='none'}
+function doCustomExport(){
+  var fEl=document.getElementById('rangeFrom');var tEl=document.getElementById('rangeTo');
+  var f=fEl?fEl.value:'';var t=tEl?tEl.value:'';
+  if(!f && !t){toast('至少填一边');return}
+  if(f && t && f>t){toast('起始日不能晚于结束日');return}
+  var from=f?new Date(f+'T00:00:00'):null;
+  var to=t?new Date(t+'T23:59:59'):null;
+  var range={from:from,to:to};
+  var label=(f&&t)?(f+' ~ '+t):(f?('从 '+f):('截至 '+t));
+  doExport(range,label);
+  hideDateRange();
+  hideExport();
+}
+window.showDateRange=showDateRange;window.hideDateRange=hideDateRange;window.doCustomExport=doCustomExport;
 function backupJSON(){
   var b=new Blob([JSON.stringify(store,null,2)],{type:'application/json'});
   var a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='mapofme-backup-'+today()+'.json';a.click();
