@@ -83,9 +83,12 @@ button:active{opacity:.6}
 .map-back{width:30px;height:30px;border-radius:50%;border:1px solid var(--brown-faint);color:var(--brown-sub);
   display:flex;align-items:center;justify-content:center;font-size:17px;line-height:1;font-family:-apple-system,sans-serif}
 .map-date{position:absolute;top:26px;right:24px;font-size:10px;letter-spacing:2px;color:var(--brown-faint)}
-.map-clock{position:absolute;top:16px;left:0;right:0;text-align:center}
-.map-title{position:absolute;top:104px;left:0;right:0;text-align:center;font-size:16px;color:#6a6354;letter-spacing:9px;font-style:italic}
-.map-mid{position:absolute;top:140px;bottom:120px;left:0;right:0;display:flex;align-items:center;justify-content:center;gap:clamp(18px,5vw,40px);padding:0 7%}
+.map-clock{position:absolute;top:118px;left:0;right:0;text-align:center}
+.map-clock #mapClock{font-family:'Songti SC','Noto Serif SC',serif;font-size:40px;font-weight:600;color:#3a3530;letter-spacing:3px;line-height:1.1}
+.map-title{position:absolute;top:60px;left:0;right:0;text-align:center;font-size:16px;color:#6a6354;letter-spacing:9px;font-style:italic}
+.map-bar{position:absolute;top:182px;left:0;right:0;text-align:center}
+.map-bar div[style*="margin:0 26%"]{margin:0 22% !important}
+.map-mid{position:absolute;top:238px;bottom:118px;left:0;right:0;display:flex;align-items:center;justify-content:center;gap:clamp(18px,5vw,40px);padding:0 7%}
 .map-tools{position:absolute;bottom:52px;left:0;right:0;text-align:center;font-size:11px;color:var(--faint);letter-spacing:.5px;line-height:1.6}
 .map-planet{position:relative;flex:0 0 auto}
 .map-planet .mini{position:relative;width:clamp(64px,17vw,88px);height:clamp(64px,17vw,88px);border-radius:50%;background:radial-gradient(circle at 35% 30%,#fbfcf8 0%,#e6ede0 50%,#c8d3bf 100%);box-shadow:inset -4px -6px 0 rgba(120,135,108,.2)}
@@ -206,14 +209,16 @@ button:active{opacity:.6}
 <div id="scr-map" class="screen">
   <div class="map-in">
     <span class="map-top"><button class="map-back" onclick="go('splash')" aria-label="回开屏">‹</button></span><span class="map-date" id="mapDate"></span>
+    <div class="map-title">the map of me</div>
     <div class="map-clock">
-      <div id="mapClock" style="font-family:'Songti SC','Noto Serif SC',serif;font-size:24px;font-weight:300;color:#3a3530;letter-spacing:2px;line-height:1.1">--:--</div>
-      <div style="height:2px;background:var(--line);border-radius:2px;margin:10px 22% 0;overflow:hidden">
+      <div id="mapClock">--:--</div>
+    </div>
+    <div class="map-bar">
+      <div style="height:2px;background:var(--line);border-radius:2px;margin:0 26%;overflow:hidden">
         <div style="height:100%;width:0;background:var(--ink);border-radius:3px;transition:width .5s" id="tdBar"></div>
       </div>
-      <div style="font-size:10.5px;color:var(--brown-faint);letter-spacing:1px;margin-top:7px" id="tdRemain">今天还剩 -- 小时 -- 分</div>
+      <div style="font-size:10.5px;color:var(--brown-faint);letter-spacing:1px;margin-top:6px" id="tdRemain">今天还剩 -- 小时 -- 分</div>
     </div>
-    <div class="map-title">the map of me</div>
     <div class="map-mid">
       <div class="map-planet">
         <div class="ring"></div>
@@ -279,11 +284,9 @@ button:active{opacity:.6}
     <!-- Direction -->
     <div id="v-direction" style="display:none;flex-direction:column;flex:1">
       <div class="sec-title">最重要的五件事<span class="side">目标越清晰，行动越坚定</span></div>
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
-        <select id="fiveYear" onchange="setFiveYear(this.value)" style="font-family:inherit;font-size:13px;padding:5px 10px;border:1px solid var(--line);border-radius:8px;background:var(--fill);color:var(--ink);outline:none;cursor:pointer"></select>
-      </div>
       <textarea id="fiveInput" rows="2" placeholder="写下一件真想推进的…" style="height:auto"></textarea>
       <div class="btn-row"><button class="pill" onclick="addFive()">＋</button></div>
+      <div style="margin:-4px 0 6px"><select id="fiveYear" onchange="setFiveYear(this.value)" style="font-family:inherit;font-size:12px;padding:4px 8px;border:1px solid var(--line);border-radius:8px;background:var(--fill);color:var(--faint);outline:none;cursor:pointer"></select></div>
       <div id="fiveList"></div>
       <div id="fiveArch"></div>
       <div class="sec-title" style="margin-top:26px">减法人生<span class="side">比起做加法，做减法才是最佳解法</span></div>
