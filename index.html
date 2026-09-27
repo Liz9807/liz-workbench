@@ -70,6 +70,7 @@ button:active{opacity:.6}
 .star.g{color:#c9a47f}
 .splash-star1{top:12%;left:22%}.splash-star2{top:16%;right:26%;font-size:5px}.splash-star3{bottom:24%;left:18%;font-size:5px}
 .splash-star4{bottom:26%;right:16%;color:#b89e7c}.splash-star5{bottom:16%;left:32%;font-size:5px;color:#8a8275}
+.splash-quote{position:absolute;bottom:17.5%;left:0;right:0;text-align:center}
 .splash-motto{position:absolute;bottom:13%;left:0;right:0;text-align:center;font-size:13px;color:#8a8275;letter-spacing:1px}
 .splash-hint{position:absolute;bottom:6%;left:0;right:0;text-align:center;font-size:10px;color:#c0b8a8;letter-spacing:4px}
 .splash-hint{animation:blink 2.4s infinite}
@@ -82,9 +83,9 @@ button:active{opacity:.6}
 .map-back{width:30px;height:30px;border-radius:50%;border:1px solid var(--brown-faint);color:var(--brown-sub);
   display:flex;align-items:center;justify-content:center;font-size:17px;line-height:1;font-family:-apple-system,sans-serif}
 .map-date{position:absolute;top:26px;right:24px;font-size:10px;letter-spacing:2px;color:var(--brown-faint)}
-.map-title{position:absolute;top:72px;left:0;right:0;text-align:center;font-size:16px;color:#6a6354;letter-spacing:9px;font-style:italic}
-.map-mid{position:absolute;top:100px;bottom:186px;left:0;right:0;display:flex;align-items:center;justify-content:center;gap:clamp(18px,5vw,40px);padding:0 7%}
-.map-quote{position:absolute;left:0;right:0;bottom:104px;text-align:center}
+.map-clock{position:absolute;top:16px;left:0;right:0;text-align:center}
+.map-title{position:absolute;top:104px;left:0;right:0;text-align:center;font-size:16px;color:#6a6354;letter-spacing:9px;font-style:italic}
+.map-mid{position:absolute;top:140px;bottom:120px;left:0;right:0;display:flex;align-items:center;justify-content:center;gap:clamp(18px,5vw,40px);padding:0 7%}
 .map-tools{position:absolute;bottom:52px;left:0;right:0;text-align:center;font-size:11px;color:var(--faint);letter-spacing:.5px;line-height:1.6}
 .map-planet{position:relative;flex:0 0 auto}
 .map-planet .mini{position:relative;width:clamp(64px,17vw,88px);height:clamp(64px,17vw,88px);border-radius:50%;background:radial-gradient(circle at 35% 30%,#fbfcf8 0%,#e6ede0 50%,#c8d3bf 100%);box-shadow:inset -4px -6px 0 rgba(120,135,108,.2)}
@@ -192,6 +193,10 @@ button:active{opacity:.6}
         </div>
       </div>
     </div>
+    <div class="splash-quote">
+      <div id="tdQuote" style="font-size:12.5px;color:#8a8275;line-height:1.9;padding:0 34px;min-height:22px;text-wrap:balance">…</div>
+      <button class="act" style="font-size:10.5px;margin-top:2px" onclick="nextQuote()">换一句 ↻</button>
+    </div>
     <div class="splash-motto serif">我无限地爱着新的一日</div>
     <div class="splash-hint serif">· 轻触星球 ·</div>
   </div>
@@ -201,6 +206,13 @@ button:active{opacity:.6}
 <div id="scr-map" class="screen">
   <div class="map-in">
     <span class="map-top"><button class="map-back" onclick="go('splash')" aria-label="回开屏">‹</button></span><span class="map-date" id="mapDate"></span>
+    <div class="map-clock">
+      <div id="mapClock" style="font-family:'Songti SC','Noto Serif SC',serif;font-size:24px;font-weight:300;color:#3a3530;letter-spacing:2px;line-height:1.1">--:--</div>
+      <div style="height:2px;background:var(--line);border-radius:2px;margin:10px 22% 0;overflow:hidden">
+        <div style="height:100%;width:0;background:var(--ink);border-radius:3px;transition:width .5s" id="tdBar"></div>
+      </div>
+      <div style="font-size:10.5px;color:var(--brown-faint);letter-spacing:1px;margin-top:7px" id="tdRemain">今天还剩 -- 小时 -- 分</div>
+    </div>
     <div class="map-title">the map of me</div>
     <div class="map-mid">
       <div class="map-planet">
@@ -208,15 +220,6 @@ button:active{opacity:.6}
         <div class="mini"><span class="a a1"></span><span class="a a2"></span><span class="a a3"></span></div>
       </div>
       <div class="map-list" id="mapList"></div>
-    </div>
-    <div class="map-quote">
-      <div style="font-size:11px;color:var(--faint);letter-spacing:3px;margin-bottom:8px">· 今日一句 ·</div>
-      <div id="tdQuote" style="font-size:13px;color:var(--sub);line-height:1.9;min-height:24px;padding:0 18px">…</div>
-      <button class="act" style="font-size:11.5px;margin-top:4px" onclick="nextQuote()">换一句 ↻</button>
-      <div style="height:2px;background:var(--line);border-radius:2px;margin:16px 20% 0;overflow:hidden">
-        <div style="height:100%;width:0;background:var(--ink);border-radius:3px;transition:width .5s" id="tdBar"></div>
-      </div>
-      <div style="font-size:10.5px;color:var(--brown-faint);letter-spacing:1px;margin-top:8px" id="tdRemain">今天还剩 -- 小时 -- 分</div>
     </div>
     <div class="map-tools">
       <button class="linkdim" onclick="showExport()">导出 · 备份</button>
@@ -275,22 +278,11 @@ button:active{opacity:.6}
 
     <!-- Direction -->
     <div id="v-direction" style="display:none;flex-direction:column;flex:1">
-      <div id="qrBanner" style="display:none;background:var(--fill);border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:14px">
-        <div style="font-size:13px;font-weight:600">季度到了——重跑你的五件事</div>
-        <div id="qrLast" style="font-size:11px;color:var(--faint);margin-top:2px"></div>
-        <div id="qrSteps" style="display:none;font-size:12px;color:var(--sub);line-height:1.8;margin-top:8px">
-          第一步 · 盘点：完成的点 ✓，自动归档<br>
-          第二步 · 放手：不再想做的点 ✗（可顺手写进减法人生）<br>
-          第三步 · 补位：空位写新目标——可以说「帮我用 WOOP 生成目标」让帮手接住你
-        </div>
-        <div style="display:flex;gap:8px;margin-top:10px;align-items:center">
-          <button class="pill" style="padding:6px 14px;font-size:12px" onclick="startQr()">开始重跑</button>
-          <button class="pill" style="background:#f1efe9;color:var(--ink);padding:6px 14px;font-size:12px" onclick="finishQr()">完成重跑</button>
-          <button class="linkdim" style="font-size:11px;margin-left:auto" onclick="qrLater()">稍后</button>
-        </div>
-      </div>
       <div class="sec-title">最重要的五件事<span class="side">目标越清晰，行动越坚定</span></div>
-      <textarea id="fiveInput" rows="2" placeholder="写下一件今年真想推进的…" style="height:auto"></textarea>
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+        <select id="fiveYear" onchange="setFiveYear(this.value)" style="font-family:inherit;font-size:13px;padding:5px 10px;border:1px solid var(--line);border-radius:8px;background:var(--fill);color:var(--ink);outline:none;cursor:pointer"></select>
+      </div>
+      <textarea id="fiveInput" rows="2" placeholder="写下一件真想推进的…" style="height:auto"></textarea>
       <div class="btn-row"><button class="pill" onclick="addFive()">＋</button></div>
       <div id="fiveList"></div>
       <div id="fiveArch"></div>
@@ -319,8 +311,8 @@ button:active{opacity:.6}
 <!-- 五件事已满 · 25/5 联动 -->
 <div id="fullPicker">
   <div class="panel">
-    <div style="font-size:12px;color:var(--sub);padding:12px 14px 4px;line-height:1.7;text-align:left">五件事已满。新的事会挤掉其中一件的精力——</div>
-    <button class="pi" onclick="fpChoice('swap')">替换：先去划掉一件旧的</button>
+    <div style="font-size:12px;color:var(--sub);padding:12px 14px 4px;line-height:1.7;text-align:left">五件事已满。点一件当场放下，新的事补位——</div>
+    <div id="fpList"></div>
     <button class="pi" onclick="fpChoice('sub')">写进减法人生</button>
     <button class="pi cancel" onclick="hideFullPicker()">算了，不加</button>
   </div>
@@ -781,7 +773,7 @@ function go(v){
   var screens={splash:document.getElementById('scr-splash'),map:document.getElementById('scr-map'),page:document.getElementById('scr-page')};
   Object.keys(screens).forEach(function(k){screens[k].classList.remove('on')});
   if(v==='map'){renderMap();screens.map.classList.add('on');document.getElementById('scr-map').scrollTop=0;return}
-  if(v==='splash'){screens.splash.classList.add('on');return}
+  if(v==='splash'){screens.splash.classList.add('on');renderQuote();return}
   /* page */
   var name=v.replace('page-','');
   screens.page.classList.add('on');
@@ -794,7 +786,7 @@ var PAGES={
   dump:['Brain Dump','先倒空脑子'],
   wander:['Wander','任思绪漫游'],
   collect:['Collect','看上的就收下'],
-  direction:['Direction','保护注意力']
+  direction:['Direction','心定 事成 运自转']
 };
 function setPageMeta(name){
   document.getElementById('pgEn').textContent=PAGES[name][0];
@@ -829,12 +821,14 @@ function renderMap(){
        '<span class="dot"><i></i></span>'+
        '<span class="tx"><span class="en">'+p[0]+'</span><span class="cn">'+p[1]+'</span></span></div>'});
   document.getElementById('mapList').innerHTML=h;
-  renderQuote();updateDayBar();
+  updateDayBar();
 }
 
-/* ============ 今日进度条（目录页） ============ */
+/* ============ 时间与进度条（目录页） ============ */
 function updateDayBar(){
   var n=new Date();
+  var ck=document.getElementById('mapClock');
+  if(ck)ck.textContent=nowHM();
   var passed=n.getHours()*60+n.getMinutes();
   var bar=document.getElementById('tdBar');
   if(bar)bar.style.width=(passed/1440*100).toFixed(2)+'%';
@@ -843,7 +837,7 @@ function updateDayBar(){
 }
 setInterval(updateDayBar,60000);
 
-/* ============ Today 今日一句 ============ */
+/* ============ 今日一句（开屏页） ============ */
 function quotePool(){return (store.quotes&&store.quotes.length)?store.quotes:SEEDS}
 function renderQuote(){
   var q=quotePool();
@@ -944,7 +938,7 @@ function editItem(id,type){
   if(!store[type])return;
   var item=store[type].find(function(x){return x.id===id});
   if(!item)return;
-  editingId=id;editingType=type;
+  editingId=id;editingType=type;window._editKind='std';
   var ta=document.getElementById('editTextarea');
   ta.value=item.text||'';
   /* 同步 textarea 高度到内容 */
@@ -962,9 +956,10 @@ function editItem(id,type){
 }
 function hideEdit(){
   document.getElementById('editPanel').style.display='none';
-  editingId=null;editingType=null;
+  editingId=null;editingType=null;window._editKind=null;
 }
 function saveEdit(){
+  if(window._editKind==='five'){saveFiveEdit();return}
   if(!editingId||!editingType)return;
   var ta=document.getElementById('editTextarea');
   var t=ta.value;
@@ -1013,20 +1008,51 @@ function ensureSubSeeds(){
   }
 }
 function activeFive(){return store.five.filter(function(f){return !f.status||f.status==='active'})}
+function ensureFiveYears(){
+  var sel=document.getElementById('fiveYear');if(!sel)return;
+  var years={};
+  store.five.forEach(function(f){if(f.year)years[f.year]=true});
+  years[new Date().getFullYear()]=true;
+  var ys=Object.keys(years).sort().reverse();
+  var cur=store.fiveYearSel||String(new Date().getFullYear());
+  sel.innerHTML=ys.map(function(y){return '<option value="'+y+'"'+(y===cur?' selected':'')+'>'+y+' 年</option>'}).join('');
+}
+function setFiveYear(y){store.fiveYearSel=y;save();renderDirection()}
+window.setFiveYear=setFiveYear;
+function curFiveYear(){return store.fiveYearSel||String(new Date().getFullYear())}
 function addFive(){
   var i=document.getElementById('fiveInput');var t=i.value.trim();if(!t){toast('先写一件');return}
-  if(activeFive().length>=5){window._pendingFive=t;document.getElementById('fullPicker').classList.add('on');return}
+  if(activeFive().length>=5){window._pendingFive=t;showFullPicker();return}
   var why=prompt('它图什么？（一句话真话，可跳过）')||'';
-  store.five.push({t:t,why:why,year:new Date().getFullYear(),status:'active'});i.value='';save();renderDirection();toast('圈下了')
+  store.five.push({t:t,why:why,year:curFiveYear(),status:'active'});i.value='';save();renderDirection();toast('圈下了')
+}
+function showFullPicker(){
+  var list=document.getElementById('fpList');if(list){
+    var act=activeFive();
+    list.innerHTML=act.map(function(f){
+      var idx=store.five.indexOf(f);
+      return '<button class="pi" onclick="fpSwap('+idx+')">放下「'+esc(f.t)+'」，加上新的</button>'}).join('');
+  }
+  document.getElementById('fullPicker').classList.add('on');
+}
+function fpSwap(idx){
+  document.getElementById('fullPicker').classList.remove('on');
+  var t=window._pendingFive||'';window._pendingFive='';
+  var f=store.five[idx];
+  if(confirm('放下「'+f.t+'」？\n\n顺手写进减法人生？（一条被放弃的目标 = 一条不做经验）')){
+    store.avoid.unshift('不推进：'+f.t);
+  }
+  f.status='dropped';f.doneDate=today();
+  store.five.push({t:t,why:'',year:curFiveYear(),status:'active'});
+  save();renderDirection();toast('替换完成');
 }
 function fpChoice(c){
   document.getElementById('fullPicker').classList.remove('on');
   var t=window._pendingFive||'';window._pendingFive='';
   if(c==='sub'){store.avoid.unshift('不开始：'+t);save();renderDirection();toast('写进减法人生——它是个好目标，但不是现在')}
-  if(c==='swap'){toast('去点一条的「✗ 放下」，再回来加这件')}
 }
 function hideFullPicker(){document.getElementById('fullPicker').classList.remove('on');window._pendingFive=''}
-window.fpChoice=fpChoice;window.hideFullPicker=hideFullPicker;
+window.fpChoice=fpChoice;window.hideFullPicker=hideFullPicker;window.fpSwap=fpSwap;
 function doneFive(idx){store.five[idx].status='done';store.five[idx].doneDate=today();save();renderDirection();toast('完成了一件事，了不起')}
 function dropFive(idx){
   var f=store.five[idx];
@@ -1044,24 +1070,21 @@ function toggle5Sec(sec){
 window.toggle5Sec=toggle5Sec;
 function renderFive(){
   var el=document.getElementById('fiveList');var h='';
-  var act=activeFive();
+  var y=curFiveYear();
+  var act=activeFive().filter(function(f){return String(f.year)===y});
   act.forEach(function(f){
     var idx=store.five.indexOf(f);
     h+='<div class="row"><span class="no">'+String(act.indexOf(f)+1).padStart(2,'0')+'</span>'+
        '<div class="txt"><div class="nm">'+esc(f.t)+(f.why?'<span style="color:var(--faint);font-size:12px"> · '+esc(f.why)+'</span>':'')+'</div>'+
        '<div class="meta">'+(f.year?f.year+' 年圈下':'')+
+       ' · <button class="act" onclick="editFive('+idx+')">编辑</button>'+
        ' · <button class="act" onclick="doneFive('+idx+')">✓ 完成</button>'+
        ' · <button class="act" onclick="dropFive('+idx+')">✗ 放下</button></div></div></div>'});
-  if(act.length<5){
-    var slots=5-act.length;
-    for(var i=0;i<Math.min(slots,2);i++){
-      h+='<div class="row" style="border-bottom:0"><span class="no" style="color:var(--line)">'+String(act.length+i+1).padStart(2,'0')+'</span>'+
-         '<div class="txt"><div class="nm" style="color:var(--faint);font-size:13px">'+(i===0?'空位——从倾倒 / 漫游里长出来':'')+'</div></div></div>'}}
-  el.innerHTML=h;
-  /* 归档折叠区（已完成 / 放下的） */
+  el.innerHTML=h||'<div class="row" style="border-bottom:0"><span class="no">·</span><div class="txt"><div class="nm" style="color:var(--faint);font-size:13px">'+y+' 年还没有目标。</div></div></div>';
+  /* 归档折叠区（已完成 / 放下的，同一年份视角） */
   var arch=document.getElementById('fiveArch');var ah='';
-  var done=store.five.filter(function(f){return f.status==='done'});
-  var dropped=store.five.filter(function(f){return f.status==='dropped'});
+  var done=store.five.filter(function(f){return f.status==='done'&&String(f.year)===y});
+  var dropped=store.five.filter(function(f){return f.status==='dropped'&&String(f.year)===y});
   store.fold5=store.fold5||{};
   function archRows(list,word){
     return list.map(function(f){
@@ -1081,36 +1104,37 @@ function addAvoid(){var i=document.getElementById('avoidInput');var t=i.value.tr
   store.avoid.unshift(t);i.value='';save();renderDirection();toast('放下了')}
 function delAvoid(idx){store.avoid.splice(idx,1);save();renderDirection()}
 window.delAvoid=delAvoid;
-function reviveAvoid(idx){
-  if(activeFive().length>=5){toast('五件事已满，先放下一件');return}
-  var t=store.avoid[idx];store.avoid.splice(idx,1);
-  var why=prompt('它图什么？')||'';store.five.push({t:t,why:why,year:new Date().getFullYear(),status:'active'});
-  save();renderDirection();toast('转正进五件事')
+/* 五件事编辑（复用编辑面板，_editKind 分流） */
+var _fiveEditIdx=-1;
+function editFive(idx){
+  _fiveEditIdx=idx;window._editKind='five';
+  var f=store.five[idx];
+  var ta=document.getElementById('editTextarea');
+  ta.value=f.t;
+  var de=document.getElementById('editDate');
+  if(de)de.textContent=(f.year||'')+' 年目标'+(f.why?' · '+f.why:'');
+  document.getElementById('editPanel').style.display='flex';
+  setTimeout(function(){ta.focus();ta.setSelectionRange(ta.value.length,ta.value.length)},80);
 }
-window.reviveAvoid=reviveAvoid;
-/* 季度重跑 */
-function curQ(){var d=new Date();return d.getFullYear()+'-Q'+(Math.floor(d.getMonth()/3)+1)}
-function checkQr(){
-  var b=document.getElementById('qrBanner');if(!b)return;
-  if(window._qrLater===curQ()){b.style.display='none';return}
-  if(store.qrLast!==curQ()){
-    b.style.display='block';
-    document.getElementById('qrLast').textContent='上次重跑：'+(store.qrLast||'还没有过');
-  }else b.style.display='none';
+function saveFiveEdit(){
+  var ta=document.getElementById('editTextarea');var t=ta.value.trim();
+  if(!t){toast('内容不能为空');return}
+  store.five[_fiveEditIdx].t=t;
+  save();renderDirection();
+  document.getElementById('editPanel').style.display='none';
+  window._editKind=null;_fiveEditIdx=-1;
+  toast('已保存');
 }
-function startQr(){document.getElementById('qrSteps').style.display='block'}
-function finishQr(){store.qrLast=curQ();save();document.getElementById('qrBanner').style.display='none';toast('已记录本次重跑')}
-function qrLater(){window._qrLater=curQ();document.getElementById('qrBanner').style.display='none'}
-window.startQr=startQr;window.finishQr=finishQr;window.qrLater=qrLater;
+window.editFive=editFive;
 function renderDirection(){
-  ensureFiveMigrate();ensureSubSeeds();checkQr();
-  var yr=store.five.length?store.five[0].year:null;
-  document.getElementById('fiveNote').textContent=(yr&&yr<new Date().getFullYear())?'新的一年了——重新圈一次这五件':'进行中 '+activeFive().length+' / 5 · 减法条目灵感来自外部方法论，可随时更新成自己的';
+  ensureFiveMigrate();ensureSubSeeds();ensureFiveYears();
+  var y=curFiveYear();
+  var actY=activeFive().filter(function(f){return String(f.year)===y}).length;
+  document.getElementById('fiveNote').textContent='进行中 '+actY+' / 5（'+y+'）· 减法条目灵感来自外部方法论，可随时更新成自己的';
   renderFive();
   var al=document.getElementById('avoidList');var h='';
   store.avoid.forEach(function(t,idx){
-    h+='<div class="row"><span class="no">·</span><div class="txt"><div class="nm done-txt">'+esc(t)+'</div></div>'+
-       '<button class="act" onclick="reviveAvoid('+idx+')">转正</button>'+
+    h+='<div class="row"><span class="no">·</span><div class="txt"><div class="nm">'+esc(t)+'</div></div>'+
        '<button class="btn-del" onclick="delAvoid('+idx+')">×</button></div>'});
   al.innerHTML=h||'<div class="row" style="border-bottom:0"><span class="no">·</span><div class="txt"><div class="nm" style="color:var(--faint);font-size:13px">想到一件现在不该管的，丢进来。</div></div></div>';
 }
