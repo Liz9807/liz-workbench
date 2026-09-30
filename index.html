@@ -388,9 +388,11 @@ button:active{opacity:.6}
     <div style="font-size:11.5px;color:var(--faint);margin-bottom:14px;line-height:1.6">导出 Markdown：选一段时间范围，复制后贴进知识库收件箱。</div>
     <div style="font-size:11.5px;color:var(--sub);margin-bottom:6px;letter-spacing:.5px">导出 Markdown</div>
     <button class="s-pill" style="margin-top:0;width:100%" onclick="showDateRange()">自定义范围 · 年月日</button>
-    <div style="font-size:11.5px;color:var(--sub);margin:14px 0 6px;letter-spacing:.5px">备份</div>
+    <div style="font-size:11.5px;color:var(--sub);margin:14px 0 6px;letter-spacing:.5px">备份 / 恢复</div>
     <div style="display:flex;flex-direction:column;gap:8px">
       <button class="pill" style="background:#f1efe9;color:var(--ink)" onclick="backupJSON()">完整备份 JSON</button>
+      <button class="pill" style="background:transparent;border:1px solid var(--line);color:var(--sub)" onclick="pickRestoreJSON()">从 JSON 恢复（合并式）</button>
+      <input type="file" id="restoreFile" accept=".json,application/json" style="display:none" onchange="restoreFromJSON(this.files[0]);this.value=''">
       <button class="pill" style="background:transparent;border:1px solid var(--line);color:var(--faint);padding:7px" onclick="hideExport()">关闭</button>
     </div>
   </div>
@@ -587,10 +589,38 @@ function getSyncStatusText(){
   return '已配置';
 }
 
+function totalItems(o){return (o.dump||[]).length+(o.roam||[]).length+(o.collect||[]).length+(o.five||[]).length+(o.avoid||[]).length}
+
 async function pushGist(){
   var token=getToken(), gistId=getGistId();
   if(!token)return false;
+  /* 空数据保护：本地几乎没内容时，绝不推空覆盖云端 */
+  if(totalItems(store)===0 && (store.quotes||[]).length<=8){
+    if(gistId){toast('本地没有内容，跳过上传（云端不受影响）');setSyncStatus('ok')}
+    return false;
+  }
   setSyncStatus('syn');
+  /* 已有云端时：先拉远端合并进本地，再推送合并结果——push 永不覆盖丢失 */
+  if(gistId){
+    try{
+      var gr=await fetch('https://api.github.com/gists/'+gistId,{
+        headers:{'Authorization':'token '+token,'Accept':'application/vnd.github+json'}
+      });
+      if(gr.ok){
+        var gd=await gr.json();
+        var gf=gd.files&&gd.files['planet.json'];
+        if(gf){
+          try{
+            var remote=JSON.parse(gf.content);
+            if(remote&&typeof remote==='object'){
+              mergeStore(remote);
+            }
+          }catch(pe){console.error('push merge parse',pe)}
+        }
+      }
+      /* 404 等错误留给下方 PATCH 兜底处理 */
+    }catch(ge){console.error('push pre-fetch',ge)}
+  }
   var body={
     description:'Planet · the map of me backup',
     public:false,
@@ -621,6 +651,65 @@ async function pushGist(){
   }
 }
 
+/* ============ 增量合并核心：任何一边的数据都不被覆盖 ============ */
+function mergeByIdLists(localArr,remoteArr){
+  var seen={};var out=localArr.slice();var added=0;
+  localArr.forEach(function(x){if(x&&x.id)seen[x.id]=true});
+  (remoteArr||[]).forEach(function(x){
+    if(!x||!x.id)return;
+    if(!seen[x.id]){out.push(x);seen[x.id]=true;added++}
+  });
+  return {list:out,added:added};
+}
+function mergeStore(remote){
+  if(!remote||typeof remote!=='object')return {added:0};
+  var before=totalItems(store);
+  var added=0;
+  /* dump / roam / collect：按 id 并集，同 id 取本地 */
+  ['dump','roam','collect'].forEach(function(k){
+    var r=mergeByIdLists(store[k]||[],remote[k]||[]);
+    store[k]=r.list;
+    added+=r.added;
+  });
+  /* five：远端有 id 的条目先认领本地同内容条目（不能先补随机 id），再并集 */
+  var rf=remote.five||[];
+  var seenT={};
+  store.five.forEach(function(f){seenT[(f.t||'')+'|'+(f.year||'')]=true});
+  rf.forEach(function(f){
+    if(!f)return;
+    if(f.id){
+      var dup=store.five.some(function(x){return x.id===f.id});
+      if(!dup){
+        var same=store.five.find(function(x){return !x.id&&(x.t||'')===(f.t||'')&&(x.year||'')===(f.year||'')});
+        if(same){same.id=f.id}
+        else{store.five.push(f);added++}
+      }
+    }else{
+      var key=(f.t||'')+'|'+(f.year||'');
+      if(!seenT[key]){store.five.push(f);seenT[key]=true;added++}
+    }
+  });
+  /* five 合并完才给仍无 id 的本地条目补 uid（顺序不能提前，否则破坏认领） */
+  ensureFiveMigrate();
+  /* avoid：字符串去重 union */
+  var aSeen={};
+  store.avoid.forEach(function(s){aSeen[s]=true});
+  (remote.avoid||[]).forEach(function(s){
+    if(typeof s==='string'&&!aSeen[s]){store.avoid.push(s);aSeen[s]=true;added++}
+  });
+  /* quotes：按 t 文本去重 union（金句池双保险） */
+  var qSeen={};
+  store.quotes.forEach(function(q){qSeen[q.t]=true});
+  (remote.quotes||[]).forEach(function(q){
+    if(q&&q.t&&!qSeen[q.t]){store.quotes.push(q);qSeen[q.t]=true;added++}
+  });
+  /* dump/roam/collect 按 date 倒序（新在前，与分组渲染兼容） */
+  ['dump','roam','collect'].forEach(function(k){
+    store[k].sort(function(a,b){return (b.date||'').localeCompare(a.date||'')});
+  });
+  return {added:added,after:totalItems(store),beforeTotal:before};
+}
+
 async function pullGist(){
   var token=getToken(), gistId=getGistId();
   if(!token||!gistId)return false;
@@ -638,30 +727,13 @@ async function pullGist(){
     var file=data.files&&data.files['planet.json'];
     if(!file){toast('云端无 planet.json');setSyncStatus('ok');return false}
     var remote=JSON.parse(file.content);
-    /* 条数比对 */
-    function total(o){return (o.dump||[]).length+(o.roam||[]).length+(o.collect||[]).length+(o.five||[]).length+(o.avoid||[]).length}
-    var lt=total(store), rt=total(remote);
-    var proceed=true;
-    if(rt>0 && lt!==rt){
-      proceed=confirm('发现云端备份（'+rt+' 条 vs 本地 '+lt+' 条），用云端覆盖本地？\n（确定 = 用云端 / 取消 = 保留本地）');
-    }else if(rt>0 && lt===0){
-      toast('从云端恢复 '+rt+' 条');
-    }
-    if(proceed){
-      /* 合并而非粗暴覆盖：本地的 quotes 池保留（避免覆盖掉 ★ 改动） */
-      var localQuotes=store.quotes?store.quotes.slice():[];
-      store=Object.assign(store,remote);
-      /* 合并金句池 */
-      var seen={};
-      (store.quotes||[]).forEach(function(q){seen[q.t]=true});
-      localQuotes.forEach(function(q){if(!seen[q.t])store.quotes=store.quotes||[],store.quotes.push(q)});
-      save();
-      /* 重渲染当前页 */
-      try{renderDump()}catch(e){}
-      try{renderRoam()}catch(e){}
-      try{renderCollect()}catch(e){}
-      try{renderDirection()}catch(e){}
-    }
+    var r=mergeStore(remote||{});
+    save();
+    try{renderDump()}catch(e){}
+    try{renderRoam()}catch(e){}
+    try{renderCollect()}catch(e){}
+    try{renderDirection()}catch(e){}
+    toast(r.added>0?('同步完成：新增 '+r.added+' 条'):'已是最新');
     bumpLast();setSyncStatus('ok');return true;
   }catch(e){
     setSyncStatus('err');
@@ -1002,7 +1074,10 @@ var SEED_AVOIDS=[
 ];
 function ensureFiveMigrate(){
   var changed=false;
-  store.five.forEach(function(f){if(!f.status){f.status='active';changed=true}});
+  store.five.forEach(function(f){
+    if(!f.status){f.status='active';changed=true}
+    if(!f.id){f.id=uid();changed=true}
+  });
   if(changed)save();
 }
 function ensureSubSeeds(){
@@ -1143,6 +1218,36 @@ function renderDirection(){
 }
 
 /* ============ 导出 ============ */
+/* ============ 从 JSON 恢复（合并式，不覆盖本地） ============ */
+function restoreFromJSON(file){
+  if(!file)return;
+  var reader=new FileReader();
+  reader.onload=function(){
+    try{
+      var obj=JSON.parse(reader.result);
+      if(!obj||typeof obj!=='object'){toast('文件不是有效的备份 JSON');return}
+      var r=mergeStore(obj);
+      save();
+      try{renderDump()}catch(e){}
+      try{renderRoam()}catch(e){}
+      try{renderCollect()}catch(e){}
+      try{renderDirection()}catch(e){}
+      try{renderQuote()}catch(e){}
+      toast('已恢复：新增 '+r.added+' 条（云端下次推送自动包含）');
+      pushSoon();
+    }catch(pe){
+      console.error('restoreFromJSON',pe);
+      toast('恢复失败：'+pe.message);
+    }
+  };
+  reader.readAsText(file);
+}
+function pickRestoreJSON(){
+  var inp=document.getElementById('restoreFile');
+  if(inp)inp.click();
+}
+window.pickRestoreJSON=pickRestoreJSON;window.restoreFromJSON=restoreFromJSON;
+
 function showExport(){document.getElementById('exportPanel').style.display='flex'}
 function hideExport(){document.getElementById('exportPanel').style.display='none'}
 window.showExport=showExport;window.hideExport=hideExport;

@@ -2,7 +2,7 @@
  * 策略：HTML 用 network-first（总拿最新）；静态资源 cache-first（图标/manifest）
  * 版本号改了之后，旧缓存会被自动清理
  */
-const VERSION = 'planet-v6-20260927';
+const VERSION = 'planet-v6b-20260930';
 const STATIC_CACHE = 'planet-static-' + VERSION;
 const HTML_CACHE = 'planet-html-' + VERSION;
 const STATIC_FILES = [
