@@ -231,8 +231,6 @@ button:active{opacity:.6}
       <span class="linkdim-sep">·</span>
       <button class="linkdim" onclick="showSync()">云端同步</button>
       <span class="linkdim-sep">·</span>
-      <button class="linkdim" onclick="showImport()">导入旧数据</button>
-      <span class="linkdim-sep">·</span>
       <button class="linkdim" onclick="checkUpdate()">检查更新</button>
     </div>
     <div class="map-motto">我无限地爱着新的一日</div>
@@ -334,20 +332,6 @@ button:active{opacity:.6}
       <button class="s-pill alt" style="margin-top:0;flex:1" onclick="hideEdit()">取消</button>
       <button class="s-pill" style="margin-top:0;flex:1" onclick="saveEdit()">保存</button>
     </div>
-  </div>
-</div>
-
-<!-- 导入面板 -->
-<div id="importPanel" style="display:none;position:fixed;inset:0;z-index:90;align-items:center;justify-content:center;background:rgba(40,37,32,.22)">
-  <div style="background:#fff;border-radius:16px;width:min(380px,92vw);padding:18px 16px 16px;max-height:86vh;overflow-y:auto">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
-      <div style="font-size:15px;font-weight:600">导入旧数据</div>
-      <button class="linkdim" style="font-size:11px" onclick="hideImport()">关闭</button>
-    </div>
-    <div style="font-size:11.5px;color:var(--faint);line-height:1.6;margin-bottom:10px">把之前导出的 Markdown 整段粘进来，自动识别「漫游 / 闪念」「倾倒」「收集」三个区。带 ★ 的会自动进金句池。</div>
-    <textarea id="importInput" style="width:100%;height:36vh;font-size:16px;font-family:ui-monospace,monospace;line-height:1.5;color:var(--ink);border:1px solid var(--line);background:var(--fill);border-radius:10px;padding:10px;outline:none;resize:vertical" placeholder="把 Markdown 内容粘在这里……"></textarea>
-    <div id="importPreview" style="font-size:11.5px;color:var(--sub);margin-top:8px;line-height:1.5;min-height:14px"></div>
-    <button class="s-pill" style="margin-top:10px" onclick="doImport()">解析并导入</button>
   </div>
 </div>
 
@@ -1350,121 +1334,6 @@ function backupJSON(){
 }
 window.backupJSON=backupJSON;
 
-/* ============ 导入旧 Markdown ============ */
-function showImport(){
-  var p=document.getElementById('importPanel');if(p)p.style.display='flex';
-  var ta=document.getElementById('importInput');if(ta){ta.value='';ta.focus()}
-  var pv=document.getElementById('importPreview');if(pv)pv.textContent='';
-}
-function hideImport(){
-  var p=document.getElementById('importPanel');if(p)p.style.display='none';
-}
-window.showImport=showImport;window.hideImport=hideImport;
-
-function parseMarkdown(text){
-  /* 返回 {roam:[], collect:[], quote:[]} */
-  var roam=[],collect=[];
-  var curSection='';
-  var records=[];
-  var lines=text.split('\n');
-  for(var i=0;i<lines.length;i++){
-    var line=lines[i];var trimmed=line.trim();
-    if(trimmed.indexOf('## ')===0){
-      var s=trimmed.slice(3).trim();
-      if(s.indexOf('漫游')>-1||s.indexOf('闪念')>-1||s.indexOf('倾倒')>-1)curSection='roam';
-      else if(s.indexOf('收集')>-1)curSection='collect';
-      else curSection='';
-      continue;
-    }
-    if(/^-\s+/.test(line)){
-      var fline=line.replace(/^-\s+/,'').trim();
-      /* 容错：没标题时按内容自动分类 */
-      var sec=curSection;
-      if(!sec){
-        if(fline.match(/^\(\d{4}-\d{2}-\d{2}\)/)||/^20\d{2}\.\d{2}\.\d{2}/.test(fline)){
-          sec='roam';
-        }else if(fline.indexOf('@')===0||/@\S+[｜|]\S+/.test(fline)){
-          sec='collect';
-        }else{
-          /* 没有 @ 也没有日期 → 默认按 collect（更通用的容器） */
-          sec='collect';
-        }
-      }
-      records.push({section:sec,firstLine:fline,restLines:[]});
-      continue;
-    }
-    /* 容错：@作者｜平台 也可能没有 `- ` 前缀（用户复制时漏了） */
-    if(!curSection && /^@\S+[｜|]\S+/.test(trimmed) && records.length>0 && records[records.length-1].section==='collect'){
-      records[records.length-1].restLines.push(trimmed);
-      continue;
-    }
-    if(records.length>0 && trimmed){
-      records[records.length-1].restLines.push(trimmed);
-    }
-  }
-  records.forEach(function(rec){
-    if(!rec.section)return;
-    if(rec.section==='roam'){
-      var dateMatch=rec.firstLine.match(/^\((\d{4}-\d{2}-\d{2})\)\s*/);
-      var date=today();var text=rec.firstLine;
-      if(dateMatch){date=dateMatch[1];text=rec.firstLine.slice(dateMatch[0].length)}
-      if(rec.restLines.length)text+='\n'+rec.restLines.join('\n');
-      /* 去掉冗余的 "2026.09.09 周三" 行 */
-      text=text.replace(/^20\d{2}\.\d{2}\.\d{2}\s?周[一二三四五六日]\n?/,'').trim();
-      roam.push({id:uid(),date:date,text:text});
-    }else if(rec.section==='collect'){
-      var ln=rec.firstLine;
-      var src='';var isQuote=false;
-      var starMatch=ln.match(/^(★|☆)\s*/);
-      if(starMatch){isQuote=starMatch[1]==='★';ln=ln.slice(starMatch[0].length).trim()}
-      if(ln.indexOf('@')===0 && rec.restLines.length){
-        src=ln.trim();
-        text=rec.restLines.join('\n').trim();
-      }else{
-        text=ln;
-        if(rec.restLines.length)text+='\n'+rec.restLines.join('\n');
-      }
-      collect.push({id:uid(),date:today(),text:text.trim(),src:src,quote:isQuote});
-    }
-  });
-  return {roam:roam,collect:collect};
-}
-
-function doImport(){
-  var ta=document.getElementById('importInput');
-  var pv=document.getElementById('importPreview');
-  var text=ta?ta.value:'';
-  if(!text.trim()){toast('请粘贴内容');return}
-  var r=parseMarkdown(text);
-  if(!r.roam.length && !r.collect.length){
-    pv.textContent='未识别到内容，请检查格式（需要 ## 漫游 / ## 收集 等标题）';
-    pv.style.color='#b07c7c';
-    return;
-  }
-  /* 合并：导入的在前 */
-  store.roam=r.roam.concat(store.roam||[]);
-  store.collect=r.collect.concat(store.collect||[]);
-  /* ★ 进金句池 */
-  if(!store.quotes)store.quotes=[];
-  r.collect.forEach(function(c){
-    if(c.quote){
-      var seen={};store.quotes.forEach(function(q){seen[q.t]=true});
-      if(!seen[c.text])store.quotes.push({t:c.text,src:c.src||''});
-    }
-  });
-  save();
-  /* 重渲染 */
-  try{renderDump()}catch(e){}
-  try{renderRoam()}catch(e){}
-  try{renderCollect()}catch(e){}
-  try{renderDirection()}catch(e){}
-  pv.style.color='var(--sub)';
-  pv.textContent='✓ 已导入 '+r.roam.length+' 条漫游 · '+r.collect.length+' 条收集（含 '+r.collect.filter(function(c){return c.quote}).length+' 条金句）';
-  toast('导入成功');
-  /* 不自动关闭，留 1.5s 给她看到结果 */
-  setTimeout(function(){hideImport()},1800);
-}
-window.doImport=doImport;
 
 /* ============ 启动 ============ */
 fillSplash();
