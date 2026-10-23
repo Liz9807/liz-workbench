@@ -137,6 +137,19 @@ button:active{opacity:.6}
 .grp-sub .tri{font-size:8px;color:var(--faint);width:12px;flex:0 0 auto;transform:translateY(-1px)}
 .grp-sub .cnt{font-size:11px;color:var(--faint);font-weight:400;margin-left:auto;letter-spacing:0}
 .done-txt{text-decoration:line-through;text-decoration-color:#d5d2ca;color:var(--sub)}
+.d-head{display:flex;align-items:baseline;justify-content:space-between;width:100%;text-align:left;font-family:inherit;font-size:13px;font-weight:600;color:var(--ink);letter-spacing:.5px;padding:12px 2px 8px;border:0;background:none;cursor:pointer}
+.d-head .d-tri{font-size:9px;color:var(--faint)}
+.vision-card{background:var(--fill);border:1px solid var(--line);border-radius:12px;padding:12px 14px;font-size:13px;line-height:1.9;color:var(--sub);white-space:pre-wrap}
+.chk-card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:10px}
+.chk-t{font-size:15px;font-weight:600;color:var(--ink);line-height:1.5}
+.chk-w{font-size:12.5px;color:var(--sub);margin-top:4px;line-height:1.6}
+.chk-row{display:flex;align-items:center;gap:8px;padding:6px 0;font-size:13.5px;color:var(--ink);cursor:pointer}
+.chk-row.lock{color:var(--faint)}
+.chk-row input{accent-color:#3b5b7e;width:16px;height:16px}
+.d7{display:inline-block;width:16px;height:16px;border-radius:4px;margin:0 3px}
+.ifthen{margin-top:10px;padding-top:10px;border-top:1px solid var(--line);font-size:11.5px;line-height:1.8;color:var(--faint)}
+.avoid-tag{font-size:10.5px;border:0.5px solid var(--line);border-radius:4px;padding:0 5px;margin-left:6px;color:var(--faint)}
+.avoid-tag.mine{color:#3b5b7e;border-color:#3b5b7e}
 .btn-row{display:flex;gap:8px;align-items:center;margin-top:12px;flex-wrap:wrap;justify-content:flex-end}
 .act{color:var(--sub);font-size:12px;text-decoration:underline;white-space:nowrap}
 .footnote{text-align:center;font-size:11px;color:var(--faint);letter-spacing:1px;margin-top:22px}
@@ -281,16 +294,61 @@ button:active{opacity:.6}
 
     <!-- Direction -->
     <div id="v-direction" style="display:none;flex-direction:column;flex:1">
-      <div class="sec-title">最重要的五件事<span class="side">目标越清晰，行动越坚定</span></div>
-      <textarea id="fiveInput" rows="2" placeholder="写下一件真想推进的…" style="height:auto"></textarea>
-      <div class="btn-row"><button class="pill" onclick="addFive()">＋</button></div>
-      <div style="margin:-4px 0 6px"><select id="fiveYear" onchange="setFiveYear(this.value)" style="font-family:inherit;font-size:12px;padding:4px 8px;border:1px solid var(--line);border-radius:8px;background:var(--fill);color:var(--faint);outline:none;cursor:pointer"></select></div>
-      <div id="fiveList"></div>
-      <div id="fiveArch"></div>
-      <div class="sec-title" style="margin-top:26px">减法人生<span class="side">比起做加法，做减法才是最佳解法</span></div>
-      <textarea id="avoidInput" rows="2" placeholder="放下一件现在不该管的…" style="height:auto"></textarea>
-      <div class="btn-row"><button class="pill" onclick="addAvoid()">＋</button></div>
-      <div id="avoidList"></div>
+      <button class="d-head" onclick="toggleD('anti')">
+        <span><span class="d-tri" id="dTri-anti">▸</span> 反愿景</span>
+        <span class="side">最后同步 2026-10-23</span>
+      </button>
+      <div id="dBody-anti" class="vision-card" style="display:none">我怕十年后，过得不快乐不自由，还是一只“井底之蛙”，怕没有过上我想要的生活，怕看病的钱都没有，怕养不起老。
+
+我怕这一辈子都找不出一件我真正擅长的事情，我怕别人问我做什么工作？有什么产出？方法论是什么？成就如何？我一句话都说不出来。
+
+我怕这一辈子都活在“不可控”的状态里，总会因为别人的问题，导致我的工作量暴增，活在“什么时候才是个头”，却没有能力逃离出来的恐慌之下。</div>
+
+      <button class="d-head" onclick="toggleD('vision')">
+        <span><span class="d-tri" id="dTri-vision">▸</span> 愿景</span>
+        <span class="side">最后同步 2026-10-23</span>
+      </button>
+      <div id="dBody-vision" class="vision-card" style="display:none">我要对我的生活、工作有绝对的掌控权，我想停的时候就停，不用因为任何人的指令或需求，陷入一种很被动的状态之中。
+
+五年后，我 33 了，已经拥有了 100w 的存款。那个时候的我，一定已经能够非常自信地说出那句“我很满意我自己”的话了。
+
+五年后的我，已经拥有一个我全款买下来的小别墅，过上了不用给别人打工的日子，有一个自己的工作室，可以自己安排工作、休假的时间，有了想出发就出发的自由和底气，有能力去到全国各地，感受不同的文化，拥有更丰富的见解。
+
+五年后的我，有规律的作息，健康的饮食，强健的体魄，精气神充足的气血状态，是个多语言能力者，尤其擅长中英德三门语言，是一个无论外在还是内在，都非常有魅力的人，有很多的兴趣爱好，有独特的审美能力，在做着自己喜欢的事情，有明确的目标，知道每一天具体要做的事，能够从这些事里锻炼自己的能力。
+
+总而言之，五年后，我一定已经在做着那件我喜欢我擅长，还能让我获得经济自由和生活底气的事情。</div>
+
+      <button class="d-head" onclick="toggleD('goals')">
+        <span><span class="d-tri" id="dTri-goals">▾</span> 今年的目标</span>
+        <span class="side">目标越清晰，行动越坚定</span>
+      </button>
+      <div id="dBody-goals">
+        <textarea id="fiveInput" rows="2" placeholder="写下一件真想推进的…" style="height:auto"></textarea>
+        <div class="btn-row"><button class="pill" onclick="addFive()">＋</button></div>
+        <div style="margin:-4px 0 6px"><select id="fiveYear" onchange="setFiveYear(this.value)" style="font-family:inherit;font-size:12px;padding:4px 8px;border:1px solid var(--line);border-radius:8px;background:var(--fill);color:var(--faint);outline:none;cursor:pointer"></select></div>
+        <div id="fiveList"></div>
+        <div id="fiveArch"></div>
+      </div>
+
+      <button class="d-head" onclick="toggleD('check')">
+        <span><span class="d-tri" id="dTri-check">▾</span> 今日打卡</span>
+        <span class="side" id="checkMeta">本月已打 0 天</span>
+      </button>
+      <div id="dBody-check">
+        <div style="margin:2px 0 8px;display:flex;gap:6px;align-items:center" id="last7"></div>
+        <div id="checkList"></div>
+      </div>
+
+      <button class="d-head" onclick="toggleD('sub')">
+        <span><span class="d-tri" id="dTri-sub">▾</span> 减法人生</span>
+        <span class="side">比起做加法，做减法才是最佳解法</span>
+      </button>
+      <div id="dBody-sub">
+        <textarea id="avoidInput" rows="2" placeholder="放下一件现在不该管的…" style="height:auto"></textarea>
+        <div class="btn-row"><button class="pill" onclick="addAvoid()">＋</button></div>
+        <div id="avoidList"></div>
+      </div>
+
       <div class="free-zone"></div>
       <div class="footnote" id="fiveNote"></div>
     </div>
@@ -328,6 +386,7 @@ button:active{opacity:.6}
     </div>
     <div id="editDate" style="font-size:11.5px;color:var(--faint);margin-bottom:8px"></div>
     <textarea id="editTextarea" style="width:100%;flex:1;min-height:30vh;font-size:16px;line-height:1.55;color:var(--ink);border:1px solid var(--line);background:var(--fill);border-radius:10px;padding:10px;outline:none;resize:vertical"></textarea>
+    <label id="editStepsRow" style="display:none;align-items:center;gap:8px;margin-top:10px;font-size:13px;color:var(--sub)"><input type="checkbox" id="editFiveSteps" style="accent-color:#3b5b7e;width:16px;height:16px"> 启用打卡步骤（每日 4 步 + 兜底）</label>
     <div style="display:flex;gap:8px;margin-top:12px">
       <button class="s-pill alt" style="margin-top:0;flex:1" onclick="hideEdit()">取消</button>
       <button class="s-pill" style="margin-top:0;flex:1" onclick="saveEdit()">保存</button>
@@ -372,6 +431,13 @@ button:active{opacity:.6}
     <div style="font-size:11.5px;color:var(--faint);margin-bottom:14px;line-height:1.6">导出 Markdown：选一段时间范围，复制后贴进知识库收件箱。</div>
     <div style="font-size:11.5px;color:var(--sub);margin-bottom:6px;letter-spacing:.5px">导出 Markdown</div>
     <button class="s-pill" style="margin-top:0;width:100%" onclick="showDateRange()">自定义范围 · 年月日</button>
+    <div style="margin-top:10px;display:flex;flex-direction:column;gap:6px">
+      <label style="display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--ink)"><input type="checkbox" id="expDump" checked> 倾倒</label>
+      <label style="display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--ink)"><input type="checkbox" id="expRoam" checked> 漫游 / 闪念</label>
+      <label style="display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--ink)"><input type="checkbox" id="expCollect" checked> 收集</label>
+      <label style="display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--ink)"><input type="checkbox" id="expDir" checked> Direction（打卡逐日 + 减法新增）</label>
+    </div>
+    <div style="font-size:11px;color:var(--faint);margin-top:6px;line-height:1.6">不包含反愿景 / 愿景 / 目标清单（正本在知识库）。导出后：打卡记录 → 贴《英语阅读｜10周学习目标》；减法新增 → 贴《我的人生系统》不做清单。</div>
     <div style="font-size:11.5px;color:var(--sub);margin:14px 0 6px;letter-spacing:.5px">备份 / 恢复</div>
     <div style="display:flex;flex-direction:column;gap:8px">
       <button class="pill" style="background:#f1efe9;color:var(--ink)" onclick="backupJSON()">完整备份 JSON</button>
@@ -675,17 +741,30 @@ function mergeStore(remote){
   });
   /* five 合并完才给仍无 id 的本地条目补 uid（顺序不能提前，否则破坏认领） */
   ensureFiveMigrate();
-  /* avoid：字符串去重 union */
+  /* avoid：对象 {t,seed} 按 t 去重 union */
   var aSeen={};
-  store.avoid.forEach(function(s){aSeen[s]=true});
-  (remote.avoid||[]).forEach(function(s){
-    if(typeof s==='string'&&!aSeen[s]){store.avoid.push(s);aSeen[s]=true;added++}
+  store.avoid.forEach(function(a){aSeen[a.t]=true});
+  (remote.avoid||[]).forEach(function(a){
+    if(!a)return;
+    var o=(typeof a==='string')?{t:a,seed:SEED_AVOIDS.indexOf(a)>-1}:a;
+    if(o.t&&!aSeen[o.t]){store.avoid.push(o);aSeen[o.t]=true;added++}
   });
   /* quotes：按 t 文本去重 union（金句池双保险） */
   var qSeen={};
   store.quotes.forEach(function(q){qSeen[q.t]=true});
   (remote.quotes||[]).forEach(function(q){
     if(q&&q.t&&!qSeen[q.t]){store.quotes.push(q);qSeen[q.t]=true;added++}
+  });
+  /* checks：按 日期→目标id→勾选数组 union（双设备不同日期互不覆盖） */
+  var rc=remote.checks||{};
+  store.checks=store.checks||{};
+  Object.keys(rc).forEach(function(d){
+    if(!store.checks[d]){store.checks[d]=rc[d];return}
+    Object.keys(rc[d]||{}).forEach(function(fid){
+      if(!store.checks[d][fid]){store.checks[d][fid]=rc[d][fid];return}
+      var seen={};store.checks[d][fid].forEach(function(x){seen[x]=true});
+      (rc[d][fid]||[]).forEach(function(x){if(!seen[x]){store.checks[d][fid].push(x);seen[x]=true}});
+    });
   });
   /* dump/roam/collect 按 date 倒序（新在前，与分组渲染兼容） */
   ['dump','roam','collect'].forEach(function(k){
@@ -824,7 +903,7 @@ var SEEDS=[
   {t:'把"我不擅长"改成"我正在探索"。',src:'flomo'},
   {t:'别慌，你还在序章里。',src:'flomo'}
 ];
-var store={quotes:SEEDS.slice(),dump:[],roam:[],collect:[],five:[],avoid:[],qi:-1,fold:{}};
+var store={quotes:SEEDS.slice(),dump:[],roam:[],collect:[],five:[],avoid:[],checks:{},qi:-1,fold:{},foldD:{}};
 load();
 
 /* ============ 视图切换 ============ */
@@ -998,6 +1077,8 @@ function editItem(id,type){
   var item=store[type].find(function(x){return x.id===id});
   if(!item)return;
   editingId=id;editingType=type;window._editKind='std';
+  var row=document.getElementById('editStepsRow');
+  if(row)row.style.display='none';
   var ta=document.getElementById('editTextarea');
   ta.value=item.text||'';
   /* 同步 textarea 高度到内容 */
@@ -1047,15 +1128,28 @@ window.editItem=editItem;window.hideEdit=hideEdit;window.saveEdit=saveEdit;
 
 /* ============ Direction · 加法与减法 ============ */
 var SEED_AVOIDS=[
-  '不在疲惫的时候做重大决定',
-  '不把休息排在所有事情之后',
-  '不反复揣测别人没有说出口的话',
-  '不为还没发生的事过度焦虑',
   '不在非工作时间秒回工作消息',
-  '不主动给没有请求的人提建议',
-  '不把收藏当成学习',
-  '不拿自己和别人的进度比较'
+  '不在还没想清楚之前，向别人寻求帮助',
+  '不在无聊或没有明确需求时刷抖音、小红书、微信等社媒',
+  '不反复揣测别人没有说出口的话',
+  '不以自己的标准，去过度评价或揣测别人的行为',
+  '不因为一次失败否定自己',
+  '不为未发生的事过度焦虑，遇到挫折不自怨自艾',
+  '不把休息排在所有事情之后'
 ];
+/* avoid 条目结构：{t, seed}——seed=true 为外部灵感种子（导出时不带），她手动添加的 seed=false */
+function ensureAvoidMigrate(){
+  var changed=false;
+  store.avoid=(store.avoid||[]).map(function(a){
+    if(typeof a==='string'){
+      changed=true;
+      return {t:a,seed:SEED_AVOIDS.indexOf(a)>-1};
+    }
+    if(a&&typeof a==='object'&&typeof a.t==='string')return a;
+    changed=true;return {t:String(a),seed:false};
+  });
+  if(changed)save();
+}
 function ensureFiveMigrate(){
   var changed=false;
   store.five.forEach(function(f){
@@ -1066,7 +1160,8 @@ function ensureFiveMigrate(){
 }
 function ensureSubSeeds(){
   if(!store.subInitiated&&(!store.avoid||!store.avoid.length)){
-    store.avoid=SEED_AVOIDS.slice();store.subInitiated=true;save();
+    store.avoid=SEED_AVOIDS.map(function(t){return {t:t,seed:true}});
+    store.subInitiated=true;save();
   }
 }
 function activeFive(){return store.five.filter(function(f){return !f.status||f.status==='active'})}
@@ -1102,7 +1197,7 @@ function fpSwap(idx){
   var t=window._pendingFive||'';window._pendingFive='';
   var f=store.five[idx];
   if(confirm('放下「'+f.t+'」？\n\n顺手写进减法人生？（一条被放弃的目标 = 一条不做经验）')){
-    store.avoid.unshift('不推进：'+f.t);
+    store.avoid.unshift({t:'不推进：'+f.t,seed:false});
   }
   f.status='dropped';f.doneDate=today();
   store.five.push({t:t,why:'',year:curFiveYear(),status:'active'});
@@ -1111,7 +1206,7 @@ function fpSwap(idx){
 function fpChoice(c){
   document.getElementById('fullPicker').classList.remove('on');
   var t=window._pendingFive||'';window._pendingFive='';
-  if(c==='sub'){store.avoid.unshift('不开始：'+t);save();renderDirection();toast('写进减法人生——它是个好目标，但不是现在')}
+  if(c==='sub'){store.avoid.unshift({t:'不开始：'+t,seed:false});save();renderDirection();toast('写进减法人生——它是个好目标，但不是现在')}
 }
 function hideFullPicker(){document.getElementById('fullPicker').classList.remove('on');window._pendingFive=''}
 window.fpChoice=fpChoice;window.hideFullPicker=hideFullPicker;window.fpSwap=fpSwap;
@@ -1119,7 +1214,7 @@ function doneFive(idx){store.five[idx].status='done';store.five[idx].doneDate=to
 function dropFive(idx){
   var f=store.five[idx];
   if(confirm('放下「'+f.t+'」？\n\n顺手写进减法人生？（一条被放弃的目标 = 一条不做经验）')){
-    store.avoid.unshift('不推进：'+f.t);
+    store.avoid.unshift({t:'不推进：'+f.t,seed:false});
   }
   f.status='dropped';f.doneDate=today();
   save();renderDirection();toast('放下了，轻了一点');
@@ -1138,7 +1233,7 @@ function renderFive(){
     var idx=store.five.indexOf(f);
     h+='<div class="row"><span class="no">'+String(act.indexOf(f)+1).padStart(2,'0')+'</span>'+
        '<div class="txt"><div class="nm">'+esc(f.t)+(f.why?'<span style="color:var(--faint);font-size:12px"> · '+esc(f.why)+'</span>':'')+'</div>'+
-       '<div class="meta">'+(f.year?f.year+' 年圈下':'')+
+       '<div class="meta">'+(f.year?f.year+' 年圈下':'')+(f.steps&&f.steps.length?' · <span style="color:#3b5b7e">已启用打卡</span>':'')+
        ' · <button class="act" onclick="editFive('+idx+')">编辑</button>'+
        ' · <button class="act" onclick="doneFive('+idx+')">✓ 完成</button>'+
        ' · <button class="act" onclick="dropFive('+idx+')">✗ 放下</button></div></div></div>'});
@@ -1163,7 +1258,7 @@ function renderFive(){
   arch.innerHTML=ah;
 }
 function addAvoid(){var i=document.getElementById('avoidInput');var t=i.value.trim();if(!t)return;
-  store.avoid.unshift(t);i.value='';save();renderDirection();toast('放下了')}
+  store.avoid.unshift({t:t,seed:false});i.value='';save();renderDirection();toast('放下了')}
 function delAvoid(idx){store.avoid.splice(idx,1);save();renderDirection()}
 window.delAvoid=delAvoid;
 /* 五件事编辑（复用编辑面板，_editKind 分流） */
@@ -1175,6 +1270,10 @@ function editFive(idx){
   ta.value=f.t;
   var de=document.getElementById('editDate');
   if(de)de.textContent=(f.year||'')+' 年目标'+(f.why?' · '+f.why:'');
+  var row=document.getElementById('editStepsRow');
+  if(row)row.style.display='flex';
+  var cb=document.getElementById('editFiveSteps');
+  if(cb)cb.checked=!!(f.steps&&f.steps.length);
   document.getElementById('editPanel').style.display='flex';
   setTimeout(function(){ta.focus();ta.setSelectionRange(ta.value.length,ta.value.length)},80);
 }
@@ -1182,6 +1281,9 @@ function saveFiveEdit(){
   var ta=document.getElementById('editTextarea');var t=ta.value.trim();
   if(!t){toast('内容不能为空');return}
   store.five[_fiveEditIdx].t=t;
+  var cb=document.getElementById('editFiveSteps');
+  if(cb&&cb.checked){store.five[_fiveEditIdx].steps=['read1','words','parse','read2']}
+  else{delete store.five[_fiveEditIdx].steps}
   save();renderDirection();
   document.getElementById('editPanel').style.display='none';
   window._editKind=null;_fiveEditIdx=-1;
@@ -1189,16 +1291,112 @@ function saveFiveEdit(){
 }
 window.editFive=editFive;
 function renderDirection(){
-  ensureFiveMigrate();ensureSubSeeds();ensureFiveYears();
+  ensureFiveMigrate();ensureSubSeeds();ensureAvoidMigrate();ensureFiveYears();applyFoldD();
   var y=curFiveYear();
   var actY=activeFive().filter(function(f){return String(f.year)===y}).length;
-  document.getElementById('fiveNote').textContent='进行中 '+actY+' / 5（'+y+'）· 减法条目灵感来自外部方法论，可随时更新成自己的';
-  renderFive();
+  document.getElementById('fiveNote').textContent='进行中 '+actY+' / 5（'+y+'）· 种子条目原文在知识库《我的人生系统》，导出只带走我新增的';
+  renderFive();renderChecks();
   var al=document.getElementById('avoidList');var h='';
-  store.avoid.forEach(function(t,idx){
-    h+='<div class="row"><span class="no">·</span><div class="txt"><div class="nm">'+esc(t)+'</div></div>'+
+  store.avoid.forEach(function(a,idx){
+    if(typeof a==='string')a={t:a,seed:SEED_AVOIDS.indexOf(a)>-1};
+    var tag=a.seed?'<span class="avoid-tag">种子</span>':'<span class="avoid-tag mine">我加的</span>';
+    h+='<div class="row"><span class="no">·</span><div class="txt"><div class="nm">'+esc(a.t)+tag+'</div></div>'+
        '<button class="btn-del" onclick="delAvoid('+idx+')">×</button></div>'});
   al.innerHTML=h||'<div class="row" style="border-bottom:0"><span class="no">·</span><div class="txt"><div class="nm" style="color:var(--faint);font-size:13px">想到一件现在不该管的，丢进来。</div></div></div>';
+}
+/* ============ 五区折叠 ============ */
+function toggleD(sec){
+  store.foldD=store.foldD||{};
+  store.foldD[sec]=!store.foldD[sec];save();applyFoldD();
+}
+function applyFoldD(){
+  store.foldD=store.foldD||{};
+  [['anti',true],['vision',true],['goals',false],['check',false],['sub',false]].forEach(function(p){
+    var sec=p[0],def=p[1];
+    var collapsed=(sec in store.foldD)?store.foldD[sec]:def;
+    var b=document.getElementById('dBody-'+sec),t=document.getElementById('dTri-'+sec);
+    if(b)b.style.display=collapsed?'none':'';
+    if(t)t.textContent=collapsed?'▸':'▾';
+  });
+}
+window.toggleD=toggleD;
+/* ============ 今日打卡 ============ */
+var STEP_ORDER=['read1','words','parse','read2'];
+var STEP_LABELS={read1:'第 1 遍原文阅读',words:'背新单词',parse:'阅读解析',read2:'第 2 遍原文阅读'};
+var FALLBACK_LABEL='只背了单词（兜底）';
+function tierOf(arr){
+  arr=arr||[];
+  if(arr.indexOf('fallback')>-1)return 'fallback';
+  var n=arr.filter(function(x){return x!=='fallback'}).length;
+  return n>=4?'full':(n>0?'half':'none');
+}
+function tierLabel(t){return {full:'完成档',half:'半档',fallback:'兜底',none:'没做'}[t]||'没做'}
+function todayChecks(){
+  store.checks=store.checks||{};
+  var d=today();store.checks[d]=store.checks[d]||{};
+  return store.checks[d];
+}
+function toggleCheck(fid,key){
+  var tc=todayChecks();
+  var arr=(tc[fid]||[]).slice();
+  if(key==='fallback'){
+    arr=arr.indexOf('fallback')>-1?[]:['fallback'];
+  }else{
+    arr=arr.filter(function(x){return x!=='fallback'});
+    arr=arr.indexOf(key)>-1?arr.filter(function(x){return x!==key}):arr.concat([key]);
+  }
+  if(arr.length)tc[fid]=arr;else delete tc[fid];
+  save();renderDirection();
+}
+window.toggleCheck=toggleCheck;
+function monthChecked(){
+  var m=today().slice(0,7);var n=0;
+  Object.keys(store.checks||{}).forEach(function(d){
+    if(d.slice(0,7)===m&&Object.keys(store.checks[d]).length)n++;
+  });
+  return n;
+}
+function renderChecks(){
+  var wrap=document.getElementById('checkList');if(!wrap)return;
+  var meta=document.getElementById('checkMeta');
+  if(meta)meta.textContent='本月已打 '+monthChecked()+' 天';
+  var targets=activeFive().filter(function(f){return f.steps&&f.steps.length});
+  var tc=todayChecks();
+  var h='';
+  targets.forEach(function(f){
+    var arr=tc[f.id]||[];
+    var hasFb=arr.indexOf('fallback')>-1;
+    var t=tierOf(arr);
+    h+='<div class="chk-card">'+
+       '<div class="chk-t">'+esc(f.t)+'</div>'+
+       (f.why?'<div class="chk-w">图什么：'+esc(f.why)+'</div>':'')+
+       '<div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--line);display:flex;align-items:baseline;justify-content:space-between">'+
+       '<span style="font-size:11px;color:var(--faint)">'+archDay(today())+'</span>'+
+       '<span style="font-size:11.5px;color:#3b5b7e">'+(t==='none'?'还没开始':'今天＝'+tierLabel(t))+'</span></div>';
+    STEP_ORDER.forEach(function(k){
+      var on=arr.indexOf(k)>-1;
+      h+='<label class="chk-row'+(hasFb?' lock':'')+'"><input type="checkbox" '+(on?'checked':'')+' '+(hasFb?'disabled':'')+' onchange="toggleCheck(\''+f.id+'\',\''+k+'\')"> '+STEP_LABELS[k]+'</label>';
+    });
+    h+='<label class="chk-row" style="border-top:1px dashed var(--line);margin-top:4px"><input type="checkbox" '+(hasFb?'checked':'')+' onchange="toggleCheck(\''+f.id+'\',\'fallback\')"> '+FALLBACK_LABEL+'</label>';
+    h+='<div class="ifthen">如果今晚太累或加班，那么就打开「不背单词」学 10 个单词。<br>如果只做得完一步，那么就完成完整学习任务里的任意一步。<br>如果断了一天以上，那么不陷入自责情绪了，接着往下学习。</div>';
+    h+='</div>';
+  });
+  if(!targets.length)h='<div class="row" style="border-bottom:0"><span class="no">·</span><div class="txt"><div class="nm" style="color:var(--faint);font-size:13px">在「编辑」里勾选「启用打卡步骤」后，这里会出现每日勾选。</div></div></div>';
+  wrap.innerHTML=h;
+  var g='';var colors={full:'#3b5b7e',half:'#85b7eb',fallback:'#ef9f27',none:'var(--line)'};
+  for(var i=6;i>=0;i--){
+    var d=new Date();d.setDate(d.getDate()-i);
+    var ds=d.getFullYear()+'-'+pad2(d.getMonth()+1)+'-'+pad2(d.getDate());
+    var tier='none';
+    Object.keys(store.checks[ds]||{}).forEach(function(fid){
+      var t2=tierOf(store.checks[ds][fid]);
+      if(t2==='full')tier='full';
+      else if(t2==='half'&&tier!=='full')tier='half';
+      else if(t2==='fallback'&&tier==='none')tier='fallback';
+    });
+    g+='<span class="d7" style="background:'+colors[tier]+'" title="'+ds+' '+tierLabel(tier)+'"></span>';
+  }
+  var lg=document.getElementById('last7');if(lg)lg.innerHTML=g;
 }
 
 /* ============ 导出 ============ */
@@ -1281,8 +1479,9 @@ function exportMarkdown(type){
 }
 window.exportMarkdown=exportMarkdown;
 function doExport(range,label){
+  function want(id){var el=document.getElementById(id);return el?el.checked:true}
   var wk=archWeek();
-  var L=['# 漫游导出 · '+label,'','> the map of me 导出',''];
+  var L=['# Planet 导出 · '+label,'','> the map of me 导出',''];
   var cnt=0;
   function inRange(d){
     if(!range)return true;
@@ -1291,12 +1490,46 @@ function doExport(range,label){
     if(range.to && x>range.to)return false;
     return true;
   }
+  function inRangeDate(ds){
+    if(!range)return true;
+    var x=new Date(ds);
+    if(range.from && x<range.from)return false;
+    if(range.to && x>range.to)return false;
+    return true;
+  }
   function pushDump(){var arr=store.dump.filter(inRange);if(arr.length){L.push('## 倾倒');arr.forEach(function(d){L.push('- ('+d.date+') '+d.text);cnt++});L.push('')}}
   function pushRoam(){var arr=store.roam.filter(inRange);if(arr.length){L.push('## 漫游 / 闪念');arr.forEach(function(r){L.push('- ('+r.date+') '+r.text);cnt++});L.push('')}}
   function pushCollect(){var arr=store.collect.filter(inRange);if(arr.length){L.push('## 收集');arr.forEach(function(c){L.push('- '+(c.quote?'★':'')+' '+c.text+(c.src?' — '+c.src:''));cnt++});L.push('')}}
-  function pushFive(){var arr=store.five.filter(function(f){return !f.status||f.status==='active'});if(arr.length){L.push('## 最重要的五件事');arr.forEach(function(f){L.push('- '+f.t+(f.why?'（图：'+f.why+'）':'')+(f.status==='done'?' ✓':''))});L.push('')}}
   function pushQuotes(){var mine=(store.quotes||[]).filter(function(q){return q.src&&q.src!=='flomo'});if(mine.length){L.push('## 新加入的金句');mine.forEach(function(q){L.push('- '+q.t+(q.src?' — '+q.src:''))});L.push('')}}
-  pushDump();pushRoam();pushCollect();pushFive();pushQuotes();
+  function pushChecks(){
+    var days=Object.keys(store.checks||{}).sort();
+    var any=false;
+    days.forEach(function(d){
+      if(!inRangeDate(d))return;
+      Object.keys(store.checks[d]||{}).forEach(function(fid){
+        var arr=store.checks[d][fid];
+        if(!arr||!arr.length)return;
+        var f=store.five.find(function(x){return x.id===fid});
+        if(!any){L.push('## 打卡 · 逐日');L.push('> 贴入知识库 Labs《英语阅读｜10周学习目标》');L.push('');any=true}
+        L.push('- '+d+' '+tierLabel(tierOf(arr))+' · '+(f?f.t:'（目标）'));
+        cnt++;
+      });
+    });
+    if(any)L.push('');
+  }
+  function pushSub(){
+    var mine=store.avoid.filter(function(a){return typeof a==='object'&&!a.seed});
+    if(!mine.length)return;
+    L.push('## 减法人生 · 我新增的');
+    L.push('> 贴入知识库《我的人生系统》不做清单');
+    L.push('');
+    mine.forEach(function(a){L.push('- '+a.t);cnt++});
+    L.push('');
+  }
+  if(want('expDump'))pushDump();
+  if(want('expRoam'))pushRoam();
+  if(want('expCollect')){pushCollect();pushQuotes()}
+  if(want('expDir')){pushChecks();pushSub()}
   if(!cnt)L.push('（这个时间段还没有内容）');
   L.push('', '---', '', '> 请帮手提炼：找出反复出现的卡点 / 念头，建议下周观察什么。');
   copyText(L.join('\n'));
