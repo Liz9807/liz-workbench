@@ -106,7 +106,9 @@ button:active{opacity:.6}
 .map-motto{position:absolute;bottom:26px;left:0;right:0;text-align:center;font-size:10.5px;color:var(--brown-sub);letter-spacing:3px;font-style:italic}
 
 /* ========= 内容页通用 ========= */
-#scr-page{background:var(--bg)}
+#scr-page{background:#edece6}
+.sec{background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px 14px 6px;margin-bottom:14px}
+.sec>.sec-title{margin:0 0 10px}
 .page-in{width:100%;max-width:560px;margin:0 auto;padding:calc(14px + env(safe-area-inset-top)) 24px 40px;flex:1;display:flex;flex-direction:column;min-height:100dvh}
 .pg-head{display:flex;align-items:center;gap:10px;margin-bottom:6px}
 .pg-back{width:30px;height:30px;border-radius:50%;border:1px solid var(--line);color:var(--sub);display:flex;align-items:center;justify-content:center;font-size:17px;line-height:1;flex:0 0 auto}
@@ -121,6 +123,8 @@ button:active{opacity:.6}
 .row .no{font-size:12px;color:var(--faint);font-variant-numeric:tabular-nums;line-height:1.6;flex:0 0 auto}
 .row .txt{flex:1;min-width:0}
 .row .nm{font-size:14px;line-height:1.6;color:var(--ink);word-break:break-word;white-space:pre-wrap}
+.goal-desc{font-size:13px;line-height:1.6;color:var(--sub);margin-top:3px;word-break:break-word;white-space:pre-wrap}
+.goal-why{font-size:12px;color:var(--faint);margin-top:2px}
 .row .meta{font-size:11.5px;color:var(--faint);margin-top:2px;line-height:1.5}
 .row .meta b{color:var(--sub);font-weight:400}
 .grp-h{display:flex;align-items:baseline;gap:8px;width:100%;text-align:left;
@@ -145,6 +149,7 @@ button:active{opacity:.6}
 .chk-card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:10px}
 .chk-t{font-size:15px;font-weight:600;color:var(--ink);line-height:1.5}
 .chk-w{font-size:12.5px;color:var(--sub);margin-top:4px;line-height:1.6}
+.chk-desc{font-size:13px;line-height:1.6;color:var(--sub);margin-top:4px;word-break:break-word;white-space:pre-wrap}
 .chk-row{display:flex;align-items:center;gap:8px;padding:6px 0;font-size:13.5px;color:var(--ink);cursor:pointer}
 .chk-row.lock{color:var(--faint)}
 .chk-row input{accent-color:#3b5b7e;width:16px;height:16px}
@@ -158,6 +163,7 @@ button:active{opacity:.6}
 .linkdim{color:var(--faint);font-size:11px;letter-spacing:1px;text-decoration:underline;background:none;padding:2px 6px}
 .linkdim-sep{color:var(--faint);opacity:.4;padding:0 2px;user-select:none}
 .free-zone{flex:1;min-height:12px}
+#dBody-anti,#dBody-vision,#dBody-goals,#dBody-check,#dBody-sub{background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin:0 0 12px}
 
 /* 下拉选项面板（伪弹出） */
 #picker,#fullPicker{position:fixed;inset:0;z-index:90;display:none;align-items:center;justify-content:center;background:rgba(40,37,32,.22)}
@@ -263,33 +269,45 @@ button:active{opacity:.6}
 
     <!-- Brain Dump -->
     <div id="v-dump" style="display:none;flex-direction:column;flex:1">
+      <div class="sec">
       <div class="sec-title">倾倒<span class="side">倒空 · 不整理</span></div>
       <textarea id="dumpInput" rows="5" placeholder="此刻脑子里有什么？全部倒出来——乱，没关系。"></textarea>
       <div class="btn-row"><button class="pill" onclick="addDump()">倒出去</button></div>
+      </div>
+      <div class="sec">
       <div class="sec-title">倾倒记录<span class="side" id="dumpCnt"></span></div>
       <div id="dumpList"></div>
+      </div>
       <div class="free-zone"></div>
       <div class="footnote">倒出来之后，有用的挑走，剩下的可以随时清掉</div>
     </div>
 
     <!-- Wander -->
     <div id="v-wander" style="display:none;flex-direction:column;flex:1">
+      <div class="sec">
       <div class="sec-title">写下一念<span class="side">任思绪漫游 · 我的日记本</span></div>
       <textarea id="roamInput" rows="4" placeholder="此刻有什么闪过，就记下什么…读的人是未来的自己，她会包容现在的你。"></textarea>
       <div class="btn-row"><button class="pill" onclick="addRoam()">记下</button></div>
+      </div>
+      <div class="sec">
       <div class="sec-title">走过的日子<span class="side">倒序 · 最近在上</span></div>
       <div id="roamList"></div>
+      </div>
       <div class="free-zone"></div>
       <div class="footnote">想到哪写到哪，不用成文</div>
     </div>
 
     <!-- Collect -->
     <div id="v-collect" style="display:none;flex-direction:column;flex:1">
+      <div class="sec">
       <div class="sec-title">收下<span class="side">★ 送进今日一句</span></div>
       <textarea id="collectInput" rows="2" placeholder="收下一句喜欢的话…" style="height:auto"></textarea>
       <div class="btn-row"><button class="pill" onclick="addCollect()">收下</button></div>
+      </div>
+      <div class="sec">
       <div class="sec-title">收下的句子<span class="side">★ = 金句池</span></div>
       <div id="collectList"></div>
+      </div>
       <div class="free-zone"></div>
       <div class="footnote">★ 点亮后，会出现在目录页的「今日一句」里 · 情绪有点崩的时候，回来翻翻这些</div>
     </div>
@@ -729,8 +747,11 @@ function mergeStore(remote){
   rf.forEach(function(f){
     if(!f)return;
     if(f.id){
-      var dup=store.five.some(function(x){return x.id===f.id});
-      if(!dup){
+      var dup=store.five.find(function(x){return x.id===f.id});
+      if(dup){
+        /* id 已存在：补回本地缺失字段（不覆盖已有内容），支持重新导入更新 name 等 */
+        Object.keys(f).forEach(function(k){if(dup[k]===undefined||dup[k]===''||dup[k]===null)dup[k]=f[k]});
+      }else{
         var same=store.five.find(function(x){return !x.id&&(x.t||'')===(f.t||'')&&(x.year||'')===(f.year||'')});
         if(same){same.id=f.id}
         else{store.five.push(f);added++}
@@ -1227,8 +1248,12 @@ function renderFive(){
   var act=activeFive().filter(function(f){return String(f.year)===y});
   act.forEach(function(f){
     var idx=store.five.indexOf(f);
+    var nm=f.name||f.t;
+    var desc=(f.name&&f.t&&f.t!==f.name)?f.t:'';
     h+='<div class="row"><span class="no">'+String(act.indexOf(f)+1).padStart(2,'0')+'</span>'+
-       '<div class="txt"><div class="nm">'+esc(f.t)+(f.why?'<span style="color:var(--faint);font-size:12px"> · '+esc(f.why)+'</span>':'')+'</div>'+
+       '<div class="txt"><div class="nm">'+esc(nm)+'</div>'+
+       (desc?'<div class="goal-desc">'+esc(desc)+'</div>':'')+
+       (f.why?'<div class="goal-why">图什么：'+esc(f.why)+'</div>':'')+
        '<div class="meta">'+(f.year?f.year+' 年圈下':'')+(f.steps&&f.steps.length?' · <span style="color:#3b5b7e">已启用打卡</span>':'')+
        ' · <button class="act" onclick="editFive('+idx+')">编辑</button>'+
        ' · <button class="act" onclick="doneFive('+idx+')">✓ 完成</button>'+
@@ -1297,13 +1322,12 @@ function renderDirection(){
   ensureFiveMigrate();ensureSubSeeds();ensureAvoidMigrate();ensureFiveYears();applyFoldD();
   var y=curFiveYear();
   var actY=activeFive().filter(function(f){return String(f.year)===y}).length;
-  document.getElementById('fiveNote').textContent='进行中 '+actY+' / 5（'+y+'）· 种子条目原文在知识库《我的人生系统》，导出只带走我新增的';
+  document.getElementById('fiveNote').textContent='进行中 '+actY+' / 5（'+y+'）';
   renderFive();renderChecks();
   var al=document.getElementById('avoidList');var h='';
   store.avoid.forEach(function(a,idx){
     if(typeof a==='string')a={t:a,seed:SEED_AVOIDS.indexOf(a)>-1};
-    var tag=a.seed?'<span class="avoid-tag">种子</span>':'<span class="avoid-tag mine">我加的</span>';
-    h+='<div class="row"><span class="no">·</span><div class="txt"><div class="nm">'+esc(a.t)+tag+'</div></div>'+
+    h+='<div class="row"><span class="no">·</span><div class="txt"><div class="nm">'+esc(a.t)+'</div></div>'+
        '<button class="btn-del" onclick="delAvoid('+idx+')">×</button></div>'});
   al.innerHTML=h||'<div class="row" style="border-bottom:0"><span class="no">·</span><div class="txt"><div class="nm" style="color:var(--faint);font-size:13px">想到一件现在不该管的，丢进来。</div></div></div>';
 }
@@ -1370,8 +1394,11 @@ function renderChecks(){
     var arr=tc[f.id]||[];
     var hasFb=arr.indexOf('fallback')>-1;
     var t=tierOf(arr);
+    var cnm=f.name||f.t;
+    var cdesc=(f.name&&f.t&&f.t!==f.name)?f.t:'';
     h+='<div class="chk-card">'+
-       '<div class="chk-t">'+esc(f.t)+'</div>'+
+       '<div class="chk-t">'+esc(cnm)+'</div>'+
+       (cdesc?'<div class="chk-desc">'+esc(cdesc)+'</div>':'')+
        (f.why?'<div class="chk-w">图什么：'+esc(f.why)+'</div>':'')+
        '<div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--line);display:flex;align-items:baseline;justify-content:space-between">'+
        '<span style="font-size:11px;color:var(--faint)">'+archDay(today())+'</span>'+
