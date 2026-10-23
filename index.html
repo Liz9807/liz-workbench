@@ -139,7 +139,9 @@ button:active{opacity:.6}
 .done-txt{text-decoration:line-through;text-decoration-color:#d5d2ca;color:var(--sub)}
 .d-head{display:flex;align-items:baseline;justify-content:space-between;width:100%;text-align:left;font-family:inherit;font-size:13px;font-weight:600;color:var(--ink);letter-spacing:.5px;padding:12px 2px 8px;border:0;background:none;cursor:pointer}
 .d-head .d-tri{font-size:9px;color:var(--faint)}
-.vision-card{background:var(--fill);border:1px solid var(--line);border-radius:12px;padding:12px 14px;font-size:13px;line-height:1.9;color:var(--sub);white-space:pre-wrap}
+.d-plus{font-family:inherit;font-size:15px;color:var(--faint);background:none;border:0;padding:0 6px;cursor:pointer;line-height:1}
+.d-plus:active{color:var(--ink)}
+.vision-card{font-size:13px;line-height:1.9;color:var(--sub);white-space:pre-wrap;padding:2px 2px 8px}
 .chk-card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:10px}
 .chk-t{font-size:15px;font-weight:600;color:var(--ink);line-height:1.5}
 .chk-w{font-size:12.5px;color:var(--sub);margin-top:4px;line-height:1.6}
@@ -323,9 +325,7 @@ button:active{opacity:.6}
         <span class="side">目标越清晰，行动越坚定</span>
       </button>
       <div id="dBody-goals">
-        <textarea id="fiveInput" rows="2" placeholder="写下一件真想推进的…" style="height:auto"></textarea>
-        <div class="btn-row"><button class="pill" onclick="addFive()">＋</button></div>
-        <div style="margin:-4px 0 6px"><select id="fiveYear" onchange="setFiveYear(this.value)" style="font-family:inherit;font-size:12px;padding:4px 8px;border:1px solid var(--line);border-radius:8px;background:var(--fill);color:var(--faint);outline:none;cursor:pointer"></select></div>
+        <div style="margin:0 0 6px"><select id="fiveYear" onchange="setFiveYear(this.value)" style="font-family:inherit;font-size:12px;padding:4px 8px;border:1px solid var(--line);border-radius:8px;background:var(--fill);color:var(--faint);outline:none;cursor:pointer"></select></div>
         <div id="fiveList"></div>
         <div id="fiveArch"></div>
       </div>
@@ -339,13 +339,14 @@ button:active{opacity:.6}
         <div id="checkList"></div>
       </div>
 
-      <button class="d-head" onclick="toggleD('sub')">
-        <span><span class="d-tri" id="dTri-sub">▾</span> 减法人生</span>
-        <span class="side">比起做加法，做减法才是最佳解法</span>
-      </button>
+      <div class="d-head">
+        <span onclick="toggleD('sub')" style="cursor:pointer;flex:1;display:flex;align-items:baseline;justify-content:space-between">
+          <span><span class="d-tri" id="dTri-sub">▾</span> 减法人生</span>
+          <span class="side">比起做加法，做减法才是最佳解法</span>
+        </span>
+        <button class="d-plus" onclick="addAvoidPrompt()" title="添加一条">＋</button>
+      </div>
       <div id="dBody-sub">
-        <textarea id="avoidInput" rows="2" placeholder="放下一件现在不该管的…" style="height:auto"></textarea>
-        <div class="btn-row"><button class="pill" onclick="addAvoid()">＋</button></div>
         <div id="avoidList"></div>
       </div>
 
@@ -431,11 +432,11 @@ button:active{opacity:.6}
     <div style="font-size:11.5px;color:var(--faint);margin-bottom:14px;line-height:1.6">导出 Markdown：选一段时间范围，复制后贴进知识库收件箱。</div>
     <div style="font-size:11.5px;color:var(--sub);margin-bottom:6px;letter-spacing:.5px">导出 Markdown</div>
     <button class="s-pill" style="margin-top:0;width:100%" onclick="showDateRange()">自定义范围 · 年月日</button>
-    <div style="margin-top:10px;display:flex;flex-direction:column;gap:6px">
-      <label style="display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--ink)"><input type="checkbox" id="expDump" checked> 倾倒</label>
-      <label style="display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--ink)"><input type="checkbox" id="expRoam" checked> 漫游 / 闪念</label>
-      <label style="display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--ink)"><input type="checkbox" id="expCollect" checked> 收集</label>
-      <label style="display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--ink)"><input type="checkbox" id="expDir" checked> Direction（打卡逐日 + 减法新增）</label>
+    <div style="margin-top:10px;display:grid;grid-template-columns:1fr 1fr;gap:8px 10px">
+      <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--faint)"><input type="checkbox" id="expDump" checked> 倾倒</label>
+      <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--faint)"><input type="checkbox" id="expRoam" checked> 漫游 / 闪念</label>
+      <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--faint)"><input type="checkbox" id="expCollect" checked> 收集</label>
+      <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--faint)"><input type="checkbox" id="expDir" checked> Direction</label>
     </div>
     <div style="font-size:11px;color:var(--faint);margin-top:6px;line-height:1.6">不包含反愿景 / 愿景 / 目标清单（正本在知识库）。导出后：打卡记录 → 贴《英语阅读｜10周学习目标》；减法新增 → 贴《我的人生系统》不做清单。</div>
     <div style="font-size:11.5px;color:var(--sub);margin:14px 0 6px;letter-spacing:.5px">备份 / 恢复</div>
@@ -1177,12 +1178,7 @@ function ensureFiveYears(){
 function setFiveYear(y){store.fiveYearSel=y;save();renderDirection()}
 window.setFiveYear=setFiveYear;
 function curFiveYear(){return store.fiveYearSel||String(new Date().getFullYear())}
-function addFive(){
-  var i=document.getElementById('fiveInput');var t=i.value.trim();if(!t){toast('先写一件');return}
-  if(activeFive().length>=5){window._pendingFive=t;showFullPicker();return}
-  var why=prompt('它图什么？（一句话真话，可跳过）')||'';
-  store.five.push({t:t,why:why,year:curFiveYear(),status:'active'});i.value='';save();renderDirection();toast('圈下了')
-}
+function addFive(){toast('目标在聊天里讨论后由帮手导入')}
 function showFullPicker(){
   var list=document.getElementById('fpList');if(list){
     var act=activeFive();
@@ -1257,9 +1253,16 @@ function renderFive(){
   }
   arch.innerHTML=ah;
 }
-function addAvoid(){var i=document.getElementById('avoidInput');var t=i.value.trim();if(!t)return;
-  store.avoid.unshift({t:t,seed:false});i.value='';save();renderDirection();toast('放下了')}
-function delAvoid(idx){store.avoid.splice(idx,1);save();renderDirection()}
+function addAvoidPrompt(){
+  var t=prompt('放下一件现在不该管的…');
+  if(t===null)return;
+  t=t.trim();if(!t){toast('没有内容');return}
+  store.avoid.unshift({t:t,seed:false});save();renderDirection();toast('放下了');
+}
+window.addAvoidPrompt=addAvoidPrompt;
+function delAvoid(idx){var a=store.avoid[idx];var t=(a&&a.t)?a.t:a;
+  if(!confirm('删除「'+t+'」？'))return;
+  store.avoid.splice(idx,1);save();renderDirection()}
 window.delAvoid=delAvoid;
 /* 五件事编辑（复用编辑面板，_editKind 分流） */
 var _fiveEditIdx=-1;
