@@ -1437,7 +1437,7 @@ function showExport(){document.getElementById('exportPanel').style.display='flex
 function hideExport(){document.getElementById('exportPanel').style.display='none'}
 window.showExport=showExport;window.hideExport=hideExport;
 window.addDump=addDump;window.addRoam=addRoam;window.addCollect=addCollect;
-window.addFive=addFive;window.addAvoid=addAvoid;
+window.addFive=addFive;window.addAvoid=addAvoidPrompt;
 function copyText(t){
   if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(t).then(function(){toast('已复制')},function(){toast('复制失败，见下方文本')})}
   else{var x=document.createElement('textarea');x.value=t;document.body.appendChild(x);x.select();try{document.execCommand('copy')}catch(e){}document.body.removeChild(x);toast('已复制')}
