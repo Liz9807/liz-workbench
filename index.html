@@ -145,9 +145,10 @@ button:active{opacity:.6}
 .d-head .d-tri{font-size:9px;color:var(--faint)}
 .d-plus{font-family:inherit;font-size:15px;color:var(--faint);background:none;border:0;padding:0 6px;cursor:pointer;line-height:1}
 .d-plus:active{color:var(--ink)}
-.vision-card{font-size:13px;line-height:1.9;color:var(--sub);white-space:pre-wrap;padding:2px 2px 8px}
+.vision-card{font-size:14px;line-height:1.9;color:var(--ink);white-space:pre-wrap;padding:2px 2px 8px}
 .chk-card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:10px}
 .chk-t{font-size:15px;font-weight:600;color:var(--ink);line-height:1.5}
+.chk-kicker{font-size:12px;color:var(--sub);margin-bottom:3px;letter-spacing:.5px}
 .chk-w{font-size:12.5px;color:var(--sub);margin-top:4px;line-height:1.6}
 .chk-desc{font-size:13px;line-height:1.6;color:var(--sub);margin-top:4px;word-break:break-word;white-space:pre-wrap}
 .chk-row{display:flex;align-items:center;gap:8px;padding:6px 0;font-size:13.5px;color:var(--ink);cursor:pointer}
@@ -400,7 +401,7 @@ button:active{opacity:.6}
 <div id="editPanel" style="display:none;position:fixed;inset:0;z-index:90;align-items:center;justify-content:center;background:rgba(40,37,32,.22)">
   <div style="background:#fff;border-radius:16px;width:min(380px,92vw);padding:18px 16px 16px;max-height:86vh;display:flex;flex-direction:column">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
-      <div style="font-size:15px;font-weight:600">编辑</div>
+      <div id="editPanelTitle" style="font-size:15px;font-weight:600">编辑</div>
       <button class="linkdim" style="font-size:11px" onclick="hideEdit()">关闭</button>
     </div>
     <div id="editDate" style="font-size:11.5px;color:var(--faint);margin-bottom:8px"></div>
@@ -1118,10 +1119,13 @@ function editItem(id,type){
 }
 function hideEdit(){
   document.getElementById('editPanel').style.display='none';
-  editingId=null;editingType=null;window._editKind=null;
+  editingId=null;editingType=null;window._editKind=null;_avoidEditIdx=-1;
+  var ttl=document.getElementById('editPanelTitle');if(ttl)ttl.textContent='编辑';
 }
 function saveEdit(){
   if(window._editKind==='five'){saveFiveEdit();return}
+  if(window._editKind==='avoid'){saveAvoidEdit();return}
+  if(window._editKind==='avoid-add'){saveAvoidAdd();return}
   if(!editingId||!editingType)return;
   var ta=document.getElementById('editTextarea');
   var t=ta.value;
@@ -1248,16 +1252,13 @@ function renderFive(){
   var act=activeFive().filter(function(f){return String(f.year)===y});
   act.forEach(function(f){
     var idx=store.five.indexOf(f);
-    var nm=f.name||f.t;
-    var desc=(f.name&&f.t&&f.t!==f.name)?f.t:'';
+    var nm=(f.name?f.name+'：':'')+(f.t||'');
     h+='<div class="row"><span class="no">'+String(act.indexOf(f)+1).padStart(2,'0')+'</span>'+
        '<div class="txt"><div class="nm">'+esc(nm)+'</div>'+
-       (desc?'<div class="goal-desc">'+esc(desc)+'</div>':'')+
-       (f.why?'<div class="goal-why">图什么：'+esc(f.why)+'</div>':'')+
        '<div class="meta">'+(f.year?f.year+' 年圈下':'')+(f.steps&&f.steps.length?' · <span style="color:#3b5b7e">已启用打卡</span>':'')+
        ' · <button class="act" onclick="editFive('+idx+')">编辑</button>'+
-       ' · <button class="act" onclick="doneFive('+idx+')">✓ 完成</button>'+
-       ' · <button class="act" onclick="dropFive('+idx+')">✗ 放下</button></div></div></div>'});
+       ' · <button class="act" onclick="doneFive('+idx+')">完成</button>'+
+       ' · <button class="act" onclick="dropFive('+idx+')">放下</button></div></div></div>'});
   el.innerHTML=h||'<div class="row" style="border-bottom:0"><span class="no">·</span><div class="txt"><div class="nm" style="color:var(--faint);font-size:13px">'+y+' 年还没有目标。</div></div></div>';
   /* 归档折叠区（已完成 / 放下的，同一年份视角） */
   var arch=document.getElementById('fiveArch');var ah='';
@@ -1278,13 +1279,49 @@ function renderFive(){
   }
   arch.innerHTML=ah;
 }
-function addAvoidPrompt(){
-  var t=prompt('放下一件现在不该管的…');
-  if(t===null)return;
-  t=t.trim();if(!t){toast('没有内容');return}
-  store.avoid.unshift({t:t,seed:false});save();renderDirection();toast('放下了');
-}
+function addAvoidPrompt(){openAvoidPanel('avoid-add');}
 window.addAvoidPrompt=addAvoidPrompt;
+var _avoidEditIdx=-1;
+function openAvoidPanel(mode,idx){
+  window._editKind=mode;_avoidEditIdx=(idx==null?-1:idx);
+  var ta=document.getElementById('editTextarea');
+  var de=document.getElementById('editDate');
+  var ttl=document.getElementById('editPanelTitle');
+  var row=document.getElementById('editStepsRow');
+  if(row)row.style.display='none';
+  if(mode==='avoid'){
+    var a=store.avoid[idx];
+    ta.value=(a&&typeof a==='object')?(a.t||''):((typeof a==='string')?a:'');
+    if(de)de.textContent='减法人生 · 编辑';
+    if(ttl)ttl.textContent='减法人生';
+  }else{
+    ta.value='';
+    if(de)de.textContent='减法人生 · 写一件现在不该管的事';
+    if(ttl)ttl.textContent='减法人生';
+  }
+  document.getElementById('editPanel').style.display='flex';
+  setTimeout(function(){ta.focus();},80);
+}
+function editAvoid(idx){openAvoidPanel('avoid',idx);}
+window.editAvoid=editAvoid;
+function saveAvoidEdit(){
+  var ta=document.getElementById('editTextarea');var t=ta.value.trim();
+  if(!t){
+    if(!confirm('内容为空，确认删除这条？'))return;
+    store.avoid.splice(_avoidEditIdx,1);
+  }else{
+    var item=store.avoid[_avoidEditIdx];
+    if(typeof item==='string'){store.avoid[_avoidEditIdx]={t:t,seed:false}}
+    else if(item){item.t=t}
+    else{store.avoid[_avoidEditIdx]={t:t,seed:false}}
+  }
+  save();renderDirection();hideEdit();toast('已保存');
+}
+function saveAvoidAdd(){
+  var ta=document.getElementById('editTextarea');var t=ta.value.trim();
+  if(!t){toast('没有内容');hideEdit();return}
+  store.avoid.unshift({t:t,seed:false});save();renderDirection();hideEdit();toast('放下了');
+}
 function delAvoid(idx){var a=store.avoid[idx];var t=(a&&a.t)?a.t:a;
   if(!confirm('删除「'+t+'」？'))return;
   store.avoid.splice(idx,1);save();renderDirection()}
@@ -1297,7 +1334,8 @@ function editFive(idx){
   var ta=document.getElementById('editTextarea');
   ta.value=f.t;
   var de=document.getElementById('editDate');
-  if(de)de.textContent=(f.year||'')+' 年目标'+(f.why?' · '+f.why:'');
+  if(de)de.textContent=(f.year||'')+' 年目标';
+  var ttl=document.getElementById('editPanelTitle');if(ttl)ttl.textContent='编辑';
   var row=document.getElementById('editStepsRow');
   if(row)row.style.display='flex';
   var cb=document.getElementById('editFiveSteps');
@@ -1328,6 +1366,7 @@ function renderDirection(){
   store.avoid.forEach(function(a,idx){
     if(typeof a==='string')a={t:a,seed:SEED_AVOIDS.indexOf(a)>-1};
     h+='<div class="row"><span class="no">·</span><div class="txt"><div class="nm">'+esc(a.t)+'</div></div>'+
+       '<button class="act" onclick="editAvoid('+idx+')">编辑</button>'+
        '<button class="btn-del" onclick="delAvoid('+idx+')">×</button></div>'});
   al.innerHTML=h||'<div class="row" style="border-bottom:0"><span class="no">·</span><div class="txt"><div class="nm" style="color:var(--faint);font-size:13px">想到一件现在不该管的，丢进来。</div></div></div>';
 }
@@ -1394,12 +1433,11 @@ function renderChecks(){
     var arr=tc[f.id]||[];
     var hasFb=arr.indexOf('fallback')>-1;
     var t=tierOf(arr);
-    var cnm=f.name||f.t;
-    var cdesc=(f.name&&f.t&&f.t!==f.name)?f.t:'';
+    var cnm=f.name||'';
+    var cdesc=f.t||f.name||'';
     h+='<div class="chk-card">'+
-       '<div class="chk-t">'+esc(cnm)+'</div>'+
-       (cdesc?'<div class="chk-desc">'+esc(cdesc)+'</div>':'')+
-       (f.why?'<div class="chk-w">图什么：'+esc(f.why)+'</div>':'')+
+       (cnm&&cnm!==cdesc?'<div class="chk-kicker">'+esc(cnm)+'</div>':'')+
+       '<div class="chk-t">'+esc(cdesc)+'</div>'+
        '<div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--line);display:flex;align-items:baseline;justify-content:space-between">'+
        '<span style="font-size:11px;color:var(--faint)">'+archDay(today())+'</span>'+
        '<span style="font-size:11.5px;color:#3b5b7e">'+(t==='none'?'还没开始':'今天＝'+tierLabel(t))+'</span></div>';
