@@ -95,7 +95,7 @@ button:active{opacity:.6}
 .map-planet .mini .a{position:absolute;left:6%;width:88%;height:1px;background:#8fa284;opacity:.4}
 .map-planet .mini .a1{top:28%}.map-planet .mini .a2{top:52%;opacity:.3}.map-planet .mini .a3{top:76%;opacity:.3}
 .map-planet .ring{position:absolute;inset:-9px;border:1px solid #c9a47f;opacity:.4;border-radius:50%}
-.map-list{flex:0 0 auto;display:flex;flex-direction:column;gap:clamp(22px,4.2vh,38px)}
+.map-list{flex:0 0 auto;display:flex;flex-direction:column;gap:clamp(12px,3vh,26px)}
 .map-item{display:flex;align-items:center;gap:clamp(9px,2.4vw,14px);cursor:pointer;min-width:0}
 .map-item .dot{flex:0 0 auto;width:clamp(12px,3.4vw,15px);height:clamp(12px,3.4vw,15px);border-radius:50%;border:1.6px solid var(--brown);background:transparent;display:flex;align-items:center;justify-content:center}
 .map-item .dot i{width:6px;height:6px;border-radius:50%;background:var(--brown)}
@@ -165,6 +165,33 @@ button:active{opacity:.6}
 .linkdim-sep{color:var(--faint);opacity:.4;padding:0 2px;user-select:none}
 .free-zone{flex:1;min-height:12px}
 #dBody-anti,#dBody-vision,#dBody-goals,#dBody-check,#dBody-sub{background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin:0 0 12px}
+
+/* ========= 情绪 / 睡眠（v7f） ========= */
+.subtabs{display:flex;gap:6px;padding:3px;background:#f0efeb;border-radius:10px;margin:0 2px 12px}
+.subtab{flex:1;text-align:center;font-size:12.5px;padding:6px 0;color:var(--sub);border-radius:8px;cursor:pointer}
+.subtab.on{background:#fff;color:var(--ink);font-weight:600}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.cal-wd{text-align:center;font-size:10.5px;color:var(--faint);padding:2px 0}
+.cal-cell{min-height:42px;border:1px solid var(--line);border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;cursor:pointer;background:#fff}
+.cal-cell b{font-size:11px;font-weight:400;color:var(--sub);line-height:1}
+.cal-cell.cal-empty{border:0;background:none;cursor:default}
+.cal-cell.cal-today{border-color:var(--brown)}
+.cal-dots{display:flex;gap:2px;height:4px}
+.cal-dot{width:14px;height:4px;border-radius:2px;display:inline-block}
+.chip{display:inline-block;font-size:12px;padding:4px 11px;border:1px solid var(--line);border-radius:999px;color:var(--sub);cursor:pointer;background:#fff;margin:0 6px 6px 0}
+.chip.on{background:#f0efeb;border-color:var(--brown);color:var(--brown)}
+.chip-add{border-style:dashed;color:var(--faint)}
+.pillrow{display:flex;gap:6px;margin-top:6px;flex-wrap:wrap}
+.pill3{flex:1;text-align:center;font-size:12.5px;padding:7px 4px;border:1px solid var(--line);border-radius:10px;color:var(--sub);cursor:pointer;background:#fff;min-width:56px}
+.pill3.on{border-color:var(--brown);background:#f0efeb;color:var(--brown);font-weight:600}
+.emo-quad{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding-bottom:8px}
+.quad-card{border-radius:10px;padding:9px 11px;font-size:12px;line-height:1.7;color:var(--sub)}
+.quad-card b{display:block;font-size:12.5px;margin-bottom:2px;font-weight:600}
+.slp-pending{background:#f5efdf;border:1px solid #e3d5b3;border-radius:10px;padding:10px 12px;margin-bottom:10px;font-size:12.5px;color:#6b5b35;line-height:1.7}
+.stat-card{background:#f6f5f1;border-radius:10px;padding:9px 10px;min-width:0}
+.stat-card .lbl{font-size:11px;color:var(--faint)}
+.stat-card .val{font-size:14px;margin-top:2px;color:var(--ink)}
+.stat-card .dl{font-size:11px;margin-top:1px;color:var(--faint)}
 
 /* 下拉选项面板（伪弹出） */
 #picker,#fullPicker{position:fixed;inset:0;z-index:90;display:none;align-items:center;justify-content:center;background:rgba(40,37,32,.22)}
@@ -268,8 +295,8 @@ button:active{opacity:.6}
       <span class="pg-date" id="pgDate"></span>
     </div>
 
-    <!-- Brain Dump -->
-    <div id="v-dump" style="display:none;flex-direction:column;flex:1">
+    <!-- Wander -->
+    <div id="v-wander" style="display:none;flex-direction:column;flex:1">
       <div class="sec">
       <div class="sec-title">倾倒<span class="side">倒空 · 不整理</span></div>
       <textarea id="dumpInput" rows="5" placeholder="此刻脑子里有什么？全部倒出来——乱，没关系。"></textarea>
@@ -279,12 +306,6 @@ button:active{opacity:.6}
       <div class="sec-title">倾倒记录<span class="side" id="dumpCnt"></span></div>
       <div id="dumpList"></div>
       </div>
-      <div class="free-zone"></div>
-      <div class="footnote">倒出来之后，有用的挑走，剩下的可以随时清掉</div>
-    </div>
-
-    <!-- Wander -->
-    <div id="v-wander" style="display:none;flex-direction:column;flex:1">
       <div class="sec">
       <div class="sec-title">写下一念<span class="side">任思绪漫游 · 我的日记本</span></div>
       <textarea id="roamInput" rows="4" placeholder="此刻有什么闪过，就记下什么…读的人是未来的自己，她会包容现在的你。"></textarea>
@@ -311,6 +332,66 @@ button:active{opacity:.6}
       </div>
       <div class="free-zone"></div>
       <div class="footnote">★ 点亮后，会出现在目录页的「今日一句」里 · 情绪有点崩的时候，回来翻翻这些</div>
+    </div>
+
+    <!-- Emotion Tracker -->
+    <div id="v-emotion" style="display:none;flex-direction:column;flex:1">
+      <div class="sec">
+        <div class="sec-title" style="cursor:pointer" onclick="toggleQuad()">情绪四象限<span class="side" id="quadTri">收起 ▾</span></div>
+        <div class="emo-quad" id="quadBody">
+          <div class="quad-card" style="background:#E1F5EE"><b style="color:#0F6E56">A · 高愉悦 × 高能量</b>热情、兴奋、喜悦、专注</div>
+          <div class="quad-card" style="background:#EAF3DE"><b style="color:#3B6D11">B · 高愉悦 × 低能量</b>平静、满足、放松、惬意</div>
+          <div class="quad-card" style="background:#FAECE7"><b style="color:#993C1D">C · 低愉悦 × 高能量</b>焦虑、烦躁、愤怒、挫败</div>
+          <div class="quad-card" style="background:#F1EFE8"><b style="color:#444441">D · 低愉悦 × 低能量</b>低落、无力、疲惫、绝望</div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin:0 2px 10px">
+        <button class="pg-back" style="width:26px;height:26px;font-size:14px" onclick="emoShift(-1)">‹</button>
+        <span id="emoMonthLabel" style="font-size:13.5px;font-weight:600"></span>
+        <button class="pg-back" style="width:26px;height:26px;font-size:14px" onclick="emoShift(1)">›</button>
+      </div>
+      <div class="subtabs" id="emoTabs"></div>
+      <div id="emoTrack" style="display:none">
+        <div class="sec"><div class="sec-title">本月情绪<span class="side">点一天记录 · 区可多选</span></div><div id="emoCalWrap"></div></div>
+        <div id="emoDayEditor" style="display:none"></div>
+        <div class="sec"><div class="sec-title">三层日记<span class="side" id="emoDiaryCnt"></span></div><div id="emoDiaryList"></div></div>
+      </div>
+      <div id="emoReview" style="display:none"></div>
+      <div id="emoDeep" style="display:none"></div>
+      <div class="free-zone"></div>
+      <div class="footnote">看见情绪周期规律，挖掘来处与去处</div>
+    </div>
+
+    <!-- Sleep Tracker -->
+    <div id="v-sleep" style="display:none;flex-direction:column;flex:1">
+      <div class="sec" id="slpIntentCard">
+        <div class="sec-title">现阶段意图<span class="side">只记方向 · 无达标判定</span></div>
+        <div id="slpIntentBody"></div>
+        <div id="slpIntentEditor" style="display:none"></div>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin:0 2px 10px">
+        <button class="pg-back" style="width:26px;height:26px;font-size:14px" onclick="slpShift(-1)">‹</button>
+        <span id="slpMonthLabel" style="font-size:13.5px;font-weight:600"></span>
+        <button class="pg-back" style="width:26px;height:26px;font-size:14px" onclick="slpShift(1)">›</button>
+      </div>
+      <div class="subtabs" id="slpTabs"></div>
+      <div id="slpTrack" style="display:none">
+        <div class="sec">
+          <div class="sec-title">本月睡眠<span class="side">颜色 = 醒来精力 · 点天打卡</span></div>
+          <div id="slpCalWrap"></div>
+          <div style="display:flex;gap:12px;margin-top:9px;font-size:11px;color:var(--faint);flex-wrap:wrap">
+            <span><i class="cal-dot" style="background:#4A7BA7"></i> 精力好</span>
+            <span><i class="cal-dot" style="background:#6B8F6B"></i> 中等</span>
+            <span><i class="cal-dot" style="background:#A9A29A"></i> 很差</span>
+            <span style="margin-left:auto">没记的日子留空，不提醒</span>
+          </div>
+        </div>
+        <div id="slpDayEditor" style="display:none"></div>
+      </div>
+      <div id="slpReview" style="display:none"></div>
+      <div id="slpTrend" style="display:none"></div>
+      <div class="free-zone"></div>
+      <div class="footnote">研究自己，找到适合自己的休息方式</div>
     </div>
 
     <!-- Direction -->
@@ -456,8 +537,10 @@ button:active{opacity:.6}
       <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--faint)"><input type="checkbox" id="expRoam" checked> 漫游 / 闪念</label>
       <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--faint)"><input type="checkbox" id="expCollect" checked> 收集</label>
       <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--faint)"><input type="checkbox" id="expDir" checked> Direction</label>
+      <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--faint)"><input type="checkbox" id="expMood" checked> 情绪日记</label>
+      <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--faint)"><input type="checkbox" id="expSleep" checked> 睡眠打卡</label>
     </div>
-    <div style="font-size:11px;color:var(--faint);margin-top:6px;line-height:1.6">不包含反愿景 / 愿景 / 目标清单（正本在知识库）。导出后：打卡记录 → 贴《英语阅读｜10周学习目标》；减法新增 → 贴《我的人生系统》不做清单。</div>
+    <div style="font-size:11px;color:var(--faint);margin-top:6px;line-height:1.6">不包含反愿景 / 愿景 / 目标清单（正本在知识库）。导出后：打卡 → 贴《英语阅读｜10周学习目标》；减法新增 → 贴《我的人生系统》；情绪 → Labs《情绪追踪》；睡眠 → Labs《睡眠追踪》。</div>
     <div style="font-size:11.5px;color:var(--sub);margin:14px 0 6px;letter-spacing:.5px">备份 / 恢复</div>
     <div style="display:flex;flex-direction:column;gap:8px">
       <button class="pill" style="background:#f1efe9;color:var(--ink)" onclick="backupJSON()">完整备份 JSON</button>
@@ -789,6 +872,39 @@ function mergeStore(remote){
       (rc[d][fid]||[]).forEach(function(x){if(!seen[x]){store.checks[d][fid].push(x);seen[x]=true}});
     });
   });
+  /* mood / sleep：逐键 union（v7f，双端互不覆盖） */
+  function mergeKeyed(dst,src){
+    Object.keys(src||{}).forEach(function(k){
+      var sv=src[k],dv=dst[k];
+      if(dv===undefined||dv===null||dv===''){dst[k]=sv;return}
+      if(Array.isArray(sv)&&Array.isArray(dv)){
+        var seen2={};dv.forEach(function(x){seen2[JSON.stringify(x)]=true});
+        sv.forEach(function(x){if(!seen2[JSON.stringify(x)])dv.push(x)});
+      }else if(sv&&dv&&typeof sv==='object'&&typeof dv==='object'){mergeKeyed(dv,sv)}
+    });
+  }
+  if(remote.mood){
+    store.mood=store.mood||{};
+    ['zones','diary','rev'].forEach(function(k){
+      store.mood[k]=store.mood[k]||{};mergeKeyed(store.mood[k],remote.mood[k]||{});
+    });
+    var dseen={};(store.mood.deep||[]).forEach(function(x){if(x&&x.id)dseen[x.id]=true});
+    (remote.mood.deep||[]).forEach(function(x){
+      if(x&&x.id&&!dseen[x.id]){store.mood.deep=store.mood.deep||[];store.mood.deep.push(x);dseen[x.id]=true;added++}
+    });
+  }
+  if(remote.sleep){
+    store.sleep=store.sleep||{};
+    store.sleep.days=store.sleep.days||{};
+    mergeKeyed(store.sleep.days,remote.sleep.days||{});
+    store.sleep.tags=store.sleep.tags||{};
+    ['behavior','factors','body'].forEach(function(k){
+      store.sleep.tags[k]=store.sleep.tags[k]||[];
+      ((remote.sleep.tags||{})[k]||[]).forEach(function(t){if(store.sleep.tags[k].indexOf(t)<0)store.sleep.tags[k].push(t)});
+    });
+    if(!store.sleep.intent&&remote.sleep.intent)store.sleep.intent=remote.sleep.intent;
+    if(!store.sleep.pending&&remote.sleep.pending)store.sleep.pending=remote.sleep.pending;
+  }
   /* dump/roam/collect 按 date 倒序（新在前，与分组渲染兼容） */
   ['dump','roam','collect'].forEach(function(k){
     store[k].sort(function(a,b){return (b.date||'').localeCompare(a.date||'')});
@@ -944,22 +1060,24 @@ function go(v){
 window.go=go;
 
 var PAGES={
-  dump:['Brain Dump','先倒空脑子'],
   wander:['Wander','任思绪漫游'],
   collect:['Collect','看上的就收下'],
+  emotion:['Emotion Tracker','情绪追踪'],
+  sleep:['Sleep Tracker','睡眠追踪'],
   direction:['Direction','心定 事成 运自转']
 };
 function setPageMeta(name){
   document.getElementById('pgEn').textContent=PAGES[name][0];
   document.getElementById('pgCn').textContent=PAGES[name][1];
   document.getElementById('pgDate').textContent=archDay(today());
-  ['dump','wander','collect','direction'].forEach(function(k){
+  ['wander','collect','emotion','sleep','direction'].forEach(function(k){
     var el=document.getElementById('v-'+k);el.style.display=(k===name)?'flex':'none'});
 }
 function renderAll(name){
-  if(name==='dump')renderDump();
-  if(name==='wander')renderRoam();
+  if(name==='wander'){renderDump();renderRoam()}
   if(name==='collect')renderCollect();
+  if(name==='emotion')renderEmotion();
+  if(name==='sleep')renderSleep();
   if(name==='direction')renderDirection();
 }
 
@@ -976,7 +1094,7 @@ document.getElementById('planetBtn').addEventListener('click',function(){go('map
 /* ============ 目录 ============ */
 function renderMap(){
   document.getElementById('mapDate').textContent=archDay(today());
-  var h='';var order=['dump','wander','collect','direction'];
+  var h='';var order=['wander','collect','emotion','sleep','direction'];
   order.forEach(function(k){var p=PAGES[k];
     h+='<div class="map-item" onclick="go(\'page-'+k+'\')">'+
        '<span class="dot"><i></i></span>'+
@@ -1467,6 +1585,463 @@ function renderChecks(){
   var lg=document.getElementById('last7');if(lg)lg.innerHTML=g;
 }
 
+/* ============ 情绪追踪 Emotion Tracker ============ */
+var EMO_ZONES={
+  A:{axis:'高愉悦 × 高能量',words:'热情、兴奋、喜悦、专注',c:'#1D9E75',bg:'#E1F5EE'},
+  B:{axis:'高愉悦 × 低能量',words:'平静、满足、放松、惬意',c:'#639922',bg:'#EAF3DE'},
+  C:{axis:'低愉悦 × 高能量',words:'焦虑、烦躁、愤怒、挫败',c:'#D85A30',bg:'#FAECE7'},
+  D:{axis:'低愉悦 × 低能量',words:'低落、无力、疲惫、绝望',c:'#888780',bg:'#F1EFE8'}
+};
+function mood(){store.mood=store.mood||{};store.mood.zones=store.mood.zones||{};store.mood.diary=store.mood.diary||{};store.mood.rev=store.mood.rev||{};store.mood.deep=store.mood.deep||[];return store.mood}
+function emoYm(){return store.eMonth||ymOf(today())}
+function emoShift(d){var p=emoYm().split('-');var dt=new Date(parseInt(p[0],10),parseInt(p[1],10)-1+d,1);store.eMonth=dt.getFullYear()+'-'+pad2(dt.getMonth()+1);_emoDay=null;_deepId=null;save();renderEmotion()}
+window.emoShift=emoShift;
+function setEmoTab(t){store.eTab=t;_emoDay=null;save();renderEmotion()}
+window.setEmoTab=setEmoTab;
+function toggleQuad(){store.quadOpen=(store.quadOpen===false);save();applyQuad()}
+window.toggleQuad=toggleQuad;
+function applyQuad(){var open=store.quadOpen!==false;var b=document.getElementById('quadBody');var t=document.getElementById('quadTri');if(b)b.style.display=open?'grid':'none';if(t)t.textContent=open?'收起 ▾':'展开 ▸'}
+function monthGrid(ym,cellFn){
+  var p=ym.split('-');var y=parseInt(p[0],10),m=parseInt(p[1],10);
+  var first=new Date(y,m-1,1);var ndays=new Date(y,m,0).getDate();
+  var wds=['日','一','二','三','四','五','六'];
+  var h='<div class="cal-grid">'+wds.map(function(w){return '<span class="cal-wd">'+w+'</span>'}).join('');
+  for(var i2=0;i2<first.getDay();i2++)h+='<span class="cal-cell cal-empty"></span>';
+  for(var d3=1;d3<=ndays;d3++){h+=cellFn(y+'-'+pad2(m)+'-'+pad2(d3),d3)}
+  return h+'</div>';
+}
+var _emoDay=null,_emoZones=null,_deepId=null;
+function renderEmoCal(){
+  var mg=mood();
+  function cell(ds,d2){
+    var zs=(mg.zones[ds]||[]);
+    var dots=zs.map(function(z){return '<i class="cal-dot" style="background:'+EMO_ZONES[z].c+'"></i>'}).join('');
+    return '<span class="cal-cell'+(ds===today()?' cal-today':'')+'" onclick="openEmoDay(\''+ds+'\')"><b>'+d2+'</b><span class="cal-dots">'+dots+'</span></span>';
+  }
+  return monthGrid(emoYm(),cell);
+}
+function openEmoDay(ds){
+  _emoDay=ds;_emoZones=(mood().zones[ds]||[]).slice();
+  renderEmoDayEditor();
+}
+window.openEmoDay=openEmoDay;
+function renderEmoChips(){
+  var el=document.getElementById('emoZoneRow');if(!el)return;
+  el.innerHTML=Object.keys(EMO_ZONES).map(function(z){
+    var on=_emoZones.indexOf(z)>-1;var Z=EMO_ZONES[z];
+    return '<span class="chip'+(on?' on':'')+'" style="'+(on?'background:'+Z.bg+';border-color:'+Z.c+';color:'+Z.c:'')+'" onclick="toggleEmoZone(\''+z+'\')">'+z+' · '+Z.axis+'</span>';
+  }).join('');
+}
+function toggleEmoZone(z){var i=_emoZones.indexOf(z);if(i>-1)_emoZones.splice(i,1);else _emoZones.push(z);renderEmoChips()}
+window.toggleEmoZone=toggleEmoZone;
+function renderEmoDayEditor(){
+  var el=document.getElementById('emoDayEditor');
+  if(!_emoDay){el.style.display='none';return}
+  var d=mood().diary[_emoDay]||{};
+  el.style.display='block';
+  el.innerHTML='<div class="sec" style="border-color:var(--brown)">'+
+    '<div class="sec-title">'+esc(archDay(_emoDay))+'<span class="side">区可多选 · 全空保存即清除</span></div>'+
+    '<div id="emoZoneRow" class="pillrow" style="margin-top:2px"></div>'+
+    '<div style="font-size:12px;color:var(--sub);margin:10px 0 4px">今天发生在我身上、最值得说的一件事是什么？</div>'+
+    '<textarea id="emoE1" rows="2">'+esc(d.e1||'')+'</textarea>'+
+    '<div style="font-size:12px;color:var(--sub);margin:10px 0 4px">今天我的情绪点是什么？（用上帝视角，抽离地看它）</div>'+
+    '<textarea id="emoE2" rows="2">'+esc(d.e2||'')+'</textarea>'+
+    '<div style="font-size:12px;color:var(--sub);margin:10px 0 4px">基于此，我做了什么决策和行动？（可选）</div>'+
+    '<textarea id="emoE3" rows="2">'+esc(d.e3||'')+'</textarea>'+
+    '<div class="btn-row"><button class="act" onclick="closeEmoDay()">收起</button><button class="pill" onclick="saveEmoDay()">保存</button></div>'+
+    '</div>';
+  renderEmoChips();
+}
+function closeEmoDay(){_emoDay=null;renderEmoDayEditor()}
+window.closeEmoDay=closeEmoDay;
+function saveEmoDay(){
+  function g(id){var e=document.getElementById(id);return e?e.value.trim():''}
+  var e1=g('emoE1'),e2=g('emoE2'),e3=g('emoE3');
+  var mg=mood();
+  if(_emoZones.length)mg.zones[_emoDay]=_emoZones.slice();else delete mg.zones[_emoDay];
+  if(e1||e2||e3)mg.diary[_emoDay]={e1:e1,e2:e2,e3:e3};else delete mg.diary[_emoDay];
+  _emoDay=null;save();renderEmotion();toast('已记录');
+}
+window.saveEmoDay=saveEmoDay;
+function renderEmoDiary(){
+  var ym=emoYm();var mg=mood();
+  var ds=Object.keys(mg.diary).filter(function(d){return d.slice(0,7)===ym}).sort().reverse();
+  var cnt=document.getElementById('emoDiaryCnt');if(cnt)cnt.textContent=ds.length+' 篇';
+  var h=ds.map(function(d){var v=mg.diary[d];var zs=(mg.zones[d]||[]).join(' ');
+    var snip=(v.e1||v.e2||'');
+    return '<div class="row" style="cursor:pointer" onclick="openEmoDay(\''+d+'\')"><span class="no">'+d.slice(8)+'</span><div class="txt"><div class="nm">'+esc(snip.slice(0,40))+(snip.length>40?'…':'')+'</div><div class="meta">'+(zs||'未标区')+'</div></div></div>'}).join('');
+  document.getElementById('emoDiaryList').innerHTML=h||'<div class="row" style="border-bottom:0"><span class="no">·</span><div class="txt"><div class="nm" style="color:var(--faint);font-size:13px">这个月还没有日记。点上面任意一天开始。</div></div></div>';
+}
+function saveMoodRev(k,v){var ym=emoYm();mood().rev[ym]=mood().rev[ym]||{};mood().rev[ym][k]=v;save()}
+window.saveMoodRev=saveMoodRev;
+function renderEmoReview(){
+  var ym=emoYm();var r=mood().rev[ym]||{};
+  function ta(k,ph,val){return '<textarea rows="2" placeholder="'+ph+'" onchange="saveMoodRev(\''+k+'\',this.value)">'+esc(val||'')+'</textarea>'}
+  document.getElementById('emoReview').innerHTML=
+   '<div class="sec"><div class="sec-title">四象限触发词<span class="side">'+ym.split('-')[0]+'年'+parseInt(ym.split('-')[1],10)+'月 · 月底回看时填</span></div>'+
+   Object.keys(EMO_ZONES).map(function(z){var Z=EMO_ZONES[z];
+     return '<div style="font-size:12px;color:'+Z.c+';margin:8px 0 4px">'+z+' · '+Z.axis+'</div>'+ta(z,Z.words+'…',r[z])}).join('')+
+   '</div>'+
+   '<div class="sec"><div class="sec-title">调节策略<span class="side">竖着写，不并列赶</span></div>'+
+   '<div style="font-size:12px;color:#993C1D;margin:2px 0 4px">当下处于 C 区，你想做什么？</div>'+ta('cs','例：叫停，走五分钟；当天不接新任务…',r.cs)+
+   '<div style="font-size:12px;color:#444441;margin:10px 0 4px">当下处于 D 区，你想做什么？</div>'+ta('ds','例：允许低电量，只做最小一件事…',r.ds)+
+   '</div>';
+}
+function deepEditorHtml(){
+  var it=null;if(_deepId!=='new'){it=(mood().deep||[]).find(function(x){return x.id===_deepId})||null}
+  var d=(it&&it.date)||today();
+  function f(k,label,ph,val){return '<div style="font-size:12px;color:var(--sub);margin:8px 0 4px">'+label+'</div><textarea id="deep_'+k+'" rows="2" placeholder="'+ph+'">'+esc(val||'')+'</textarea>'}
+  return '<div class="sec" style="border-color:var(--brown)">'+
+   '<div class="sec-title">五步分析<span class="side">按原版五步 · 偶发才记</span></div>'+
+   '<input type="date" id="deepDate" value="'+d+'" style="font-family:inherit;font-size:14px;padding:8px 10px;border:1px solid var(--line);background:var(--fill);border-radius:8px;outline:none;width:100%;color:var(--ink)">'+
+   f('s1','① 情景','发生了什么',it&&it.s1)+
+   f('s2','② 自动思维','脑海里出现的念头',it&&it.s2)+
+   f('s3','③ 我的情绪','焦虑、自责、沮丧和无力…',it&&it.s3)+
+   f('s4','④ 反应分析','换个角度还能怎么看？还有其他可能性吗？',it&&it.s4)+
+   f('s5','⑤ 结果与行动','做完分析后的情绪如何？接下来可以做什么？',it&&it.s5)+
+   '<div class="btn-row"><button class="act" onclick="_deepId=null;renderEmotion()">取消</button><button class="pill" onclick="saveDeep()">保存</button>'+(it?'<button class="act" style="color:#b07c7c" onclick="delDeep(\''+it.id+'\')">删除</button>':'')+'</div></div>';
+}
+function renderEmoDeep(){
+  var list=(mood().deep||[]).slice().sort(function(a,b){return (b.date||'').localeCompare(a.date||'')});
+  var h='<div class="btn-row" style="justify-content:flex-start;margin:0 2px 10px"><button class="pill" style="font-size:13px;padding:8px 18px" onclick="editDeep(\'new\')">＋ 记一次分析</button></div>';
+  if(_deepId)h+=deepEditorHtml();
+  if(!list.length&&!_deepId)h+='<div class="sec"><div class="row" style="border-bottom:0"><span class="no">·</span><div class="txt"><div class="nm" style="color:var(--faint);font-size:13px">偶发的深度分析放这里：情绪反复来、或一件事翻不过去的时候记一次。</div></div></div></div>';
+  list.forEach(function(it){
+    if(it.id===_deepId)return;
+    h+='<div class="sec"><div class="sec-title" style="cursor:pointer" onclick="editDeep(\''+it.id+'\')">'+esc(archDay(it.date))+'<span class="side">'+esc((it.s1||'').slice(0,14))+((it.s1||'').length>14?'…':'')+'</span></div>'+
+       '<div style="font-size:12.5px;line-height:1.8;color:var(--sub);padding-bottom:8px;word-break:break-word">'+
+       '<b style="color:var(--ink)">情景</b> '+esc(it.s1||'')+'<br>'+
+       '<b style="color:var(--ink)">自动思维</b> '+esc(it.s2||'')+'<br>'+
+       '<b style="color:var(--ink)">我的情绪</b> '+esc(it.s3||'')+'<br>'+
+       '<b style="color:var(--ink)">反应分析</b> '+esc(it.s4||'')+'<br>'+
+       '<b style="color:var(--ink)">结果与行动</b> '+esc(it.s5||'')+'</div></div>';
+  });
+  document.getElementById('emoDeep').innerHTML=h;
+}
+function editDeep(id){_deepId=id;renderEmotion()}
+window.editDeep=editDeep;
+function saveDeep(){
+  function g(k){var e=document.getElementById('deep_'+k);return e?e.value.trim():''}
+  var item={s1:g('s1'),s2:g('s2'),s3:g('s3'),s4:g('s4'),s5:g('s5')};
+  var dtEl=document.getElementById('deepDate');var dt=dtEl?dtEl.value:'';
+  if(!dt)dt=today();
+  if(!item.s1&&!item.s2){toast('至少写情景或念头');return}
+  var mg=mood();
+  if(_deepId==='new'){item.id=uid();item.date=dt;mg.deep.push(item)}
+  else{var it=mg.deep.find(function(x){return x.id===_deepId});if(!it)return;it.s1=item.s1;it.s2=item.s2;it.s3=item.s3;it.s4=item.s4;it.s5=item.s5;it.date=dt}
+  _deepId=null;save();renderEmotion();toast('已保存');
+}
+window.saveDeep=saveDeep;
+function delDeep(id){if(!confirm('删除这条分析？'))return;var mg=mood();mg.deep=mg.deep.filter(function(x){return x.id!==id});_deepId=null;save();renderEmotion()}
+window.delDeep=delDeep;
+function renderEmotion(){
+  try{applyQuad()}catch(e){}
+  var ym=emoYm();
+  document.getElementById('emoMonthLabel').textContent=ym.split('-')[0]+'年'+parseInt(ym.split('-')[1],10)+'月';
+  var tabs=[['track','追踪'],['review','回顾'],['deep','分析']];
+  document.getElementById('emoTabs').innerHTML=tabs.map(function(t){
+    return '<span class="subtab'+(store.eTab===t[0]?' on':'')+'" onclick="setEmoTab(\''+t[0]+'\')">'+t[1]+'</span>'}).join('');
+  document.getElementById('emoTrack').style.display=store.eTab==='track'?'block':'none';
+  document.getElementById('emoReview').style.display=store.eTab==='review'?'block':'none';
+  document.getElementById('emoDeep').style.display=store.eTab==='deep'?'block':'none';
+  if(store.eTab==='track'){
+    document.getElementById('emoCalWrap').innerHTML=renderEmoCal();
+    renderEmoDiary();
+    if(_emoDay)renderEmoDayEditor();else document.getElementById('emoDayEditor').style.display='none';
+  }else if(store.eTab==='review'){renderEmoReview()}
+  else{renderEmoDeep()}
+}
+
+/* ============ 睡眠追踪 Sleep Tracker ============ */
+var SLP_ENERGY={bad:{t:'很差',c:'#A9A29A',bg:'#F1EFE8'},mid:{t:'中等',c:'#6B8F6B',bg:'#EAF3DE'},good:{t:'很好',c:'#4A7BA7',bg:'#E6F1FB'}};
+function slp(){
+  store.sleep=store.sleep||{};
+  store.sleep.days=store.sleep.days||{};
+  store.sleep.tags=store.sleep.tags||{};
+  store.sleep.tags.behavior=store.sleep.tags.behavior||['看书','泡脚','拉伸','洗澡','冥想','听播客','无屏幕30分钟'];
+  store.sleep.tags.factors=store.sleep.tags.factors||['玩手机','想事情','情绪不好','经期','加班','咖啡','酒','运动','晚饭太晚','环境吵'];
+  store.sleep.tags.body=store.sleep.tags.body||['肩颈紧','头沉','眼睛干','腰酸','无'];
+  return store.sleep;
+}
+function slpYm(){return store.sMonth||ymOf(today())}
+function slpShift(d){var p=slpYm().split('-');var dt=new Date(parseInt(p[0],10),parseInt(p[1],10)-1+d,1);store.sMonth=dt.getFullYear()+'-'+pad2(dt.getMonth()+1);_slpDay=null;_slpAddKind=null;save();renderSleep()}
+window.slpShift=slpShift;
+function setSlpTab(t){store.sTab=t;_slpDay=null;_slpAddKind=null;save();renderSleep()}
+window.setSlpTab=setSlpTab;
+var _slpDay=null,_slpDraft=null,_slpAddKind=null;
+function calcDur(bed,rise){if(!bed||!rise)return 0;var b=bed.split(':'),r=rise.split(':');var m=(parseInt(r[0],10)*60+parseInt(r[1],10))-(parseInt(b[0],10)*60+parseInt(b[1],10));if(m<=0)m+=1440;return m}
+function durTxt(m){if(!m)return '--';return Math.floor(m/60)+' 时 '+(m%60)+' 分'}
+function openSlpDay(ds){
+  _slpDay=ds;_slpAddKind=null;
+  var v=slp().days[ds];
+  _slpDraft=JSON.parse(JSON.stringify(v||{bed:'',rise:'',durM:0,energy:'',state:'',ease:'',wake:'',behavior:[],factors:[],body:[],note:''}));
+  renderSlpEditor();
+}
+window.openSlpDay=openSlpDay;
+function slpSyncTimes(){
+  var b=document.getElementById('slpBed'),r=document.getElementById('slpRise'),n=document.getElementById('slpNote');
+  if(b)_slpDraft.bed=b.value;if(r)_slpDraft.rise=r.value;if(n)_slpDraft.note=n.value;
+  _slpDraft.durM=calcDur(_slpDraft.bed,_slpDraft.rise);
+  var du=document.getElementById('slpDur');if(du)du.textContent=durTxt(_slpDraft.durM);
+}
+function slpSet(k,v){slpSyncTimes();_slpDraft[k]=(_slpDraft[k]===v?'':v);renderSlpEditor()}
+window.slpSet=slpSet;
+function toggleSlpTag(kind,t){slpSyncTimes();var arr=_slpDraft[kind]||[];var i=arr.indexOf(t);if(i>-1)arr.splice(i,1);else arr.push(t);_slpDraft[kind]=arr;renderSlpEditor()}
+window.toggleSlpTag=toggleSlpTag;
+function addSlpTag(kind){slpSyncTimes();_slpAddKind=kind;renderSlpEditor()}
+window.addSlpTag=addSlpTag;
+function confirmAddTag(){
+  var i=document.getElementById('slpNewTag');var t=i?i.value.trim():'';
+  if(!t){_slpAddKind=null;renderSlpEditor();return}
+  var arr=slp().tags[_slpAddKind];
+  if(arr.indexOf(t)<0){arr.push(t);save()}
+  if((_slpDraft[_slpAddKind]||[]).indexOf(t)<0)_slpDraft[_slpAddKind].push(t);
+  _slpAddKind=null;renderSlpEditor();
+}
+window.confirmAddTag=confirmAddTag;
+function slpChipsHtml(kind,label,hint){
+  var arr=_slpDraft[kind]||[];
+  var tags=slp().tags[kind]||[];
+  var h='<div style="font-size:12px;color:var(--sub);margin-top:12px">'+label+'<span style="color:var(--faint)"> · '+hint+'</span></div><div style="margin-top:4px">';
+  h+=tags.map(function(t){var on=arr.indexOf(t)>-1;
+    return '<span class="chip'+(on?' on':'')+'" onclick="toggleSlpTag(\''+kind+'\',\''+t+'\')">'+esc(t)+'</span>'}).join('');
+  h+='<span class="chip chip-add" onclick="addSlpTag(\''+kind+'\')">＋ 添加</span>';
+  if(_slpAddKind===kind){
+    h+='<span style="display:inline-flex;gap:6px;margin:0 0 6px;vertical-align:middle"><input type="text" id="slpNewTag" placeholder="自己加一项" style="width:130px;padding:4px 10px;font-size:13px" onkeydown="if(event.keyCode===13){event.preventDefault();confirmAddTag()}"><button class="pill" style="padding:4px 12px;font-size:12px" onclick="confirmAddTag()">加</button></span>';
+  }
+  return h+'</div>';
+}
+function pillRowHtml(key,opts,cur){
+  return '<div class="pillrow">'+opts.map(function(o){
+    return '<span class="pill3'+(cur===o[0]?' on':'')+'" onclick="slpSet(\''+key+'\',\''+o[0]+'\')">'+o[1]+'</span>'}).join('')+'</div>';
+}
+function renderSlpEditor(){
+  var el=document.getElementById('slpDayEditor');
+  if(!_slpDay){el.style.display='none';return}
+  var d=_slpDraft;
+  var h='<div class="sec" style="border-color:var(--brown)">'+
+   '<div class="sec-title">'+esc(archDay(_slpDay))+'<span class="side">能勾的都勾 · 30 秒</span></div>'+
+   slpChipsHtml('behavior','睡前行为','昨晚做了什么 · 可多选')+
+   '<div style="display:flex;gap:8px;margin-top:12px">'+
+     '<div style="flex:1"><div style="font-size:11px;color:var(--faint)">上床</div><input type="time" id="slpBed" value="'+(d.bed||'')+'" onchange="slpSyncTimes()" style="width:100%;font-size:15px;padding:7px 9px;border:1px solid var(--line);background:var(--fill);border-radius:8px;outline:none;color:var(--ink)"></div>'+
+     '<div style="flex:1"><div style="font-size:11px;color:var(--faint)">起床</div><input type="time" id="slpRise" value="'+(d.rise||'')+'" onchange="slpSyncTimes()" style="width:100%;font-size:15px;padding:7px 9px;border:1px solid var(--line);background:var(--fill);border-radius:8px;outline:none;color:var(--ink)"></div>'+
+     '<div style="flex:1"><div style="font-size:11px;color:var(--faint)">时长（自动）</div><div id="slpDur" style="font-size:15px;padding:8px 0;color:var(--ink)">'+durTxt(d.durM)+'</div></div>'+
+   '</div>'+
+   '<div style="font-size:12px;color:var(--sub);margin-top:12px">醒来精力<span style="color:var(--faint)"> · 单选 · 日历显示这条色</span></div>'+
+   pillRowHtml('energy',[['bad','灰 · 很差'],['mid','绿 · 中等'],['good','蓝 · 很好']],d.energy)+
+   '<div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px">'+
+     '<div style="flex:1;min-width:130px"><div style="font-size:12px;color:var(--sub)">睡眠状态</div>'+pillRowHtml('state',[['good','好'],['ok','还行'],['bad','不好']],d.state)+'</div>'+
+     '<div style="flex:1;min-width:130px"><div style="font-size:12px;color:var(--sub)">入睡难易</div>'+pillRowHtml('ease',[['easy','容易'],['mid','一般'],['hard','难']],d.ease)+'</div>'+
+   '</div>'+
+   '<div style="font-size:12px;color:var(--sub);margin-top:12px">夜醒次数</div>'+
+   pillRowHtml('wake',[['0','0'],['1','1'],['2','2'],['3+','3 次以上']],d.wake)+
+   slpChipsHtml('body','身体感受','可多选')+
+   slpChipsHtml('factors','影响因素','可多选 · 复盘原因分析用')+
+   '<div style="font-size:12px;color:var(--sub);margin-top:12px">备注 <span style="color:var(--faint)">可空</span></div>'+
+   '<textarea id="slpNote" rows="2" placeholder="例：凌晨 3 点醒了一次，想起标书的事">'+esc(d.note||'')+'</textarea>'+
+   '<div class="btn-row"><button class="act" onclick="closeSlpDay()">收起</button>'+
+   (slp().days[_slpDay]?'<button class="act" style="color:#b07c7c" onclick="clearSlpDay()">清除记录</button>':'')+
+   '<button class="pill" onclick="saveSlpDay()">保存</button></div></div>';
+  el.innerHTML=h;el.style.display='block';
+}
+function closeSlpDay(){_slpDay=null;renderSlpEditor()}
+window.closeSlpDay=closeSlpDay;
+function clearSlpDay(){if(!confirm('清除这一天的打卡记录？'))return;delete slp().days[_slpDay];_slpDay=null;save();renderSleep();toast('已清除')}
+window.clearSlpDay=clearSlpDay;
+function saveSlpDay(){
+  slpSyncTimes();
+  var d=_slpDraft;
+  var has=d.bed||d.rise||d.energy||d.state||d.ease||(d.wake!=='')||d.note||(d.behavior||[]).length||(d.factors||[]).length||(d.body||[]).length;
+  if(has){d.durM=calcDur(d.bed,d.rise);slp().days[_slpDay]=d}
+  else{delete slp().days[_slpDay]}
+  _slpDay=null;save();renderSleep();toast('已记录');
+}
+window.saveSlpDay=saveSlpDay;
+function renderSlpCal(){
+  var s=slp();
+  function cell(ds,d2){
+    var v=s.days[ds];var bar='';
+    if(v&&v.energy)bar='<span class="cal-dots"><i class="cal-dot" style="background:'+SLP_ENERGY[v.energy].c+'"></i></span>';
+    return '<span class="cal-cell'+(ds===today()?' cal-today':'')+'" onclick="openSlpDay(\''+ds+'\')"><b>'+d2+'</b>'+bar+'</span>';
+  }
+  return monthGrid(slpYm(),cell);
+}
+function renderSlpIntent(){
+  var s=slp();var el=document.getElementById('slpIntentBody');
+  var it=s.intent;var h='';
+  if(s.pending){
+    h+='<div class="slp-pending">有新的阶段意图草稿（'+esc(s.pending.ym||'')+' 复盘产出）'+
+       '<div style="margin-top:5px">'+esc(s.pending.goal||'')+'</div>'+
+       ((s.pending.rules||[]).length?'<div style="font-size:11.5px;color:#8a7a52;margin-top:3px">'+s.pending.rules.map(function(r){return esc(r)}).join('<br>')+'</div>':'')+
+       '<div style="margin-top:8px"><button class="pill" style="padding:5px 14px;font-size:12px" onclick="adoptSlpDraft()">采用</button> <button class="act" style="margin-left:10px" onclick="discardSlpDraft()">忽略</button></div></div>';
+  }
+  if(it&&it.goal){
+    h+='<div style="display:flex;justify-content:space-between;align-items:flex-start"><div style="font-size:13.5px;line-height:1.7;white-space:pre-wrap;word-break:break-word">'+esc(it.goal)+'</div><button class="act" style="margin-left:8px;white-space:nowrap" onclick="editSlpIntent()">编辑</button></div>';
+    if((it.rules||[]).length)h+='<div class="ifthen">'+it.rules.map(function(r){return esc(r)}).join('<br>')+'</div>';
+  }else if(!s.pending){
+    h+='<div style="font-size:12.5px;color:var(--faint);line-height:1.7">还没有现阶段目标。先记打卡，月底复盘时生成草稿；也可以<button class="act" onclick="editSlpIntent()">直接写一条</button>。</div>';
+  }
+  el.innerHTML=h;
+}
+function editSlpIntent(){
+  var it=slp().intent||{goal:'',rules:[]};
+  var el=document.getElementById('slpIntentEditor');
+  el.style.display='block';
+  el.innerHTML='<div style="font-size:12px;color:var(--sub);margin:2px 0 4px">现阶段目标（一句话）</div>'+
+   '<textarea id="slpGoalIn" rows="2" placeholder="现阶段目标：优先保证 23:30 前上床，不再执着睡满 7 小时。">'+esc(it.goal||'')+'</textarea>'+
+   '<div style="font-size:12px;color:var(--sub);margin:8px 0 4px">障碍-计划 · 一行一条「如果…那么…」</div>'+
+   '<textarea id="slpRulesIn" rows="3">'+esc((it.rules||[]).join('\n'))+'</textarea>'+
+   '<div class="btn-row"><button class="act" onclick="hideSlpIntentEditor()">取消</button><button class="pill" onclick="saveSlpIntent()">保存</button></div>';
+}
+window.editSlpIntent=editSlpIntent;
+function hideSlpIntentEditor(){document.getElementById('slpIntentEditor').style.display='none'}
+window.hideSlpIntentEditor=hideSlpIntentEditor;
+function saveSlpIntent(){
+  var g=document.getElementById('slpGoalIn').value.trim();
+  var rules=document.getElementById('slpRulesIn').value.split('\n').map(function(x){return x.trim()}).filter(Boolean);
+  if(!g){toast('写一句话目标');return}
+  slp().intent={goal:g,rules:rules};save();hideSlpIntentEditor();renderSlpIntent();toast('已保存');
+}
+window.saveSlpIntent=saveSlpIntent;
+function adoptSlpDraft(){var s=slp();s.intent={goal:s.pending.goal,rules:s.pending.rules||[]};s.pending=null;save();renderSleep();toast('已采用，置顶卡更新')}
+window.adoptSlpDraft=adoptSlpDraft;
+function discardSlpDraft(){slp().pending=null;save();renderSlpIntent();toast('已忽略')}
+window.discardSlpDraft=discardSlpDraft;
+function prevYm(ym){var p=ym.split('-');var dt=new Date(parseInt(p[0],10),parseInt(p[1],10)-2,1);return dt.getFullYear()+'-'+pad2(dt.getMonth()+1)}
+function monthStats(ym){
+  var s=slp();var days=Object.keys(s.days).filter(function(d){return d.slice(0,7)===ym}).sort();
+  var st={n:days.length,beds:[],rises:[],durM:0,durN:0,wake:0,wakeN:0,wokeN:0,
+    buckets:{'9':0,'79':0,'57':0,'5':0},state:{good:0,ok:0,bad:0},ease:0,energy:{bad:0,mid:0,good:0},
+    bodyCount:{},goodFactors:{},badFactors:{}};
+  days.forEach(function(d){
+    var v=s.days[d]||{};
+    if(v.bed)st.beds.push(v.bed);
+    if(v.rise)st.rises.push(v.rise);
+    if(v.durM){st.durM+=v.durM;st.durN++;var hh=v.durM/60;
+      if(hh>=9)st.buckets['9']++;else if(hh>=7)st.buckets['79']++;else if(hh>=5)st.buckets['57']++;else st.buckets['5']++}
+    if(v.wake!==''&&v.wake!=null&&v.wake!==undefined){var w=parseInt(v.wake,10)||0;st.wake+=w;st.wakeN++;if(w>0)st.wokeN++}
+    if(v.state&&st.state[v.state]!=null)st.state[v.state]++;
+    if(v.ease==='easy')st.ease++;
+    if(v.energy&&st.energy[v.energy])st.energy[v.energy]++;
+    (v.body||[]).forEach(function(t){st.bodyCount[t]=(st.bodyCount[t]||0)+1});
+    var fs=v.factors||[];
+    if(v.state==='good')fs.forEach(function(t){st.goodFactors[t]=(st.goodFactors[t]||0)+1});
+    if(v.state==='bad')fs.forEach(function(t){st.badFactors[t]=(st.badFactors[t]||0)+1});
+  });
+  return st;
+}
+function statCard(lbl,val,dl){
+  var cl='var(--faint)';
+  if(dl&&dl.indexOf('▲')===0)cl='#3B6D11';
+  else if(dl&&dl.indexOf('▼')===0)cl='#185FA5';
+  return '<div class="stat-card"><div class="lbl">'+lbl+'</div><div class="val">'+val+'</div><div class="dl" style="color:'+cl+'">'+(dl||'')+'</div></div>';
+}
+function bucketHtml(lbl,n){return '<span style="flex:1;text-align:center;font-size:11.5px;padding:5px 0;background:#f6f5f1;border-radius:8px;color:var(--sub);min-width:66px">'+lbl+'　'+n+' 天</span>'}
+function topN(obj,n){return Object.keys(obj).sort(function(a,b){return obj[b]-obj[a]}).slice(0,n).map(function(k){return esc(k)+' '+obj[k]}).join(' · ')||'—'}
+function rngOf(arr){if(!arr.length)return '—';var a=arr.slice().sort();return a[0]+' – '+a[a.length-1]}
+function saveSlpRev(ym,k,v){var s=slp();s.rev=s.rev||{};s.rev[ym]=s.rev[ym]||{};s.rev[ym][k]=v;save()}
+window.saveSlpRev=saveSlpRev;
+function makeSlpDraft(ym){
+  var s=slp();var rv=(s.rev||{})[ym]||{};
+  var goal=(rv.woopG||'').trim();
+  if(!goal){toast('先写「下阶段目标」一句话');return}
+  var rules=(rv.woopR||'').split('\n').map(function(x){return x.trim()}).filter(Boolean);
+  s.pending={goal:goal,rules:rules,ym:ym};
+  save();renderSleep();toast('草稿已生成，去置顶卡点「采用」');
+}
+window.makeSlpDraft=makeSlpDraft;
+function renderSlpReview(){
+  var ym=slpYm();var st=monthStats(ym);
+  var pm=prevYm(ym);var pst=monthStats(pm);
+  var s=slp();s.rev=s.rev||{};var rv=s.rev[ym]=s.rev[ym]||{insight:'',woopO:'',woopG:'',woopR:''};
+  var avgDur=st.durN?Math.round(st.durM/st.durN/6)/10:0;
+  var pAvgDur=pst.durN?Math.round(pst.durM/pst.durN/6)/10:0;
+  var avgWake=st.wakeN?Math.round(st.wake/st.wakeN*10)/10:0;
+  var pAvgWake=pst.wakeN?Math.round(pst.wake/pst.wakeN*10)/10:0;
+  function dl(a,b,unit){if(!b)return '';var d2=Math.round((a-b)*10)/10;return (d2>=0?'▲ +':'▼ ')+d2+unit}
+  var goodN=st.state.good||0,pGoodN=pst.state.good||0;
+  var topBody=Object.keys(st.bodyCount).sort(function(a,b){return st.bodyCount[b]-st.bodyCount[a]})[0];
+  var h='<div class="sec"><div class="sec-title">与上月比<span class="side">'+pm+' → '+ym+'</span></div>'+
+   '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:7px">'+
+   statCard('时长',avgDur?avgDur+' 时':'—',pAvgDur?dl(avgDur,pAvgDur,'时'):'')+
+   statCard('睡得好',st.n?goodN+' 天':'—',pst.n?dl(goodN,pGoodN,'天'):'')+
+   statCard('夜醒均值',st.wakeN?avgWake+' 次':'—',pAvgWake?dl(avgWake,pAvgWake,'次'):'')+
+   statCard('身体',st.n?(topBody||'—'):'—',st.n+' 天有记录')+
+   '</div></div>';
+  h+='<div class="sec"><div class="sec-title">1　作息怎么样</div>'+
+   '<div style="font-size:12.5px;color:var(--sub);line-height:1.9">睡觉区间 '+rngOf(st.beds)+'　·　起床区间 '+rngOf(st.rises)+'</div>'+
+   '<div style="display:flex;gap:5px;margin-top:7px;flex-wrap:wrap">'+
+   bucketHtml('≥9 时',st.buckets['9'])+bucketHtml('7–9 时',st.buckets['79'])+bucketHtml('5–7 时',st.buckets['57'])+bucketHtml('≤5 时',st.buckets['5'])+'</div></div>';
+  h+='<div class="sec"><div class="sec-title">2　状态怎么样</div>'+
+   '<div style="display:flex;gap:5px;flex-wrap:wrap">'+
+   bucketHtml('睡得好',st.state.good)+bucketHtml('还行',st.state.ok)+bucketHtml('不好',st.state.bad)+'</div>'+
+   '<div style="font-size:12.5px;color:var(--sub);line-height:1.9;margin-top:6px">入睡容易 '+st.ease+' 天　·　有夜醒 '+st.wokeN+' 天　·　记了 '+st.n+' 天</div></div>';
+  h+='<div class="sec"><div class="sec-title">3　原因分析</div>'+
+   '<div style="display:flex;gap:9px;flex-wrap:wrap">'+
+   '<div style="flex:1;min-width:150px;background:#f6f5f1;border-radius:10px;padding:9px 11px"><div style="font-size:11px;color:var(--faint)">睡得不好的日子反复出现</div><div style="font-size:12.5px;line-height:1.9;margin-top:4px;color:var(--sub)">'+topN(st.badFactors,4)+'</div></div>'+
+   '<div style="flex:1;min-width:150px;background:#f6f5f1;border-radius:10px;padding:9px 11px"><div style="font-size:11px;color:var(--faint)">睡得好的日子反复出现</div><div style="font-size:12.5px;line-height:1.9;margin-top:4px;color:var(--sub)">'+topN(st.goodFactors,4)+'</div></div>'+
+   '</div></div>';
+  h+='<div class="sec"><div class="sec-title">4　洞察<span class="side">你写，帮手不替你下结论</span></div>'+
+   '<textarea rows="3" placeholder="这个月的睡眠有什么规律或关联吗？和前一个月相比，我和睡眠的关系如何？对早睡早起的目标，遇到了什么障碍？有什么决策和行动？" onchange="saveSlpRev(\''+ym+'\',\'insight\',this.value)">'+esc(rv.insight||'')+'</textarea></div>';
+  h+='<div class="sec"><div class="sec-title">WOOP 复盘<span class="side">填完生成草稿 · 采用后才进置顶卡</span></div>'+
+   '<div style="font-size:12px;color:var(--sub);margin:2px 0 4px">障碍：这个月卡住你的是什么？（从 3 里挑）</div>'+
+   '<textarea rows="2" onchange="saveSlpRev(\''+ym+'\',\'woopO\',this.value)">'+esc(rv.woopO||'')+'</textarea>'+
+   '<div style="font-size:12px;color:var(--sub);margin:8px 0 4px">下阶段目标（一句话 · 会显示在置顶卡）</div>'+
+   '<textarea rows="2" placeholder="现阶段目标：优先保证 23:30 前上床，不再执着睡满 7 小时。" onchange="saveSlpRev(\''+ym+'\',\'woopG\',this.value)">'+esc(rv.woopG||'')+'</textarea>'+
+   '<div style="font-size:12px;color:var(--sub);margin:8px 0 4px">计划：如果…那么…（一行一条）</div>'+
+   '<textarea rows="3" placeholder="如果 晚上还在刷手机，那么 23:00 手机放到客厅充电。" onchange="saveSlpRev(\''+ym+'\',\'woopR\',this.value)">'+esc(rv.woopR||'')+'</textarea>'+
+   '<div class="btn-row"><button class="pill" onclick="makeSlpDraft(\''+ym+'\')">保存为本阶段意图草稿</button></div>'+
+   '<div style="font-size:11px;color:var(--faint);margin-top:8px;line-height:1.6">草稿先挂在置顶卡上方，点「采用」才替换旧意图；「忽略」就丢弃。帮手在知识库侧产出的草稿，也会出现在同一个位置。</div></div>';
+  document.getElementById('slpReview').innerHTML=h;
+}
+function renderSlpTrend(){
+  var curYm=slpYm();
+  var p=curYm.split('-');var base=new Date(parseInt(p[0],10),parseInt(p[1],10)-1,1);
+  var pts=[];
+  for(var i=7;i>=0;i--){
+    var dt=new Date(base.getFullYear(),base.getMonth()-i,1);
+    var ym=dt.getFullYear()+'-'+pad2(dt.getMonth()+1);
+    var st=monthStats(ym);
+    var avg=st.durN?Math.round(st.durM/st.durN/6)/10:0;
+    pts.push({ym:ym,avg:avg,label:(dt.getMonth()+1)+'月'});
+  }
+  var withData=pts.filter(function(x){return x.avg>0});
+  var h='<div class="sec"><div class="sec-title">跨月趋势<span class="side">月均睡眠时长 · 小时</span></div>';
+  if(withData.length<2){
+    h+='<div style="font-size:12.5px;color:var(--faint);padding:8px 0 10px;line-height:1.8">记满两个月后，这里会画出跨月折线——阶段起伏一眼可见。目前有 '+withData.length+' 个月的数据。</div></div>';
+    document.getElementById('slpTrend').innerHTML=h;return;
+  }
+  function X(i2){return 46+i2*(380/(pts.length-1))}
+  function Y(v){var c=Math.max(4,Math.min(10,v));return 118-((c-4)/6)*96}
+  var line=withData.map(function(pt){var i2=pts.indexOf(pt);return X(i2)+','+Y(pt.avg)}).join(' ');
+  var svg='<svg viewBox="0 0 440 150" style="width:100%;height:auto">';
+  [4,7,10].forEach(function(g){var y2=Y(g);
+    svg+='<line x1="40" y1="'+y2+'" x2="432" y2="'+y2+'" stroke="#ecebe4" stroke-width="1"/>';
+    svg+='<text x="6" y="'+(y2+4)+'" font-size="11" fill="#c9c7c0">'+g+'h</text>';});
+  pts.forEach(function(pt,i2){
+    if(pt.avg>0)svg+='<circle cx="'+X(i2)+'" cy="'+Y(pt.avg)+'" r="3.5" fill="#3b5b7e"/>';
+    svg+='<text x="'+(X(i2)-9)+'" y="142" font-size="11" fill="#c9c7c0">'+pt.label+'</text>';});
+  svg+='<polyline points="'+line+'" fill="none" stroke="#3b5b7e" stroke-width="2" stroke-linejoin="round"/></svg>';
+  h+=svg+'<div style="font-size:11px;color:var(--faint);margin-top:4px">只有月均值，不带评判——阶段好不好，你在复盘里自己下结论。</div></div>';
+  document.getElementById('slpTrend').innerHTML=h;
+}
+function renderSleep(){
+  var ym=slpYm();
+  document.getElementById('slpMonthLabel').textContent=ym.split('-')[0]+'年'+parseInt(ym.split('-')[1],10)+'月';
+  var tabs=[['track','打卡'],['review','复盘'],['trend','趋势']];
+  document.getElementById('slpTabs').innerHTML=tabs.map(function(t){
+    return '<span class="subtab'+(store.sTab===t[0]?' on':'')+'" onclick="setSlpTab(\''+t[0]+'\')">'+t[1]+'</span>'}).join('');
+  document.getElementById('slpTrack').style.display=store.sTab==='track'?'block':'none';
+  document.getElementById('slpReview').style.display=store.sTab==='review'?'block':'none';
+  document.getElementById('slpTrend').style.display=store.sTab==='trend'?'block':'none';
+  renderSlpIntent();
+  if(store.sTab==='track'){
+    document.getElementById('slpCalWrap').innerHTML=renderSlpCal();
+    renderSlpEditor();
+  }else if(store.sTab==='review'){renderSlpReview()}
+  else{renderSlpTrend()}
+}
+
 /* ============ 导出 ============ */
 /* ============ 从 JSON 恢复（合并式，不覆盖本地） ============ */
 function restoreFromJSON(file){
@@ -1482,6 +2057,8 @@ function restoreFromJSON(file){
       try{renderRoam()}catch(e){}
       try{renderCollect()}catch(e){}
       try{renderDirection()}catch(e){}
+      try{renderEmotion()}catch(e){}
+      try{renderSleep()}catch(e){}
       try{renderQuote()}catch(e){}
       toast('已恢复：新增 '+r.added+' 条（云端下次推送自动包含）');
       pushSoon();
@@ -1594,10 +2171,53 @@ function doExport(range,label){
     mine.forEach(function(a){L.push('- '+a.t);cnt++});
     L.push('');
   }
+  function pushMood(){
+    var mg=store.mood||{};var any=false;
+    Object.keys(mg.diary||{}).sort().forEach(function(d){
+      if(!inRangeDate(d))return;var v=mg.diary[d];
+      if(!any){L.push('## 情绪 · 三层日记');L.push('> 贴入知识库 Labs《情绪追踪》');L.push('');any=true}
+      var zs=(mg.zones[d]||[]).join('、');
+      L.push('- '+d+(zs?'（'+zs+'）':''));
+      if(v.e1)L.push('  - 最值得说的一件事：'+v.e1);
+      if(v.e2)L.push('  - 情绪点：'+v.e2);
+      if(v.e3)L.push('  - 决策/行动：'+v.e3);
+      cnt++;
+    });
+    (mg.deep||[]).slice().sort(function(a,b){return (a.date||'').localeCompare(b.date||'')}).forEach(function(it){
+      if(!inRangeDate(it.date))return;
+      if(!any){L.push('## 情绪 · 三层日记');L.push('> 贴入知识库 Labs《情绪追踪》');L.push('');any=true}
+      L.push('- '+it.date+' 五步分析：'+(it.s1||''));
+      L.push('  - 自动思维：'+(it.s2||'')+' ｜ 情绪：'+(it.s3||''));
+      L.push('  - 反应分析：'+(it.s4||'')+' ｜ 结果与行动：'+(it.s5||''));
+      cnt++;
+    });
+    if(any)L.push('');
+  }
+  function pushSleep(){
+    var sp=store.sleep||{};var any=false;
+    Object.keys(sp.days||{}).sort().forEach(function(d){
+      if(!inRangeDate(d))return;var v=sp.days[d];
+      if(!any){L.push('## 睡眠 · 每日打卡');L.push('> 贴入知识库 Labs《睡眠追踪》');L.push('');any=true}
+      var parts=[];
+      if(v.bed)parts.push('上床 '+v.bed);if(v.rise)parts.push('起床 '+v.rise);
+      if(v.durM)parts.push('时长 '+Math.floor(v.durM/60)+'时'+(v.durM%60)+'分');
+      if(v.energy)parts.push('精力'+({bad:'差',mid:'中',good:'好'}[v.energy]));
+      if(v.state)parts.push('状态'+({good:'好',ok:'还行',bad:'不好'}[v.state]));
+      if(v.ease)parts.push('入睡'+({easy:'易',mid:'一般',hard:'难'}[v.ease]));
+      if(v.wake)parts.push('夜醒 '+v.wake);
+      if((v.body||[]).length)parts.push('身体：'+v.body.join('、'));
+      if((v.factors||[]).length)parts.push('因素：'+v.factors.join('、'));
+      if(v.note)parts.push('备注：'+v.note);
+      L.push('- '+d+' '+parts.join(' · '));cnt++;
+    });
+    if(any)L.push('');
+  }
   if(want('expDump'))pushDump();
   if(want('expRoam'))pushRoam();
   if(want('expCollect')){pushCollect();pushQuotes()}
   if(want('expDir')){pushChecks();pushSub()}
+  if(want('expMood'))pushMood();
+  if(want('expSleep'))pushSleep();
   if(!cnt)L.push('（这个时间段还没有内容）');
   L.push('', '---', '', '> 请帮手提炼：找出反复出现的卡点 / 念头，建议下周观察什么。');
   copyText(L.join('\n'));
