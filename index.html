@@ -2015,7 +2015,7 @@ function openSlpWoopEdit(ym){
   document.getElementById('slpPanel').style.display='flex';
 }
 function panelBtns(hasD){
-  return hasD?'<div style="display:flex;gap:8px;margin-top:12px"><button class="s-pill alt" style="margin-top:0;flex:1" onclick="discardSlpPanel()">忽略草稿</button><button class="s-pill" style="margin-top:0;flex:1" onclick="adoptSlpPanel()">采用</button></div>':'<div style="display:flex;gap:8px;margin-top:12px"><button class="s-pill alt" style="margin-top:0;flex:1" onclick="hideSlpPanel()">取消</button><button class="s-pill" style="margin-top:0;flex:1" onclick="adoptSlpPanel()">保存</button></div>';
+  return hasD?'<div style="display:flex;gap:8px;margin-top:12px"><button class="s-pill alt" style="margin-top:0;flex:1" onclick="hideSlpPanel()">编辑</button><button class="s-pill" style="margin-top:0;flex:1" onclick="adoptSlpPanel()">采用</button></div>':'<div style="display:flex;gap:8px;margin-top:12px"><button class="s-pill alt" style="margin-top:0;flex:1" onclick="hideSlpPanel()">取消</button><button class="s-pill" style="margin-top:0;flex:1" onclick="adoptSlpPanel()">保存</button></div>';
 }
 function hideSlpPanel(){document.getElementById('slpPanel').style.display='none';_slpPanelKind=null}
 function discardSlpPanel(){
@@ -2038,7 +2038,7 @@ function adoptSlpPanel(){
   }
   save();hideSlpPanel();renderSleep();
 }
-window.openSlpInsDraft=openSlpInsEdit;window.openSlpWoopDraft=openSlpWoopEdit;
+window.openSlpInsDraft=openSlpInsEdit;window.openSlpWoopDraft=openSlpWoopEdit;window.openSlpInsEdit=openSlpInsEdit;window.openSlpWoopEdit=openSlpWoopEdit;window.hideSlpPanel=hideSlpPanel;window.discardSlpPanel=discardSlpPanel;window.adoptSlpPanel=adoptSlpPanel;window.openSlpInsEdit=openSlpInsEdit;window.openSlpWoopEdit=openSlpWoopEdit;
 function renderSlpReview(){
   var ym=slpYm();var st=monthStats(ym);
   var pm=prevYm(ym);var pst=monthStats(pm);
@@ -2058,13 +2058,16 @@ function renderSlpReview(){
    statCard('身体',st.n?(topBody||'—'):'—',st.n+' 天有记录')+
    '</div></div>';
   h+='<div class="sec"><div class="sec-title">1　作息怎么样</div>'+
-   '<div style="font-size:12.5px;color:var(--sub);line-height:1.9">睡觉区间 '+rngOf(st.beds)+'　·　起床区间 '+rngOf(st.rises)+'</div>'+
+   '<div style="display:flex;gap:5px;margin-top:7px;flex-wrap:wrap">'+
+   '<span style="flex:1;text-align:center;font-size:11.5px;padding:5px 0;background:#f6f5f1;border-radius:8px;color:var(--sub);min-width:110px">睡觉 '+rngOf(st.beds)+'</span>'+
+   '<span style="flex:1;text-align:center;font-size:11.5px;padding:5px 0;background:#f6f5f1;border-radius:8px;color:var(--sub);min-width:110px">起床 '+rngOf(st.rises)+'</span></div>'+
    '<div style="display:flex;gap:5px;margin-top:7px;flex-wrap:wrap">'+
    bucketHtml('≥9 时',st.buckets['9'])+bucketHtml('7–9 时',st.buckets['79'])+bucketHtml('5–7 时',st.buckets['57'])+bucketHtml('≤5 时',st.buckets['5'])+'</div></div>';
   h+='<div class="sec"><div class="sec-title">2　状态怎么样</div>'+
    '<div style="display:flex;gap:5px;flex-wrap:wrap">'+
    bucketHtml('睡得好',st.state.good)+bucketHtml('还行',st.state.ok)+bucketHtml('不好',st.state.bad)+'</div>'+
-   '<div style="font-size:12.5px;color:var(--sub);line-height:1.9;margin-top:6px">入睡容易 '+st.ease+' 天　·　有夜醒 '+st.wokeN+' 天　·　记了 '+st.n+' 天</div></div>';
+   '<div style="display:flex;gap:5px;margin-top:6px;flex-wrap:wrap">'+
+   bucketHtml('入睡容易',st.ease)+bucketHtml('有夜醒',st.wokeN)+bucketHtml('记了',st.n)+'</div></div>';
   h+='<div class="sec"><div class="sec-title">3　原因分析</div>'+
    '<div style="display:flex;gap:9px;flex-wrap:wrap">'+
    '<div style="flex:1;min-width:150px;background:#f6f5f1;border-radius:10px;padding:9px 11px"><div style="font-size:11px;color:var(--faint)">睡得不好的日子反复出现</div><div style="font-size:12.5px;line-height:1.9;margin-top:4px;color:var(--sub)">'+topN(st.badFactors,4)+'</div></div>'+
@@ -2086,7 +2089,7 @@ function renderSlpReview(){
    '<div style="font-size:11.5px;color:var(--faint);margin-top:8px">下阶段目标（采用后显示在置顶卡）</div><div style="font-size:13px;line-height:1.8;color:'+(rv.woopG?'var(--ink)':'var(--faint)')+';white-space:pre-wrap;word-break:break-word">'+(rv.woopG?esc(rv.woopG):'还没填')+'</div>'+
    '<div style="font-size:11.5px;color:var(--faint);margin-top:8px">计划（如果…那么…）</div><div style="font-size:13px;line-height:1.8;color:'+(rv.woopR?'var(--ink)':'var(--faint)')+';white-space:pre-wrap;word-break:break-word">'+(rv.woopR?esc(rv.woopR):'还没填')+'</div>'+
    '<div class="btn-row" style="justify-content:flex-end"><button class="pill" style="background:#f1efe9;color:var(--ink);font-size:12.5px;padding:6px 16px" onclick="openSlpWoopEdit(\''+ym+'\')">编辑</button></div>'+
-   '<div style="font-size:11px;color:var(--faint);margin-top:6px;line-height:1.6">「保存并挂置顶卡」先出草稿，点置顶卡的「采用」才真正更新。</div></div>';
+   '<div style="font-size:11px;color:var(--faint);margin-top:6px;line-height:1.6">目标会先挂到置顶卡，点「采用」才生效。</div></div>';
   document.getElementById('slpReview').innerHTML=h;
 }
 function renderSlpTrend(){
@@ -2411,6 +2414,7 @@ window.pullFromCloud=pullFromCloud;window.disconnectSync=disconnectSync;
 </script>
 </body>
 </html>
+
 
 
 
