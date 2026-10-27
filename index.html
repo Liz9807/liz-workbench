@@ -503,10 +503,6 @@ button:active{opacity:.6}
       <button class="linkdim" style="font-size:11px" onclick="hideSlpPanel()">关闭</button>
     </div>
     <div id="slpPanelBody"></div>
-    <div style="display:flex;gap:8px;margin-top:12px">
-      <button class="s-pill alt" style="margin-top:0;flex:1" onclick="discardSlpPanel()">忽略草稿</button>
-      <button class="s-pill" style="margin-top:0;flex:1" onclick="adoptSlpPanel()">采用</button>
-    </div>
   </div>
 </div>
 
@@ -1999,19 +1995,27 @@ function discardWoopDraft(ym){var rv=slp().rev[ym];if(rv){rv.draftO=rv.draftG=rv
 window.discardWoopDraft=discardWoopDraft;
 /* ---- v7h：草稿弹窗（洞察单框 / WOOP 三框） ---- */
 var _slpPanelKind=null,_slpPanelYm=null;
-function openSlpInsDraft(ym){
+function openSlpInsEdit(ym){
   _slpPanelKind='ins';_slpPanelYm=ym;
   var rv=(slp().rev||{})[ym]||{};
-  document.getElementById('slpPanelTitle').textContent='洞察 · 帮手草稿';
-  document.getElementById('slpPanelBody').innerHTML='<div style="font-size:11.5px;color:var(--faint);margin-bottom:6px">在草稿里补充你的话，点「采用」进正稿</div><textarea id="slpPanelIns" rows="6">'+esc(rv.draftInsight||'')+'</textarea>';
+  var hasD=!!rv.draftInsight;
+  document.getElementById('slpPanelTitle').textContent='洞察 · 编辑';
+  var pre=hasD?rv.draftInsight:(rv.insight||'');
+  var hint=hasD?'帮手草稿已预填 · 补充你的话后点「采用」':'直接写；「保存」后显示在复盘页';
+  document.getElementById('slpPanelBody').innerHTML='<div style="font-size:11.5px;color:var(--faint);margin-bottom:6px">'+hint+'</div><textarea id="slpPanelIns" rows="6">'+esc(pre)+'</textarea>'+panelBtns(hasD);
   document.getElementById('slpPanel').style.display='flex';
 }
-function openSlpWoopDraft(ym){
+function openSlpWoopEdit(ym){
   _slpPanelKind='woop';_slpPanelYm=ym;
   var rv=(slp().rev||{})[ym]||{};
-  document.getElementById('slpPanelTitle').textContent='WOOP · 帮手草稿';
-  document.getElementById('slpPanelBody').innerHTML='<div style="font-size:11.5px;color:var(--faint);margin-bottom:6px">补充后采用；采用后挂到置顶卡，再确认才更新。目标留空则不动置顶卡。</div><div style="font-size:12px;color:var(--sub);margin:6px 0 4px">障碍</div><textarea id="slpPanelO" rows="2">'+esc(rv.draftO||'')+'</textarea><div style="font-size:12px;color:var(--sub);margin:8px 0 4px">下阶段目标</div><textarea id="slpPanelG" rows="2">'+esc(rv.draftG||'')+'</textarea><div style="font-size:12px;color:var(--sub);margin:8px 0 4px">计划（一行一条）</div><textarea id="slpPanelR" rows="3">'+esc(rv.draftR||'')+'</textarea>';
+  var hasD=!!(rv.draftO||rv.draftG||rv.draftR);
+  document.getElementById('slpPanelTitle').textContent='WOOP · 编辑';
+  var hint=hasD?'帮手草稿已预填 · 补充后点「采用」；目标非空会挂到置顶卡，再确认才更新':'「保存」会写正稿；目标非空会挂到置顶卡，再确认才更新';
+  document.getElementById('slpPanelBody').innerHTML='<div style="font-size:11.5px;color:var(--faint);margin-bottom:6px">'+hint+'</div><div style="font-size:12px;color:var(--sub);margin:6px 0 4px">障碍</div><textarea id="slpPanelO" rows="2">'+esc(hasD?(rv.draftO||''):(rv.woopO||''))+'</textarea><div style="font-size:12px;color:var(--sub);margin:8px 0 4px">下阶段目标</div><textarea id="slpPanelG" rows="2">'+esc(hasD?(rv.draftG||''):(rv.woopG||''))+'</textarea><div style="font-size:12px;color:var(--sub);margin:8px 0 4px">计划（一行一条）</div><textarea id="slpPanelR" rows="3">'+esc(hasD?(rv.draftR||''):(rv.woopR||''))+'</textarea>'+panelBtns(hasD);
   document.getElementById('slpPanel').style.display='flex';
+}
+function panelBtns(hasD){
+  return hasD?'<div style="display:flex;gap:8px;margin-top:12px"><button class="s-pill alt" style="margin-top:0;flex:1" onclick="discardSlpPanel()">忽略草稿</button><button class="s-pill" style="margin-top:0;flex:1" onclick="adoptSlpPanel()">采用</button></div>':'<div style="display:flex;gap:8px;margin-top:12px"><button class="s-pill alt" style="margin-top:0;flex:1" onclick="hideSlpPanel()">取消</button><button class="s-pill" style="margin-top:0;flex:1" onclick="adoptSlpPanel()">保存</button></div>';
 }
 function hideSlpPanel(){document.getElementById('slpPanel').style.display='none';_slpPanelKind=null}
 function discardSlpPanel(){
@@ -2034,7 +2038,7 @@ function adoptSlpPanel(){
   }
   save();hideSlpPanel();renderSleep();
 }
-window.openSlpInsDraft=openSlpInsDraft;window.openSlpWoopDraft=openSlpWoopDraft;window.hideSlpPanel=hideSlpPanel;window.discardSlpPanel=discardSlpPanel;window.adoptSlpPanel=adoptSlpPanel;
+window.openSlpInsDraft=openSlpInsEdit;window.openSlpWoopDraft=openSlpWoopEdit;
 function renderSlpReview(){
   var ym=slpYm();var st=monthStats(ym);
   var pm=prevYm(ym);var pst=monthStats(pm);
@@ -2068,23 +2072,21 @@ function renderSlpReview(){
    '</div></div>';
   var insCard='';
   if(rv.draftInsight){
-    insCard='<div class="slp-pending" style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin:0 0 10px"><span>帮手草稿待采用 · 点开修改补充</span><button class="pill" style="padding:4px 14px;font-size:12px;flex:none" onclick="openSlpInsDraft(\''+ym+'\')">打开</button></div>';
+    insCard='<div class="slp-pending" style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin:0 0 10px"><span>帮手草稿待采用 · 点开修改补充</span><button class="pill" style="padding:4px 14px;font-size:12px;flex:none" onclick="openSlpInsEdit(\''+ym+'\')">打开</button></div>';
   }
   h+='<div class="sec"><div class="sec-title">4　洞察<span class="side">帮手出草稿 · 你补充后采用</span></div>'+insCard+
-   '<textarea rows="3" placeholder="这个月的睡眠有什么规律或关联吗？和前一个月相比，我和睡眠的关系如何？对早睡早起的目标，遇到了什么障碍？有什么决策和行动？" onchange="saveSlpRev(\''+ym+'\',\'insight\',this.value)">'+esc(rv.insight||'')+'</textarea></div>';
+   (rv.insight?'<div style="font-size:13px;line-height:1.9;color:var(--ink);white-space:pre-wrap;word-break:break-word;padding-bottom:8px">'+esc(rv.insight)+'</div>':'<div style="font-size:12.5px;color:var(--faint);line-height:1.8;padding-bottom:8px">还没有洞察。等帮手草稿，或点「编辑」自己写。</div>')+
+   '<div class="btn-row" style="justify-content:flex-end"><button class="pill" style="background:#f1efe9;color:var(--ink);font-size:12.5px;padding:6px 16px" onclick="openSlpInsEdit(\''+ym+'\')">编辑</button></div></div>';
   var wdh='';
   if(rv.draftO||rv.draftG||rv.draftR){
-    wdh='<div class="slp-pending" style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin:0 0 10px"><span>帮手草稿待采用 · 障碍 / 目标 / 计划</span><button class="pill" style="padding:4px 14px;font-size:12px;flex:none" onclick="openSlpWoopDraft(\''+ym+'\')">打开</button></div>';
+    wdh='<div class="slp-pending" style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin:0 0 10px"><span>帮手草稿待采用 · 障碍 / 目标 / 计划</span><button class="pill" style="padding:4px 14px;font-size:12px;flex:none" onclick="openSlpWoopEdit(\''+ym+'\')">打开</button></div>';
   }
   h+='<div class="sec"><div class="sec-title">WOOP 复盘<span class="side">帮手出草稿 · 也可自己填</span></div>'+wdh+
-   '<div style="font-size:12px;color:var(--sub);margin:2px 0 4px">障碍：这个月卡住你的是什么？（从 3 里挑）</div>'+
-   '<textarea rows="2" onchange="saveSlpRev(\''+ym+'\',\'woopO\',this.value)">'+esc(rv.woopO||'')+'</textarea>'+
-   '<div style="font-size:12px;color:var(--sub);margin:8px 0 4px">下阶段目标（一句话 · 会显示在置顶卡）</div>'+
-   '<textarea rows="2" placeholder="现阶段目标：优先保证 23:30 前上床，不再执着睡满 7 小时。" onchange="saveSlpRev(\''+ym+'\',\'woopG\',this.value)">'+esc(rv.woopG||'')+'</textarea>'+
-   '<div style="font-size:12px;color:var(--sub);margin:8px 0 4px">计划：如果…那么…（一行一条）</div>'+
-   '<textarea rows="3" placeholder="如果 晚上还在刷手机，那么 23:00 手机放到客厅充电。" onchange="saveSlpRev(\''+ym+'\',\'woopR\',this.value)">'+esc(rv.woopR||'')+'</textarea>'+
-   '<div class="btn-row"><button class="pill" onclick="makeSlpDraft(\''+ym+'\')">保存为本阶段意图草稿</button></div>'+
-   '<div style="font-size:11px;color:var(--faint);margin-top:8px;line-height:1.6">草稿先挂在置顶卡上方，点「采用」才替换旧意图；「忽略」就丢弃。帮手在知识库侧产出的草稿，也会出现在同一个位置。</div></div>';
+   '<div style="font-size:11.5px;color:var(--faint);margin-top:2px">障碍</div><div style="font-size:13px;line-height:1.8;color:'+(rv.woopO?'var(--ink)':'var(--faint)')+';white-space:pre-wrap;word-break:break-word">'+(rv.woopO?esc(rv.woopO):'还没填')+'</div>'+
+   '<div style="font-size:11.5px;color:var(--faint);margin-top:8px">下阶段目标（采用后显示在置顶卡）</div><div style="font-size:13px;line-height:1.8;color:'+(rv.woopG?'var(--ink)':'var(--faint)')+';white-space:pre-wrap;word-break:break-word">'+(rv.woopG?esc(rv.woopG):'还没填')+'</div>'+
+   '<div style="font-size:11.5px;color:var(--faint);margin-top:8px">计划（如果…那么…）</div><div style="font-size:13px;line-height:1.8;color:'+(rv.woopR?'var(--ink)':'var(--faint)')+';white-space:pre-wrap;word-break:break-word">'+(rv.woopR?esc(rv.woopR):'还没填')+'</div>'+
+   '<div class="btn-row" style="justify-content:flex-end"><button class="pill" style="background:#f1efe9;color:var(--ink);font-size:12.5px;padding:6px 16px" onclick="openSlpWoopEdit(\''+ym+'\')">编辑</button></div>'+
+   '<div style="font-size:11px;color:var(--faint);margin-top:6px;line-height:1.6">「保存并挂置顶卡」先出草稿，点置顶卡的「采用」才真正更新。</div></div>';
   document.getElementById('slpReview').innerHTML=h;
 }
 function renderSlpTrend(){
@@ -2409,5 +2411,6 @@ window.pullFromCloud=pullFromCloud;window.disconnectSync=disconnectSync;
 </script>
 </body>
 </html>
+
 
 
