@@ -2001,7 +2001,7 @@ function openSlpInsEdit(ym){
   var hasD=!!rv.draftInsight;
   document.getElementById('slpPanelTitle').textContent='洞察 · 编辑';
   var pre=hasD?rv.draftInsight:(rv.insight||'');
-  var hint=hasD?'帮手草稿已预填 · 补充你的话后点「采用」':'直接写；「保存」后显示在复盘页';
+  var hint='这个月的睡眠有什么规律或关联？有什么障碍、决策和行动？';
   document.getElementById('slpPanelBody').innerHTML='<div style="font-size:11.5px;color:var(--faint);margin-bottom:6px">'+hint+'</div><textarea id="slpPanelIns" rows="6">'+esc(pre)+'</textarea>'+panelBtns(hasD);
   document.getElementById('slpPanel').style.display='flex';
 }
@@ -2010,8 +2010,7 @@ function openSlpWoopEdit(ym){
   var rv=(slp().rev||{})[ym]||{};
   var hasD=!!(rv.draftO||rv.draftG||rv.draftR);
   document.getElementById('slpPanelTitle').textContent='WOOP · 编辑';
-  var hint=hasD?'帮手草稿已预填 · 补充后点「采用」；目标非空会挂到置顶卡，再确认才更新':'「保存」会写正稿；目标非空会挂到置顶卡，再确认才更新';
-  document.getElementById('slpPanelBody').innerHTML='<div style="font-size:11.5px;color:var(--faint);margin-bottom:6px">'+hint+'</div><div style="font-size:12px;color:var(--sub);margin:6px 0 4px">障碍</div><textarea id="slpPanelO" rows="2">'+esc(hasD?(rv.draftO||''):(rv.woopO||''))+'</textarea><div style="font-size:12px;color:var(--sub);margin:8px 0 4px">下阶段目标</div><textarea id="slpPanelG" rows="2">'+esc(hasD?(rv.draftG||''):(rv.woopG||''))+'</textarea><div style="font-size:12px;color:var(--sub);margin:8px 0 4px">计划（一行一条）</div><textarea id="slpPanelR" rows="3">'+esc(hasD?(rv.draftR||''):(rv.woopR||''))+'</textarea>'+panelBtns(hasD);
+  document.getElementById('slpPanelBody').innerHTML='<div style="font-size:12px;color:var(--sub);margin:6px 0 4px">障碍：这个月卡住你的是什么？可从原因分析里挑</div><textarea id="slpPanelO" rows="2">'+esc(hasD?(rv.draftO||''):(rv.woopO||''))+'</textarea><div style="font-size:12px;color:var(--sub);margin:8px 0 4px">下阶段目标：一句话，会显示在置顶卡</div><textarea id="slpPanelG" rows="2">'+esc(hasD?(rv.draftG||''):(rv.woopG||''))+'</textarea><div style="font-size:12px;color:var(--sub);margin:8px 0 4px">计划：如果…那么…，一行一条</div><textarea id="slpPanelR" rows="3">'+esc(hasD?(rv.draftR||''):(rv.woopR||''))+'</textarea>'+panelBtns(hasD);
   document.getElementById('slpPanel').style.display='flex';
 }
 function panelBtns(hasD){
@@ -2078,18 +2077,19 @@ function renderSlpReview(){
     insCard='<div class="slp-pending" style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin:0 0 10px"><span>帮手草稿待采用 · 点开修改补充</span><button class="pill" style="padding:4px 14px;font-size:12px;flex:none" onclick="openSlpInsEdit(\''+ym+'\')">打开</button></div>';
   }
   h+='<div class="sec"><div class="sec-title">4　洞察<span class="side">帮手出草稿 · 你补充后采用</span></div>'+insCard+
-   (rv.insight?'<div style="font-size:13px;line-height:1.9;color:var(--ink);white-space:pre-wrap;word-break:break-word;padding-bottom:8px">'+esc(rv.insight)+'</div>':'<div style="font-size:12.5px;color:var(--faint);line-height:1.8;padding-bottom:8px">还没有洞察。等帮手草稿，或点「编辑」自己写。</div>')+
+   (rv.insight?'<div style="font-size:13px;line-height:1.9;color:var(--ink);white-space:pre-wrap;word-break:break-word;padding-bottom:8px">'+esc(rv.insight)+'</div>':'<div style="font-size:12.5px;color:var(--faint);line-height:1.8;padding-bottom:8px">这个月的睡眠有什么规律或关联？有什么障碍、决策和行动？</div>')+
    '<div class="btn-row" style="justify-content:flex-end"><button class="pill" style="background:#f1efe9;color:var(--ink);font-size:12.5px;padding:6px 16px" onclick="openSlpInsEdit(\''+ym+'\')">编辑</button></div></div>';
   var wdh='';
   if(rv.draftO||rv.draftG||rv.draftR){
     wdh='<div class="slp-pending" style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin:0 0 10px"><span>帮手草稿待采用 · 障碍 / 目标 / 计划</span><button class="pill" style="padding:4px 14px;font-size:12px;flex:none" onclick="openSlpWoopEdit(\''+ym+'\')">打开</button></div>';
   }
-  h+='<div class="sec"><div class="sec-title">WOOP 复盘<span class="side">帮手出草稿 · 也可自己填</span></div>'+wdh+
-   '<div style="font-size:11.5px;color:var(--faint);margin-top:2px">障碍</div><div style="font-size:13px;line-height:1.8;color:'+(rv.woopO?'var(--ink)':'var(--faint)')+';white-space:pre-wrap;word-break:break-word">'+(rv.woopO?esc(rv.woopO):'还没填')+'</div>'+
-   '<div style="font-size:11.5px;color:var(--faint);margin-top:8px">下阶段目标（采用后显示在置顶卡）</div><div style="font-size:13px;line-height:1.8;color:'+(rv.woopG?'var(--ink)':'var(--faint)')+';white-space:pre-wrap;word-break:break-word">'+(rv.woopG?esc(rv.woopG):'还没填')+'</div>'+
-   '<div style="font-size:11.5px;color:var(--faint);margin-top:8px">计划（如果…那么…）</div><div style="font-size:13px;line-height:1.8;color:'+(rv.woopR?'var(--ink)':'var(--faint)')+';white-space:pre-wrap;word-break:break-word">'+(rv.woopR?esc(rv.woopR):'还没填')+'</div>'+
+  h+='<div class="sec"><div class="sec-title">5　复盘<span class="side">帮手出草稿 · 也可自己填</span></div>'+wdh+
+   ((rv.woopO||rv.woopG||rv.woopR)?'':'<div style="font-size:12.5px;color:var(--faint);line-height:1.8;padding-bottom:4px">这个月卡住你的是什么？下阶段目标一句话，计划写成如果…那么…</div>')+
+   (rv.woopO?'<div style="font-size:11.5px;color:var(--faint);margin-top:2px">障碍</div><div style="font-size:13px;line-height:1.8;color:var(--ink);white-space:pre-wrap;word-break:break-word">'+esc(rv.woopO)+'</div>':'')+
+   (rv.woopG?'<div style="font-size:11.5px;color:var(--faint);margin-top:8px">下阶段目标（采用后显示在置顶卡）</div><div style="font-size:13px;line-height:1.8;color:var(--ink);white-space:pre-wrap;word-break:break-word">'+esc(rv.woopG)+'</div>':'')+
+   (rv.woopR?'<div style="font-size:11.5px;color:var(--faint);margin-top:8px">计划（如果…那么…）</div><div style="font-size:13px;line-height:1.8;color:var(--ink);white-space:pre-wrap;word-break:break-word">'+esc(rv.woopR)+'</div>':'')+
    '<div class="btn-row" style="justify-content:flex-end"><button class="pill" style="background:#f1efe9;color:var(--ink);font-size:12.5px;padding:6px 16px" onclick="openSlpWoopEdit(\''+ym+'\')">编辑</button></div>'+
-   '<div style="font-size:11px;color:var(--faint);margin-top:6px;line-height:1.6">目标会先挂到置顶卡，点「采用」才生效。</div></div>';
+   '</div>';
   document.getElementById('slpReview').innerHTML=h;
 }
 function renderSlpTrend(){
