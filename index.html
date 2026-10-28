@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#faf9f6">
 <title>Planet</title>
@@ -344,7 +344,7 @@ button:active{opacity:.6}
       <div class="subtabs" id="emoTabs"></div>
       <div id="emoTrack" style="display:none">
         <div class="sec"><div class="sec-title">本月情绪<span class="side">点一天记录 · 区可多选</span></div><div id="emoCalWrap"></div></div>
-        <div id="emoDayEditor" style="display:none"></div>
+        <div id="emoDayEditor" style="display:none;margin-top:8px"></div>
       </div>
       <div id="emoReview" style="display:none"></div>
       <div id="emoDeep" style="display:none"></div>
@@ -549,7 +549,6 @@ button:active{opacity:.6}
     <div style="font-size:11.5px;color:var(--sub);margin-bottom:6px;letter-spacing:.5px">导出 Markdown</div>
     <button class="s-pill" style="margin-top:0;width:100%" onclick="showDateRange()">自定义范围 · 年月日</button>
     <div style="margin-top:10px;display:grid;grid-template-columns:1fr 1fr;gap:8px 10px">
-      <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--faint)"><input type="checkbox" id="expDump" checked> 倾倒</label>
       <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--faint)"><input type="checkbox" id="expRoam" checked> 漫游 / 闪念</label>
       <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--faint)"><input type="checkbox" id="expCollect" checked> 收集</label>
       <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--faint)"><input type="checkbox" id="expDir" checked> Direction</label>
@@ -1682,7 +1681,7 @@ function renderEmoShow(){
   var ds=_emoShowDay;var d=mood().diary[ds]||{};var zs=(mood().zones[ds]||[]);
   var zc=zs.length?zs.map(function(z){return '<span class="chip" style="background:'+EMO_ZONES[z].bg+';border-color:'+EMO_ZONES[z].c+';color:'+EMO_ZONES[z].c+'">'+z+' · '+EMO_ZONES[z].axis+'</span>'}).join(''):'';
   el.style.display='block';
-  el.innerHTML='<div class="sec" style="border-color:var(--brown)">'+
+  el.innerHTML='<div class="sec" style="border-color:var(--brown);padding-bottom:14px">'+
    '<div class="sec-title">'+esc(archDay(ds))+'<span class="side">区可多选</span></div>'+
    (zc?'<div class="pillrow" style="margin-top:2px">'+zc+'</div>':'')+
    ((d.e1||d.e2||d.e3)?'':'<div style="font-size:12.5px;color:var(--faint);line-height:1.8;padding-bottom:8px">这天还没写。点「写一条」记录。</div>')+
@@ -1784,7 +1783,15 @@ function slp(){
   store.sleep.tags.body=store.sleep.tags.body||['肩颈紧','头沉','眼睛干','腰酸','无'];
   /* v7h：标签池收敛回预设词——v7f 时期沉淀的自定义词从池中清掉（记录数据在 days 里不丢） */
   var POOL={behavior:['看书','泡脚','拉伸','学习','冥想','听播客','无屏幕30分钟'],factors:['玩手机','想事情','情绪不好','经期？','加班','咖啡','奶茶','运动','晚饭太晚','环境吵'],body:['肩颈紧','头沉','眼睛干','腰酸','无']};
-  Object.keys(POOL).forEach(function(k){store.sleep.tags[k]=(store.sleep.tags[k]||[]).filter(function(t){return POOL[k].indexOf(t)>-1})});
+  Object.keys(POOL).forEach(function(k){
+    var cur=(store.sleep.tags[k]||[]).slice();
+    POOL[k].forEach(function(w){if(cur.indexOf(w)<0)cur.push(w)});
+    store.sleep.tags[k]=cur.filter(function(t){return POOL[k].indexOf(t)>-1});
+  });
+  Object.keys(store.sleep.days).forEach(function(d){
+    var v=store.sleep.days[d];
+    if(v&&v.factors)v.factors=v.factors.map(function(t){return t==='经期'?'经期？':t});
+  });
   return store.sleep;
 }
 function slpYm(){return store.sMonth||ymOf(today())}
@@ -2247,8 +2254,12 @@ function doExport(range,label){
     if(range.to && x>range.to)return false;
     return true;
   }
-  function pushDump(){var arr=store.dump.filter(inRange);if(arr.length){L.push('## 倾倒');arr.forEach(function(d){L.push('- ('+d.date+') '+d.text);cnt++});L.push('')}}
-  function pushRoam(){var arr=store.roam.filter(inRange);if(arr.length){L.push('## 漫游 / 闪念');arr.forEach(function(r){L.push('- ('+r.date+') '+r.text);cnt++});L.push('')}}
+  function pushRoam(){
+    var arr=(store.roam||[]).filter(inRange).map(function(r){return {d:r.date,t:r.text}});
+    (store.dump||[]).filter(inRange).forEach(function(x){arr.push({d:x.date,t:'倾倒 · '+x.text})});
+    arr.sort(function(x,y){return y.d.localeCompare(x.d)});
+    if(arr.length){L.push('## 漫游 / 闪念');arr.forEach(function(r){L.push('- ('+r.d+') '+r.t);cnt++});L.push('')}
+  }
   function pushCollect(){var arr=store.collect.filter(inRange);if(arr.length){L.push('## 收集');arr.forEach(function(c){L.push('- '+(c.quote?'★':'')+' '+c.text+(c.src?' — '+c.src:''));cnt++});L.push('')}}
   function pushQuotes(){var mine=(store.quotes||[]).filter(function(q){return q.src&&q.src!=='flomo'});if(mine.length){L.push('## 新加入的金句');mine.forEach(function(q){L.push('- '+q.t+(q.src?' — '+q.src:''))});L.push('')}}
   function pushChecks(){
@@ -2323,7 +2334,6 @@ function doExport(range,label){
     });
     if(any)L.push('');
   }
-  if(want('expDump'))pushDump();
   if(want('expRoam'))pushRoam();
   if(want('expCollect')){pushCollect();pushQuotes()}
   if(want('expDir')){pushChecks();pushSub()}
@@ -2331,8 +2341,13 @@ function doExport(range,label){
   if(want('expSleep'))pushSleep();
   if(!cnt)L.push('（这个时间段还没有内容）');
   L.push('', '---', '', '> 请帮手提炼：找出反复出现的卡点 / 念头，建议下周观察什么。');
-  copyText(L.join('\n'));
-  toast('已复制 '+label+' — 贴进收件箱或发我')
+  var txt=L.join('\n');
+  var fname='planet-export-'+label.replace(/[^0-9A-Za-z\u4e00-\u9fa5]+/g,'-')+'.md';
+  var blob=new Blob([txt],{type:'text/markdown;charset=utf-8'});
+  var aEl=document.createElement('a');aEl.href=URL.createObjectURL(blob);aEl.download=fname;
+  document.body.appendChild(aEl);aEl.click();document.body.removeChild(aEl);
+  copyText(txt);
+  toast('已下载 '+fname+' · 内容也已复制')
 }
 
 /* ============ 自定义日期范围导出 ============ */
