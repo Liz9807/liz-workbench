@@ -298,15 +298,6 @@ button:active{opacity:.6}
     <!-- Wander -->
     <div id="v-wander" style="display:none;flex-direction:column;flex:1">
       <div class="sec">
-      <div class="sec-title">倾倒<span class="side">倒空 · 不整理</span></div>
-      <textarea id="dumpInput" rows="5" placeholder="此刻脑子里有什么？全部倒出来——乱，没关系。"></textarea>
-      <div class="btn-row"><button class="pill" onclick="addDump()">倒出去</button></div>
-      </div>
-      <div class="sec">
-      <div class="sec-title">倾倒记录<span class="side" id="dumpCnt"></span></div>
-      <div id="dumpList"></div>
-      </div>
-      <div class="sec">
       <div class="sec-title">写下一念<span class="side">任思绪漫游 · 我的日记本</span></div>
       <textarea id="roamInput" rows="4" placeholder="此刻有什么闪过，就记下什么…读的人是未来的自己，她会包容现在的你。"></textarea>
       <div class="btn-row"><button class="pill" onclick="addRoam()">记下</button></div>
@@ -354,7 +345,6 @@ button:active{opacity:.6}
       <div id="emoTrack" style="display:none">
         <div class="sec"><div class="sec-title">本月情绪<span class="side">点一天记录 · 区可多选</span></div><div id="emoCalWrap"></div></div>
         <div id="emoDayEditor" style="display:none"></div>
-        <div class="sec"><div class="sec-title">三层日记<span class="side" id="emoDiaryCnt"></span></div><div id="emoDiaryList"></div></div>
       </div>
       <div id="emoReview" style="display:none"></div>
       <div id="emoDeep" style="display:none"></div>
@@ -503,6 +493,21 @@ button:active{opacity:.6}
       <button class="linkdim" style="font-size:11px" onclick="hideSlpPanel()">关闭</button>
     </div>
     <div id="slpPanelBody"></div>
+  </div>
+</div>
+
+<!-- 情绪日记弹窗面板 -->
+<div id="emoPanel" style="display:none;position:fixed;inset:0;z-index:91;align-items:center;justify-content:center;background:rgba(40,37,32,.22)">
+  <div style="background:#fff;border-radius:16px;width:min(380px,92vw);padding:18px 16px 16px;max-height:86vh;overflow-y:auto">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+      <div id="emoPanelTitle" style="font-size:15px;font-weight:600">三层日记</div>
+      <button class="linkdim" style="font-size:11px" onclick="hideEmoPanel()">关闭</button>
+    </div>
+    <div id="emoPanelBody"></div>
+    <div style="display:flex;gap:8px;margin-top:12px">
+      <button class="s-pill alt" style="margin-top:0;flex:1" onclick="hideEmoPanel()">取消</button>
+      <button class="s-pill" style="margin-top:0;flex:1" onclick="saveEmoPanel()">保存</button>
+    </div>
   </div>
 </div>
 
@@ -1087,7 +1092,7 @@ function setPageMeta(name){
     var el=document.getElementById('v-'+k);el.style.display=(k===name)?'flex':'none'});
 }
 function renderAll(name){
-  if(name==='wander'){renderDump();renderRoam()}
+  if(name==='wander')renderRoam()
   if(name==='collect')renderCollect();
   if(name==='emotion')renderEmotion();
   if(name==='sleep')renderSleep();
@@ -1147,19 +1152,8 @@ function addDump(){
   var i=document.getElementById('dumpInput');var t=i.value.trim();if(!t){toast('先写点什么');return}
   store.dump.unshift({id:uid(),date:today(),text:t});i.value='';save();renderDump();toast('倒出来了，轻了一点')
 }
-function renderDump(){
-  var el=document.getElementById('dumpList');
-  document.getElementById('dumpCnt').textContent=store.dump.length+' 段 · 可移存';
-  function itemHtml(d){
-    return '<div class="row"><span class="no">·</span><div class="txt"><div class="nm">'+esc(d.text)+'</div>'+
-      '<div class="meta">'+archDay(d.date)+' · <button class="act" onclick="editItem(\''+d.id+'\',\'dump\')">编辑</button> · '+
-      '<button class="act" onclick="pickDump(\''+d.id+'\')">移存</button> · '+
-      '<button class="act" onclick="delDump(\''+d.id+'\')">丢弃</button></div></div></div>';
-  }
-  var h=groupedHtml(store.dump,'dump',itemHtml,{subGroup:'week'});
-  el.innerHTML=h||'<div class="row" style="border-bottom:0"><span class="no">·</span><div class="txt"><div class="nm" style="color:var(--faint);font-size:13px">还没倒过。有什么堵着的，先写出来。</div></div></div>';
-}
-function delDump(id){store.dump=store.dump.filter(function(d){return d.id!==id});save();renderDump();toast('已丢弃')}
+function renderDump(){}
+function delDump(id){store.dump=store.dump.filter(function(d){return d.id!==id});save();renderRoam();toast('已丢弃')}
 window.delDump=delDump;
 var pickingId=null;
 function pickDump(id){pickingId=id;document.getElementById('picker').classList.add('on')}
@@ -1174,7 +1168,7 @@ function pickTo(target){
   if(target==='collect')store.collect.unshift({id:uid(),date:date,text:t,src:'',quote:false});
   if(target==='five'){if(activeFive().length>=5){toast('五件事已满');store.dump.unshift(d);save();renderDump();hidePicker();return}store.five.push({t:t,why:'',year:new Date().getFullYear(),status:'active'})}
   if(target==='avoid')store.avoid.unshift(t);
-  save();hidePicker();renderDump();toast('已移存')
+  save();hidePicker();renderRoam();toast('已移存')
 }
 window.pickTo=pickTo;
 
@@ -1185,12 +1179,21 @@ function addRoam(){
 }
 function renderRoam(){
   var el=document.getElementById('roamList');
+  var dumpMarked=(store.dump||[]).map(function(x){var o=Object.assign({},x);o._src='dump';return o});
+  var roamMarked=(store.roam||[]).map(function(x){var o=Object.assign({},x);o._src='roam';return o});
+  var merged=dumpMarked.concat(roamMarked).sort(function(x,y){return (y.date||'').localeCompare(x.date||'')}).slice(0,80);
   function itemHtml(r){
+    if(r._src==='dump'){
+      return '<div class="row"><span class="no">·</span><div class="txt"><div class="nm">'+esc(r.text)+'</div>'+
+        '<div class="meta">倾倒 · '+archDay(r.date)+' · <button class="act" onclick="editItem(\''+r.id+'\',\'dump\')">编辑</button> · '+
+        '<button class="act" onclick="pickDump(\''+r.id+'\')">移存</button> · '+
+        '<button class="act" onclick="delDump(\''+r.id+'\')">丢弃</button></div></div></div>';
+    }
     return '<div class="row"><span class="no">·</span><div class="txt"><div class="nm">'+esc(r.text)+'</div>'+
       '<div class="meta">'+archDay(r.date)+' · <button class="act" onclick="editItem(\''+r.id+'\',\'roam\')">编辑</button> · '+
       '<button class="act" onclick="delRoam(\''+r.id+'\')">删除</button></div></div></div>';
   }
-  var h=groupedHtml(store.roam.slice(0,60),'roam',itemHtml,{subGroup:'week'});
+  var h=groupedHtml(merged,'roam',itemHtml,{subGroup:'week'});
   el.innerHTML=h||'<div class="row" style="border-bottom:0"><span class="no">·</span><div class="txt"><div class="nm" style="color:var(--faint);font-size:13px">还没有漫游。随便写点什么，想到哪写到哪。</div></div></div>';
 }
 function delRoam(id){store.roam=store.roam.filter(function(r){return r.id!==id});save();renderRoam()}
@@ -1607,9 +1610,9 @@ var EMO_ZONES={
 };
 function mood(){store.mood=store.mood||{};store.mood.zones=store.mood.zones||{};store.mood.diary=store.mood.diary||{};store.mood.rev=store.mood.rev||{};store.mood.deep=store.mood.deep||[];return store.mood}
 function emoYm(){return store.eMonth||ymOf(today())}
-function emoShift(d){var p=emoYm().split('-');var dt=new Date(parseInt(p[0],10),parseInt(p[1],10)-1+d,1);store.eMonth=dt.getFullYear()+'-'+pad2(dt.getMonth()+1);_emoDay=null;_deepId=null;save();renderEmotion()}
+function emoShift(d){var p=emoYm().split('-');var dt=new Date(parseInt(p[0],10),parseInt(p[1],10)-1+d,1);store.eMonth=dt.getFullYear()+'-'+pad2(dt.getMonth()+1);_emoShowDay=null;_deepId=null;save();renderEmotion()}
 window.emoShift=emoShift;
-function setEmoTab(t){store.eTab=t;_emoDay=null;save();renderEmotion()}
+function setEmoTab(t){store.eTab=t;_emoShowDay=null;save();renderEmotion()}
 window.setEmoTab=setEmoTab;
 function toggleQuad(){store.quadOpen=(store.quadOpen===false);save();applyQuad()}
 window.toggleQuad=toggleQuad;
@@ -1623,67 +1626,73 @@ function monthGrid(ym,cellFn){
   for(var d3=1;d3<=ndays;d3++){h+=cellFn(y+'-'+pad2(m)+'-'+pad2(d3),d3)}
   return h+'</div>';
 }
-var _emoDay=null,_emoZones=null,_deepId=null;
+var _emoZones=null,_deepId=null,_emoPanelDay=null,_emoShowDay=null;
 function renderEmoCal(){
   var mg=mood();
   function cell(ds,d2){
     var zs=(mg.zones[ds]||[]);
     var dots=zs.map(function(z){return '<i class="cal-dot" style="background:'+EMO_ZONES[z].c+'"></i>'}).join('');
-    return '<span class="cal-cell'+(ds===today()?' cal-today':'')+'" onclick="openEmoDay(\''+ds+'\')"><b>'+d2+'</b><span class="cal-dots">'+dots+'</span></span>';
+    return '<span class="cal-cell'+(ds===today()?' cal-today':'')+'" onclick="showEmoDay(\''+ds+'\')"><b>'+d2+'</b><span class="cal-dots">'+dots+'</span></span>';
   }
   return monthGrid(emoYm(),cell);
 }
-function openEmoDay(ds){
-  _emoDay=ds;_emoZones=(mood().zones[ds]||[]).slice();
-  renderEmoDayEditor();
+function openEmoPanel(ds){
+  _emoPanelDay=ds;
+  _emoZones=(mood().zones[ds]||[]).slice();
+  var d=mood().diary[ds]||{};
+  document.getElementById('emoPanelTitle').textContent='三层日记 · '+archDay(ds);
+  document.getElementById('emoPanelBody').innerHTML=
+   '<div id="emoZoneRow" class="pillrow"></div>'+
+   '<div style="font-size:12px;color:var(--sub);margin:10px 0 4px">今天发生在我身上、最值得说的一件事是什么？</div>'+
+   '<textarea id="emoE1" rows="2" style="font-size:13px">'+esc(d.e1||'')+'</textarea>'+
+   '<div style="font-size:12px;color:var(--sub);margin:10px 0 4px">今天我的情绪点是什么？（用上帝视角，抽离地看它）</div>'+
+   '<textarea id="emoE2" rows="2" style="font-size:13px">'+esc(d.e2||'')+'</textarea>'+
+   '<div style="font-size:12px;color:var(--sub);margin:10px 0 4px">基于此，我做了什么决策和行动？（可选）</div>'+
+   '<textarea id="emoE3" rows="2" style="font-size:13px">'+esc(d.e3||'')+'</textarea>';
+  renderEmoPanelChips();
+  document.getElementById('emoPanel').style.display='flex';
 }
-window.openEmoDay=openEmoDay;
-function renderEmoChips(){
+window.openEmoPanel=openEmoPanel;
+function renderEmoPanelChips(){
   var el=document.getElementById('emoZoneRow');if(!el)return;
   el.innerHTML=Object.keys(EMO_ZONES).map(function(z){
     var on=_emoZones.indexOf(z)>-1;var Z=EMO_ZONES[z];
     return '<span class="chip'+(on?' on':'')+'" style="'+(on?'background:'+Z.bg+';border-color:'+Z.c+';color:'+Z.c:'')+'" onclick="toggleEmoZone(\''+z+'\')">'+z+' · '+Z.axis+'</span>';
   }).join('');
 }
-function toggleEmoZone(z){var i=_emoZones.indexOf(z);if(i>-1)_emoZones.splice(i,1);else _emoZones.push(z);renderEmoChips()}
+function toggleEmoZone(z){var i=_emoZones.indexOf(z);if(i>-1)_emoZones.splice(i,1);else _emoZones.push(z);renderEmoPanelChips()}
 window.toggleEmoZone=toggleEmoZone;
-function renderEmoDayEditor(){
-  var el=document.getElementById('emoDayEditor');
-  if(!_emoDay){el.style.display='none';return}
-  var d=mood().diary[_emoDay]||{};
-  el.style.display='block';
-  el.innerHTML='<div class="sec" style="border-color:var(--brown)">'+
-    '<div class="sec-title">'+esc(archDay(_emoDay))+'<span class="side">区可多选 · 全空保存即清除</span></div>'+
-    '<div id="emoZoneRow" class="pillrow" style="margin-top:2px"></div>'+
-    '<div style="font-size:12px;color:var(--sub);margin:10px 0 4px">今天发生在我身上、最值得说的一件事是什么？</div>'+
-    '<textarea id="emoE1" rows="2">'+esc(d.e1||'')+'</textarea>'+
-    '<div style="font-size:12px;color:var(--sub);margin:10px 0 4px">今天我的情绪点是什么？（用上帝视角，抽离地看它）</div>'+
-    '<textarea id="emoE2" rows="2">'+esc(d.e2||'')+'</textarea>'+
-    '<div style="font-size:12px;color:var(--sub);margin:10px 0 4px">基于此，我做了什么决策和行动？（可选）</div>'+
-    '<textarea id="emoE3" rows="2">'+esc(d.e3||'')+'</textarea>'+
-    '<div class="btn-row"><button class="act" onclick="closeEmoDay()">收起</button><button class="pill" onclick="saveEmoDay()">保存</button></div>'+
-    '</div>';
-  renderEmoChips();
-}
-function closeEmoDay(){_emoDay=null;renderEmoDayEditor()}
-window.closeEmoDay=closeEmoDay;
-function saveEmoDay(){
+function hideEmoPanel(){document.getElementById('emoPanel').style.display='none';_emoPanelDay=null}
+window.hideEmoPanel=hideEmoPanel;
+function saveEmoPanel(){
   function g(id){var e=document.getElementById(id);return e?e.value.trim():''}
   var e1=g('emoE1'),e2=g('emoE2'),e3=g('emoE3');
   var mg=mood();
-  if(_emoZones.length)mg.zones[_emoDay]=_emoZones.slice();else delete mg.zones[_emoDay];
-  if(e1||e2||e3)mg.diary[_emoDay]={e1:e1,e2:e2,e3:e3};else delete mg.diary[_emoDay];
-  _emoDay=null;save();renderEmotion();toast('已记录');
+  if(_emoZones.length)mg.zones[_emoPanelDay]=_emoZones.slice();else delete mg.zones[_emoPanelDay];
+  if(e1||e2||e3)mg.diary[_emoPanelDay]={e1:e1,e2:e2,e3:e3};else delete mg.diary[_emoPanelDay];
+  _emoShowDay=_emoPanelDay;
+  hideEmoPanel();save();renderEmotion();toast('已记录');
 }
-window.saveEmoDay=saveEmoDay;
-function renderEmoDiary(){
-  var ym=emoYm();var mg=mood();
-  var ds=Object.keys(mg.diary).filter(function(d){return d.slice(0,7)===ym}).sort().reverse();
-  var cnt=document.getElementById('emoDiaryCnt');if(cnt)cnt.textContent=ds.length+' 篇';
-  var h=ds.map(function(d){var v=mg.diary[d];var zs=(mg.zones[d]||[]).join(' ');
-    var snip=(v.e1||v.e2||'');
-    return '<div class="row" style="cursor:pointer" onclick="openEmoDay(\''+d+'\')"><span class="no">'+d.slice(8)+'</span><div class="txt"><div class="nm">'+esc(snip.slice(0,40))+(snip.length>40?'…':'')+'</div><div class="meta">'+(zs||'未标区')+'</div></div></div>'}).join('');
-  document.getElementById('emoDiaryList').innerHTML=h||'<div class="row" style="border-bottom:0"><span class="no">·</span><div class="txt"><div class="nm" style="color:var(--faint);font-size:13px">这个月还没有日记。点上面任意一天开始。</div></div></div>';
+window.saveEmoPanel=saveEmoPanel;
+function showEmoDay(ds){_emoShowDay=ds;renderEmotion()}
+window.showEmoDay=showEmoDay;
+function renderEmoShow(){
+  var el=document.getElementById('emoDayEditor');
+  if(!_emoShowDay){el.style.display='none';return}
+  var ds=_emoShowDay;var d=mood().diary[ds]||{};var zs=(mood().zones[ds]||[]);
+  var zc=zs.length?zs.map(function(z){return '<span class="chip" style="background:'+EMO_ZONES[z].bg+';border-color:'+EMO_ZONES[z].c+';color:'+EMO_ZONES[z].c+'">'+z+' · '+EMO_ZONES[z].axis+'</span>'}).join(''):'';
+  el.style.display='block';
+  el.innerHTML='<div class="sec" style="border-color:var(--brown)">'+
+   '<div class="sec-title">'+esc(archDay(ds))+'<span class="side">区可多选</span></div>'+
+   (zc?'<div class="pillrow" style="margin-top:2px">'+zc+'</div>':'')+
+   ((d.e1||d.e2||d.e3)?'':'<div style="font-size:12.5px;color:var(--faint);line-height:1.8;padding-bottom:8px">这天还没写。点「写一条」记录。</div>')+
+   '<div style="font-size:12px;color:var(--sub);margin:10px 0 4px">今天发生在我身上、最值得说的一件事是什么？</div>'+
+   '<div style="font-size:13.5px;line-height:1.8;color:var(--ink);white-space:pre-wrap;word-break:break-word">'+(d.e1?esc(d.e1):'—')+'</div>'+
+   '<div style="font-size:12px;color:var(--sub);margin:10px 0 4px">今天我的情绪点是什么？（用上帝视角，抽离地看它）</div>'+
+   '<div style="font-size:13.5px;line-height:1.8;color:var(--ink);white-space:pre-wrap;word-break:break-word">'+(d.e2?esc(d.e2):'—')+'</div>'+
+   '<div style="font-size:12px;color:var(--sub);margin:10px 0 4px">基于此，我做了什么决策和行动？（可选）</div>'+
+   '<div style="font-size:13.5px;line-height:1.8;color:var(--ink);white-space:pre-wrap;word-break:break-word">'+(d.e3?esc(d.e3):'—')+'</div>'+
+   '<div class="btn-row" style="justify-content:flex-end"><button class="pill" style="background:#f1efe9;color:var(--ink);font-size:12.5px;padding:6px 16px" onclick="openEmoPanel(\''+ds+'\')">'+((d.e1||d.e2||d.e3)?'编辑':'写一条')+'</button></div></div>';
 }
 function saveMoodRev(k,v){var ym=emoYm();mood().rev[ym]=mood().rev[ym]||{};mood().rev[ym][k]=v;save()}
 window.saveMoodRev=saveMoodRev;
@@ -1759,8 +1768,7 @@ function renderEmotion(){
   document.getElementById('emoDeep').style.display=store.eTab==='deep'?'block':'none';
   if(store.eTab==='track'){
     document.getElementById('emoCalWrap').innerHTML=renderEmoCal();
-    renderEmoDiary();
-    if(_emoDay)renderEmoDayEditor();else document.getElementById('emoDayEditor').style.display='none';
+    if(_emoShowDay)renderEmoShow();else document.getElementById('emoDayEditor').style.display='none';
   }else if(store.eTab==='review'){renderEmoReview()}
   else{renderEmoDeep()}
 }
@@ -1771,11 +1779,11 @@ function slp(){
   store.sleep=store.sleep||{};
   store.sleep.days=store.sleep.days||{};
   store.sleep.tags=store.sleep.tags||{};
-  store.sleep.tags.behavior=store.sleep.tags.behavior||['看书','泡脚','拉伸','洗澡','冥想','听播客','无屏幕30分钟'];
-  store.sleep.tags.factors=store.sleep.tags.factors||['玩手机','想事情','情绪不好','经期','加班','咖啡','酒','运动','晚饭太晚','环境吵'];
+  store.sleep.tags.behavior=store.sleep.tags.behavior||['看书','泡脚','拉伸','学习','冥想','听播客','无屏幕30分钟'];
+  store.sleep.tags.factors=store.sleep.tags.factors||['玩手机','想事情','情绪不好','经期？','加班','咖啡','奶茶','运动','晚饭太晚','环境吵'];
   store.sleep.tags.body=store.sleep.tags.body||['肩颈紧','头沉','眼睛干','腰酸','无'];
   /* v7h：标签池收敛回预设词——v7f 时期沉淀的自定义词从池中清掉（记录数据在 days 里不丢） */
-  var POOL={behavior:['看书','泡脚','拉伸','洗澡','冥想','听播客','无屏幕30分钟'],factors:['玩手机','想事情','情绪不好','经期','加班','咖啡','酒','运动','晚饭太晚','环境吵'],body:['肩颈紧','头沉','眼睛干','腰酸','无']};
+  var POOL={behavior:['看书','泡脚','拉伸','学习','冥想','听播客','无屏幕30分钟'],factors:['玩手机','想事情','情绪不好','经期？','加班','咖啡','奶茶','运动','晚饭太晚','环境吵'],body:['肩颈紧','头沉','眼睛干','腰酸','无']};
   Object.keys(POOL).forEach(function(k){store.sleep.tags[k]=(store.sleep.tags[k]||[]).filter(function(t){return POOL[k].indexOf(t)>-1})});
   return store.sleep;
 }
@@ -1810,7 +1818,6 @@ function confirmAddTag(){
   var i=document.getElementById('slpNewTag');var t=i?i.value.trim():'';
   if(!t){_slpAddKind=null;renderSlpEditor();return}
   /* v7g：自定义词是临时项，只进当天记录，不进标签池；取消勾选即删除 */
-  if((_slpDraft[_slpAddKind]||[]).indexOf(t)<0)_slpDraft[_slpAddKind].push(t);
   if((_slpDraft[_slpAddKind]||[]).indexOf(t)<0)_slpDraft[_slpAddKind].push(t);
   _slpAddKind=null;renderSlpEditor();
 }
@@ -1857,7 +1864,7 @@ function renderSlpEditor(){
    slpChipsHtml('body','身体感受','可多选')+
    slpChipsHtml('factors','影响因素','可多选 · 复盘原因分析用')+
    '<div style="font-size:12px;color:var(--sub);margin-top:12px">备注 <span style="color:var(--faint)">可空</span></div>'+
-   '<textarea id="slpNote" rows="2" placeholder="例：凌晨 3 点醒了一次，想起标书的事">'+esc(d.note||'')+'</textarea>'+
+   '<textarea id="slpNote" rows="2" style="font-size:13px" placeholder="例：凌晨 3 点醒了一次，想起标书的事">'+esc(d.note||'')+'</textarea>'+
    '<div class="btn-row"><button class="act" onclick="closeSlpDay()">收起</button>'+
    (slp().days[_slpDay]?'<button class="act" style="color:#b07c7c" onclick="clearSlpDay()">清除记录</button>':'')+
    '<button class="pill" onclick="saveSlpDay()">保存</button></div></div>';
