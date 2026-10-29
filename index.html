@@ -1623,6 +1623,8 @@ function renderDirCal(){
   var colors={full:'#3b5b7e',half:'#85b7eb',fallback:'#ef9f27'};
   var h=monthGrid(today().slice(0,7),function(ds,d2){
     var t=dirTier(ds);var c=colors[t];
+    var future=ds>today();
+    if(future)return '<span class="cal-cell" style="color:var(--faint)"><b>'+d2+'</b></span>';
     return '<span class="cal-cell'+(ds===today()?' cal-today':'')+'" style="cursor:pointer" onclick="showDirEdit(\''+ds+'\')"><b>'+d2+'</b>'+(t!=='none'?'<span class="cal-dots"><i class="cal-dot" style="background:'+c+'"></i></span>':'<span class="cal-dots"><i class="cal-dot" style="background:#e5e2da"></i></span>')+'</span>';
   });
   wrap.innerHTML='<div class="sec" style="margin-bottom:10px"><div class="sec-title">本月打卡<span class="side">点日期展开 · 再点收起</span></div>'+h+'</div>';
@@ -1634,7 +1636,8 @@ function renderDirEdit(){
   if(!_dirEditDay||_dirEditDay===today()||_dirEditDay==='__off__'){el.style.display='none';return}
   var ds=_dirEditDay;var tc=(store.checks||{})[ds]||{};
   var targets=activeFive().filter(function(f){return f.steps&&f.steps.length});
-  var h='<div class="sec" style="border-color:var(--brown)"><div class="sec-title">'+esc(archDay(ds))+'<span class="side">勾选保存 · 第3遍原文阅读勾上即满格</span></div>';
+  var PRAISE={full:'太棒啦！今天顺利通关',half:'行动一小步，也是进步',fallback:'适当休息也不算掉队哦',none:'今天还没开始打卡哦'};
+  var h='<div class="sec" style="border-color:var(--brown)"><div class="sec-title">'+esc(archDay(ds))+'<span class="side">'+PRAISE[dirTier(ds)]+'</span></div>';
   if(!targets.length){h+='<div style="font-size:12.5px;color:var(--faint);line-height:1.8;padding-bottom:8px">这天没有启用打卡步骤的目标。</div></div>';el.style.display='block';el.innerHTML=h;return}
   targets.forEach(function(f){
     var arr=tc[f.id]||[];var hasFb=arr.indexOf('fallback')>-1;
