@@ -1584,12 +1584,12 @@ function renderChecks(){
        '<div class="chk-t">'+esc(cdesc)+'</div>'+
        '<div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--line);display:flex;align-items:baseline;justify-content:space-between">'+
        '<span style="font-size:11px;color:var(--faint)">'+archDay(today())+'</span>'+
-       '<span style="font-size:11.5px;color:#3b5b7e">'+(t==='none'?'还没开始':'今天＝'+tierLabel(t))+'</span></div>';
+       '<span style="font-size:11.5px;color:#3b5b7e">'+(function(){var PR={full:'太棒啦！今天顺利通关',half:'行动一小步，也是进步',fallback:'适当休息也不算掉队哦',none:'今天还没开始打卡哦'};return PR[t]})()+'</span></div>';
     STEP_ORDER.forEach(function(k){
       var on=arr.indexOf(k)>-1;
       h+='<label class="chk-row'+(hasFb?' lock':'')+'"><input type="checkbox" '+(on?'checked':'')+' '+(hasFb?'disabled':'')+' onchange="toggleCheck(\''+f.id+'\',\''+k+'\')"> '+STEP_LABELS[k]+'</label>';
     });
-    h+='<label class="chk-row" style="border-top:1px dashed var(--line);margin-top:4px"><input type="checkbox" '+(hasFb?'checked':'')+' onchange="toggleCheck(\''+f.id+'\',\'fallback\')"> '+FALLBACK_LABEL+'</label>';
+    h+='<label class="chk-row" style="border-top:1px dashed var(--line);margin-top:4px;padding-bottom:0"><input type="checkbox" '+(hasFb?'checked':'')+' onchange="toggleCheck(\''+f.id+'\',\'fallback\')"> '+FALLBACK_LABEL+'</label>';
     h+='</div>';
   });
   if(!targets.length)h='<div class="row" style="border-bottom:0"><span class="no">·</span><div class="txt"><div class="nm" style="color:var(--faint);font-size:13px">在「编辑」里勾选「启用打卡步骤」后，这里会出现每日勾选。</div></div></div>';
@@ -1637,23 +1637,24 @@ function renderDirEdit(){
   var ds=_dirEditDay;var tc=(store.checks||{})[ds]||{};
   var targets=activeFive().filter(function(f){return f.steps&&f.steps.length});
   var PRAISE={full:'太棒啦！今天顺利通关',half:'行动一小步，也是进步',fallback:'适当休息也不算掉队哦',none:'今天还没开始打卡哦'};
-  var h='<div class="sec" style="border-color:var(--brown)"><div class="sec-title">'+esc(archDay(ds))+'<span class="side">'+PRAISE[dirTier(ds)]+'</span></div>';
-  if(!targets.length){h+='<div style="font-size:12.5px;color:var(--faint);line-height:1.8;padding-bottom:8px">这天没有启用打卡步骤的目标。</div></div>';el.style.display='block';el.innerHTML=h;return}
+  var h='';
+  if(!targets.length){h='<div class="chk-card"><div style="font-size:12.5px;color:var(--faint);line-height:1.8">这天没有启用打卡步骤的目标。</div></div>';el.style.display='block';el.innerHTML=h;return}
   targets.forEach(function(f){
     var arr=tc[f.id]||[];var hasFb=arr.indexOf('fallback')>-1;
-    h+='<div class="chk-card" style="margin-bottom:10px"><div class="chk-t">'+esc(f.t||f.name||'（目标）')+'</div>';
+    var t=tierOf(arr);
+    h+='<div class="chk-card" style="margin-bottom:10px">'+
+       '<div class="chk-kicker">'+esc(f.name||f.t||'（目标）')+'</div>'+
+       '<div class="chk-t">'+esc(f.t||f.name||'（目标）')+'</div>'+
+       '<div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--line);display:flex;align-items:baseline;justify-content:space-between"><span style="font-size:11px;color:var(--faint)">'+esc(archDay(ds))+'</span><span style="font-size:11.5px;color:#3b5b7e">'+PRAISE[t]+'</span></div>';
     STEP_ORDER.forEach(function(k){
       var on=arr.indexOf(k)>-1;
       h+='<label class="chk-row'+(hasFb?' lock':'')+'"><input type="checkbox" '+(on?'checked':'')+' '+(hasFb?'disabled':'')+' onchange="toggleCheckAt(\''+ds+'\',\''+f.id+'\',\''+k+'\')"> '+STEP_LABELS[k]+'</label>';
     });
-    h+='<label class="chk-row" style="border-top:1px dashed var(--line);margin-top:4px"><input type="checkbox" '+(hasFb?'checked':'')+' onchange="toggleCheckAt(\''+ds+'\',\''+f.id+'\',\'fallback\')"> '+FALLBACK_LABEL+'</label>';
-    var t=tierOf(arr);
-    h+='<div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--line);display:flex;align-items:baseline;justify-content:space-between"><span style="font-size:11px;color:var(--faint)">'+esc(archDay(ds))+'</span><span style="font-size:11.5px;color:#3b5b7e">'+(t==='none'?'还没开始':'当天＝'+tierLabel(t))+'</span></div></div>';
+    h+='<label class="chk-row" style="border-top:1px dashed var(--line);margin-top:4px;padding-bottom:0"><input type="checkbox" '+(hasFb?'checked':'')+' onchange="toggleCheckAt(\''+ds+'\',\''+f.id+'\',\'fallback\')"> '+FALLBACK_LABEL+'</label>';
+    h+='</div>';
   });
-  h+='<div class="btn-row" style="justify-content:flex-end"><button class="act" onclick="_dirEditDay=null;renderDirEdit()">收起</button></div></div>';
   el.style.display='block';el.innerHTML=h;
 }
-
 
 /* ============ 情绪追踪 Emotion Tracker ============ */
 var EMO_ZONES={
