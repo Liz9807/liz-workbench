@@ -1567,6 +1567,7 @@ function monthChecked(){
 }
 function renderChecks(){
   var wrap=document.getElementById('checkList');if(!wrap)return;
+  wrap.style.display=(_dirEditDay&&_dirEditDay!==today())?'none':'block';
   var meta=document.getElementById('checkMeta');
   if(meta)meta.textContent='本月已打 '+monthChecked()+' 天';
   var targets=activeFive().filter(function(f){return f.steps&&f.steps.length});
@@ -1624,13 +1625,13 @@ function renderDirCal(){
     var t=dirTier(ds);var c=colors[t];
     return '<span class="cal-cell'+(ds===today()?' cal-today':'')+'" style="cursor:pointer" onclick="showDirEdit(\''+ds+'\')"><b>'+d2+'</b>'+(t!=='none'?'<span class="cal-dots"><i class="cal-dot" style="background:'+c+'"></i></span>':'<span class="cal-dots"><i class="cal-dot" style="background:#e5e2da"></i></span>')+'</span>';
   });
-  wrap.innerHTML='<div class="sec" style="margin-bottom:10px"><div class="sec-title">本月打卡<span class="side">点日期展开 · 再点收起</span></div>'+h+'</div>';
+  wrap.innerHTML='<div class="sec" style="margin-bottom:10px"><div class="sec-title">本月打卡<span class="side">点日期看那天 · 再点回今天</span></div>'+h+'</div>';
 }
-function showDirEdit(ds){if(_dirEditDay===ds){_dirEditDay=null}else{_dirEditDay=ds}renderDirEdit()}
+function showDirEdit(ds){if(ds===today()||_dirEditDay===ds){_dirEditDay=null}else{_dirEditDay=ds}renderChecks()}
 window.showDirEdit=showDirEdit;
 function renderDirEdit(){
   var el=document.getElementById('dirEditCard');if(!el)return;
-  if(!_dirEditDay){el.style.display='none';return}
+  if(!_dirEditDay||_dirEditDay===today()){el.style.display='none';return}
   var ds=_dirEditDay;var tc=(store.checks||{})[ds]||{};
   var targets=activeFive().filter(function(f){return f.steps&&f.steps.length});
   var h='<div class="sec" style="border-color:var(--brown)"><div class="sec-title">'+esc(archDay(ds))+'<span class="side">勾选保存 · 第3遍原文阅读勾上即满格</span></div>';
