@@ -160,10 +160,10 @@ button:active{opacity:.6}
 .avoid-tag.mine{color:#3b5b7e;border-color:#3b5b7e}
 .btn-row{display:flex;gap:8px;align-items:center;margin-top:12px;flex-wrap:wrap;justify-content:flex-end}
 .act{color:var(--sub);font-size:12px;text-decoration:underline;white-space:nowrap}
-.footnote{text-align:center;font-size:11px;color:var(--faint);letter-spacing:1px;margin-top:22px}
+.footnote{text-align:center;font-size:11px;color:var(--faint);letter-spacing:1px}
 .linkdim{color:var(--faint);font-size:11px;letter-spacing:1px;text-decoration:underline;background:none;padding:2px 6px}
 .linkdim-sep{color:var(--faint);opacity:.4;padding:0 2px;user-select:none}
-.free-zone{flex:1;min-height:12px}
+.free-zone{flex:1;min-height:12px;display:flex;align-items:center;justify-content:center}
 #dBody-anti,#dBody-vision,#dBody-goals,#dBody-check,#dBody-sub{background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin:0 0 12px}
 
 /* ========= 情绪 / 睡眠（v7f） ========= */
@@ -181,6 +181,12 @@ button:active{opacity:.6}
 .mquad{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .mcard{border:1.5px solid var(--line);border-radius:10px;padding:8px 9px;font-size:11.5px;line-height:1.65;cursor:pointer;background:#faf9f5;color:var(--sub)}
 .mcard b{display:block;font-size:11.5px}
+.dq{padding:10px 0;border-bottom:1px dashed var(--line)}
+.dq:last-child{border-bottom:0;padding-bottom:2px}
+.dq-head{display:flex;align-items:center;gap:7px;margin-bottom:3px}
+.dq-badge{width:17px;height:17px;border-radius:50%;background:var(--fill,#f1efe8);border:1px solid var(--line);color:var(--sub);font-size:10.5px;display:flex;align-items:center;justify-content:center;flex:none}
+.dq-q{font-size:12px;color:var(--sub)}
+.dq-a{font-size:13.5px;color:var(--ink);white-space:pre-wrap;word-break:break-word;padding-left:24px;line-height:1.8}
 .chip{display:inline-block;font-size:12px;padding:4px 11px;border:1px solid var(--line);border-radius:999px;color:var(--sub);cursor:pointer;background:#fff;margin:0 6px 6px 0}
 .chip.on{background:#f0efeb;border-color:var(--brown);color:var(--brown)}
 .chip-add{border-style:dashed;color:var(--faint)}
@@ -826,11 +832,16 @@ async function pushGist(){
 }
 
 /* ============ 增量合并核心：任何一边的数据都不被覆盖 ============ */
-function mergeByIdLists(localArr,remoteArr){
+function isTomb(k,key){return (store.tomb||[]).some(function(y){return y&&y.k===k&&y.key===key})}
+function addTomb(k,key){store.tomb=store.tomb||[];if(!key)return;var at=Date.now();
+  var dup=store.tomb.find(function(y){return y&&y.k===k&&y.key===key});
+  if(dup){if(at>(dup.at||0))dup.at=at}else{store.tomb.push({k:k,key:key,at:at})}}
+function mergeByIdLists(localArr,remoteArr,tombK){
   var seen={};var out=localArr.slice();var added=0;
   localArr.forEach(function(x){if(x&&x.id)seen[x.id]=true});
   (remoteArr||[]).forEach(function(x){
     if(!x||!x.id)return;
+    if(tombK&&isTomb(tombK,x.id))return;
     if(!seen[x.id]){out.push(x);seen[x.id]=true;added++}
   });
   return {list:out,added:added};
@@ -839,22 +850,32 @@ function mergeStore(remote){
   if(!remote||typeof remote!=='object')return {added:0};
   var before=totalItems(store);
   var added=0;
-  /* dump / roam / collect：按 id 并集，同 id 取本地 */
+  /* 墓碑同步：删除操作跨设备生效（墓碑 30 天后自动过期） */
+  store.tomb=store.tomb||[];
+  (remote.tomb||[]).forEach(function(x){
+    if(!x||!x.k||!x.key)return;
+    var dup=store.tomb.find(function(y){return y&&y.k===x.k&&y.key===x.key});
+    if(dup){if((x.at||0)>(dup.at||0))dup.at=x.at}
+    else{store.tomb.push(x);added++}
+  });
+  store.tomb=store.tomb.filter(function(x){return x&&(x.at||0)>Date.now()-30*86400000});
+  /* dump/roam/collect：本地剔除墓碑，远端命中墓碑不加回 */
   ['dump','roam','collect'].forEach(function(k){
-    var r=mergeByIdLists(store[k]||[],remote[k]||[]);
+    store[k]=(store[k]||[]).filter(function(x){return x&&x.id&&!isTomb(k,x.id)});
+    var r=mergeByIdLists(store[k]||[],remote[k]||[],k);
     store[k]=r.list;
     added+=r.added;
   });
-  /* five：远端有 id 的条目先认领本地同内容条目（不能先补随机 id），再并集 */
-  var rf=remote.five||[];
+  /* five：远端有 id 的条目先认领本地同内容条目（不能先补随机 id），再并集；墓碑按 id 过滤 */
+  var rf=(remote.five||[]).filter(function(f){return !(f&&f.id&&isTomb('five',f.id))});
   var seenT={};
+  store.five=store.five.filter(function(f){return !isTomb('five',f.id)});
   store.five.forEach(function(f){seenT[(f.t||'')+'|'+(f.year||'')]=true});
   rf.forEach(function(f){
     if(!f)return;
     if(f.id){
       var dup=store.five.find(function(x){return x.id===f.id});
       if(dup){
-        /* id 已存在：补回本地缺失字段（不覆盖已有内容），支持重新导入更新 name 等 */
         Object.keys(f).forEach(function(k){if(dup[k]===undefined||dup[k]===''||dup[k]===null)dup[k]=f[k]});
       }else{
         var same=store.five.find(function(x){return !x.id&&(x.t||'')===(f.t||'')&&(x.year||'')===(f.year||'')});
@@ -866,21 +887,22 @@ function mergeStore(remote){
       if(!seenT[key]){store.five.push(f);seenT[key]=true;added++}
     }
   });
-  /* five 合并完才给仍无 id 的本地条目补 uid（顺序不能提前，否则破坏认领） */
   ensureFiveMigrate();
-  /* avoid：对象 {t,seed} 按 t 去重 union */
+  /* avoid：墓碑按 t 过滤（本地与远端双向） */
   var aSeen={};
+  store.avoid=store.avoid.filter(function(a){var t=(typeof a==='string')?a:(a&&a.t);return t&&!isTomb('avoid',t)});
   store.avoid.forEach(function(a){aSeen[a.t]=true});
   (remote.avoid||[]).forEach(function(a){
     if(!a)return;
     var o=(typeof a==='string')?{t:a,seed:SEED_AVOIDS.indexOf(a)>-1}:a;
-    if(o.t&&!aSeen[o.t]){store.avoid.push(o);aSeen[o.t]=true;added++}
+    if(o.t&&!aSeen[o.t]&&!isTomb('avoid',o.t)){store.avoid.push(o);aSeen[o.t]=true;added++}
   });
-  /* quotes：按 t 文本去重 union（金句池双保险） */
+  /* quotes：墓碑按 t 过滤（collect 删除时连带记墓碑） */
   var qSeen={};
+  store.quotes=store.quotes.filter(function(q){return q&&q.t&&!isTomb('quote',q.t)});
   store.quotes.forEach(function(q){qSeen[q.t]=true});
   (remote.quotes||[]).forEach(function(q){
-    if(q&&q.t&&!qSeen[q.t]){store.quotes.push(q);qSeen[q.t]=true;added++}
+    if(q&&q.t&&!qSeen[q.t]&&!isTomb('quote',q.t)){store.quotes.push(q);qSeen[q.t]=true;added++}
   });
   /* checks：按 日期→目标id→勾选数组 union（双设备不同日期互不覆盖） */
   var rc=remote.checks||{};
@@ -1158,7 +1180,12 @@ function addDump(){
   store.dump.unshift({id:uid(),date:today(),text:t});i.value='';save();renderDump();toast('倒出来了，轻了一点')
 }
 function renderDump(){}
-function delDump(id){store.dump=store.dump.filter(function(d){return d.id!==id});save();renderRoam();toast('已丢弃')}
+var _askCb=null;
+function askConfirm(body,cb){document.getElementById("askBody").textContent=body;_askCb=cb;var m=document.getElementById("askMask");m.style.display="flex"}
+function askOk(){document.getElementById("askMask").style.display="none";if(_askCb)_askCb();_askCb=null}
+function askCancel(){document.getElementById("askMask").style.display="none";_askCb=null}
+window.askConfirm=askConfirm;
+function delDump(id){var d=store.dump.find(function(x){return x.id===id});askConfirm('丢弃「'+((d&&d.text)||'').slice(0,24)+'」？删除后将同步到云端。',function(){addTomb('dump',id);store.dump=store.dump.filter(function(x){return x.id!==id});save();renderRoam();toast('已丢弃')})}
 window.delDump=delDump;
 var pickingId=null;
 function pickDump(id){pickingId=id;document.getElementById('picker').classList.add('on')}
@@ -1201,7 +1228,7 @@ function renderRoam(){
   var h=groupedHtml(merged,'roam',itemHtml,{subGroup:'week'});
   el.innerHTML=h||'<div class="row" style="border-bottom:0"><span class="no">·</span><div class="txt"><div class="nm" style="color:var(--faint);font-size:13px">还没有漫游。随便写点什么，想到哪写到哪。</div></div></div>';
 }
-function delRoam(id){store.roam=store.roam.filter(function(r){return r.id!==id});save();renderRoam()}
+function delRoam(id){var r=store.roam.find(function(x){return x.id===id});askConfirm('删除「'+((r&&r.text)||'').slice(0,24)+'」？删除后将同步到云端。',function(){addTomb('roam',id);store.roam=store.roam.filter(function(x){return x.id!==id});save();renderRoam()})}
 window.delRoam=delRoam;
 
 /* ============ Collect ============ */
@@ -1227,9 +1254,7 @@ function toggleQuote(id){var c=store.collect.find(function(x){return x.id===id})
   save();renderCollect();toast(c.quote?'已进今日一句':'移出金句池')
 }
 window.toggleQuote=toggleQuote;
-function delCollect(id){var c=store.collect.find(function(x){return x.id===id});
-  if(c&&c.quote)store.quotes=store.quotes.filter(function(q){return q.t!==c.text});
-  store.collect=store.collect.filter(function(x){return x.id!==id});save();renderCollect()}
+function delCollect(id){var c=store.collect.find(function(x){return x.id===id});askConfirm('删除这条收集？'+((c&&c.quote)?'关联的金句也会一起删除。':'删除后将同步到云端。'),function(){if(c&&c.quote)addTomb('quote',c.text);addTomb('collect',id);if(c&&c.quote)store.quotes=store.quotes.filter(function(q){return q.t!==c.text});store.collect=store.collect.filter(function(x){return x.id!==id});save();renderCollect()})}
 window.delCollect=delCollect;
 
 /* ============ 编辑（dump/roam/collect 共用） ============ */
@@ -1325,7 +1350,7 @@ function ensureFiveMigrate(){
 }
 function ensureSubSeeds(){
   if(!store.subInitiated&&(!store.avoid||!store.avoid.length)){
-    store.avoid=SEED_AVOIDS.map(function(t){return {t:t,seed:true}});
+    store.avoid=SEED_AVOIDS.filter(function(t){return !isTomb('avoid',t)}).map(function(t){return {t:t,seed:true}});
     store.subInitiated=true;save();
   }
 }
@@ -1461,9 +1486,7 @@ function saveAvoidAdd(){
   if(!t){toast('没有内容');hideEdit();return}
   store.avoid.unshift({t:t,seed:false});save();renderDirection();hideEdit();toast('放下了');
 }
-function delAvoid(idx){var a=store.avoid[idx];var t=(a&&a.t)?a.t:a;
-  if(!confirm('删除「'+t+'」？'))return;
-  store.avoid.splice(idx,1);save();renderDirection()}
+function delAvoid(idx){var a=store.avoid[idx];var t=(a&&a.t)?a.t:a;askConfirm('删除「'+t+'」？删除后将同步到云端。',function(){addTomb('avoid',t);store.avoid.splice(idx,1);save();renderDirection()})}
 window.delAvoid=delAvoid;
 /* 五件事编辑（复用编辑面板，_editKind 分流） */
 var _fiveEditIdx=-1;
@@ -1687,6 +1710,7 @@ function renderEmoCal(){
   function cell(ds,d2){
     var zs=(mg.zones[ds]||[]);
     var dots=zs.map(function(z){return '<i class="cal-dot" style="background:'+EMO_ZONES[z].c+'"></i>'}).join('');
+    if(ds>today())return '<span class="cal-cell" style="color:var(--faint)"><b>'+d2+'</b></span>';
     return '<span class="cal-cell'+(ds===today()?' cal-today':'')+'" onclick="showEmoDay(\''+ds+'\')"><b>'+d2+'</b><span class="cal-dots">'+dots+'</span></span>';
   }
   return monthGrid(emoYm(),cell);
@@ -1729,26 +1753,31 @@ function saveEmoPanel(){
   hideEmoPanel();save();renderEmotion();toast('已记录');
 }
 window.saveEmoPanel=saveEmoPanel;
-function showEmoDay(ds){_emoShowDay=ds;renderEmotion()}
+var _emoShowDay=today();
+function showEmoDay(ds){if(_emoShowDay===ds){_emoShowDay="__off__"}else{_emoShowDay=ds}renderEmotion()}
 window.showEmoDay=showEmoDay;
 function renderEmoShow(){
   var el=document.getElementById('emoDayEditor');
-  if(!_emoShowDay){el.style.display='none';return}
+  if(!_emoShowDay||_emoShowDay==='__off__'){el.style.display='none';return}
   var ds=_emoShowDay;var d=mood().diary[ds]||{};var zs=(mood().zones[ds]||[]);
   var zc=zs.length?zs.map(function(z){return '<span class="chip" style="background:'+EMO_ZONES[z].bg+';border-color:'+EMO_ZONES[z].c+';color:'+EMO_ZONES[z].c+'">'+z+' · '+EMO_ZONES[z].axis+'</span>'}).join(''):'';
+  var QN=['今天发生在我身上、最值得说的一件事是什么？','今天我的情绪点是什么？（用上帝视角，抽离地看它）','基于此，我做了什么决策和行动？（可选）'];
+  var QA=[d.e1,d.e2,d.e3];
+  var filled=0;
+  var body=QA.map(function(a,i){
+    if(!a)return '';
+    filled++;
+    return '<div class="dq"><div class="dq-head"><span class="dq-badge">'+(i+1)+'</span><span class="dq-q">'+QN[i]+'</span></div><div class="dq-a">'+esc(a)+'</div></div>';
+  }).join('');
+  if(!filled)body='<div style="font-size:12.5px;color:var(--faint);line-height:1.8;padding-bottom:8px">这天还没写。点「写一条」记录。</div>';
   el.style.display='block';
   el.innerHTML='<div class="sec" style="border-color:var(--brown);padding-bottom:14px">'+
-   '<div class="sec-title">'+esc(archDay(ds))+'<span class="side">区可多选</span></div>'+
+   '<div class="sec-title">'+esc(archDay(ds))+'<span class="side">'+(filled?filled+' / 3':'未写')+'</span></div>'+
    (zc?'<div class="pillrow" style="margin-top:2px">'+zc+'</div>':'')+
-   ((d.e1||d.e2||d.e3)?'':'<div style="font-size:12.5px;color:var(--faint);line-height:1.8;padding-bottom:8px">这天还没写。点「写一条」记录。</div>')+
-   '<div style="font-size:12px;color:var(--sub);margin:10px 0 4px">今天发生在我身上、最值得说的一件事是什么？</div>'+
-   '<div style="font-size:13.5px;line-height:1.8;color:var(--ink);white-space:pre-wrap;word-break:break-word">'+(d.e1?esc(d.e1):'—')+'</div>'+
-   '<div style="font-size:12px;color:var(--sub);margin:10px 0 4px">今天我的情绪点是什么？（用上帝视角，抽离地看它）</div>'+
-   '<div style="font-size:13.5px;line-height:1.8;color:var(--ink);white-space:pre-wrap;word-break:break-word">'+(d.e2?esc(d.e2):'—')+'</div>'+
-   '<div style="font-size:12px;color:var(--sub);margin:10px 0 4px">基于此，我做了什么决策和行动？（可选）</div>'+
-   '<div style="font-size:13.5px;line-height:1.8;color:var(--ink);white-space:pre-wrap;word-break:break-word">'+(d.e3?esc(d.e3):'—')+'</div>'+
-   '<div class="btn-row" style="justify-content:flex-end"><button class="pill" style="background:#f1efe9;color:var(--ink);font-size:12.5px;padding:6px 16px" onclick="openEmoPanel(\''+ds+'\')">'+((d.e1||d.e2||d.e3)?'编辑':'写一条')+'</button></div></div>';
+   body+
+   '<div class="btn-row" style="justify-content:flex-end"><button class="pill" style="background:#f1efe9;color:var(--ink);font-size:12.5px;padding:6px 16px" onclick="openEmoPanel(\''+ds+'\')">'+(filled?'编辑':'写一条')+'</button></div></div>';
 }
+
 function saveMoodRev(k,v){var ym=emoYm();mood().rev[ym]=mood().rev[ym]||{};mood().rev[ym][k]=v;save()}
 window.saveMoodRev=saveMoodRev;
 function renderEmoReview(){
@@ -1812,6 +1841,7 @@ window.saveDeep=saveDeep;
 function delDeep(id){if(!confirm('删除这条分析？'))return;var mg=mood();mg.deep=mg.deep.filter(function(x){return x.id!==id});_deepId=null;save();renderEmotion()}
 window.delDeep=delDeep;
 function renderEmotion(){
+  if(_emoShowDay===undefined)_emoShowDay=today();
   store.eTab=store.eTab||'track';
   try{applyQuad()}catch(e){}
   var ym=emoYm();
@@ -1857,10 +1887,11 @@ function slpShift(d){var p=slpYm().split('-');var dt=new Date(parseInt(p[0],10),
 window.slpShift=slpShift;
 function setSlpTab(t){store.sTab=t;_slpDay=null;_slpAddKind=null;save();renderSleep()}
 window.setSlpTab=setSlpTab;
-var _slpDay=null,_slpDraft=null,_slpAddKind=null;
+var _slpDay=undefined,_slpDraft=null,_slpAddKind=null;
 function calcDur(bed,rise){if(!bed||!rise)return 0;var b=bed.split(':'),r=rise.split(':');var m=(parseInt(r[0],10)*60+parseInt(r[1],10))-(parseInt(b[0],10)*60+parseInt(b[1],10));if(m<=0)m+=1440;return m}
 function durTxt(m){if(!m)return '--';return Math.floor(m/60)+' 时 '+(m%60)+' 分'}
 function openSlpDay(ds){
+  if(ds===_slpDay){_slpDay='__off__';_slpDraft=null;renderSlpEditor();return}
   _slpDay=ds;_slpAddKind=null;
   var v=slp().days[ds];
   _slpDraft=JSON.parse(JSON.stringify(v||{bed:'',rise:'',durM:0,energy:'',state:'',ease:'',wake:'',behavior:[],factors:[],body:[],note:'',city:'gz'}));
@@ -1908,7 +1939,8 @@ function pillRowHtml(key,opts,cur){
 }
 function renderSlpEditor(){
   var el=document.getElementById('slpDayEditor');
-  if(!_slpDay){el.style.display='none';return}
+  if(!_slpDay||_slpDay==='__off__'){el.style.display='none';return}
+  if(!_slpDraft)_slpDraft=JSON.parse(JSON.stringify(slp().days[_slpDay]||{bed:'',rise:'',durM:0,energy:'',state:'',ease:'',wake:'',behavior:[],factors:[],body:[],note:'',city:'gz'}));
   var d=_slpDraft;
   var h='<div class="sec" style="border-color:var(--brown)">'+
    '<div class="sec-title">'+esc(archDay(_slpDay))+'<span class="side">能勾的都勾 · 30 秒</span></div>'+
@@ -1975,6 +2007,7 @@ function renderSlpCal(){
     var v=s.days[ds];var bar='';
     if(v&&v.energy)bar='<span class="cal-dots"><i class="cal-dot" style="background:'+SLP_ENERGY[v.energy].c+'"></i></span>';
     if(v&&v.weather&&v.weather.rain>0)bar+='<span class="cal-dots"><i class="cal-dot" style="background:#6fa8dc" title="有降水"></i></span>';
+    if(ds>today())return '<span class="cal-cell" style="color:var(--faint)"><b>'+d2+'</b></span>';
     return '<span class="cal-cell'+(ds===today()?' cal-today':'')+'" onclick="openSlpDay(\''+ds+'\')"><b>'+d2+'</b>'+bar+'</span>';
   }
   return monthGrid(slpYm(),cell);
@@ -2218,6 +2251,7 @@ function renderSlpTrend(){
   document.getElementById('slpTrend').innerHTML=h;
 }
 function renderSleep(){
+  if(_slpDay===undefined)_slpDay=today();
   store.sTab=store.sTab||'track';
   var ym=slpYm();
   document.getElementById('slpMonthLabel').textContent=ym.split('-')[0]+'年'+parseInt(ym.split('-')[1],10)+'月';
@@ -2516,6 +2550,16 @@ window.submitToken=submitToken;window.manualSync=manualSync;
 window.pullFromCloud=pullFromCloud;window.disconnectSync=disconnectSync;
 })();
 </script>
+<div id="askMask" style="display:none;position:fixed;inset:0;z-index:95;align-items:center;justify-content:center;background:rgba(40,37,32,.28)">
+  <div style="background:#fff;border-radius:14px;padding:20px 18px 14px;width:78%;max-width:300px;box-shadow:0 10px 34px rgba(40,37,32,.18)">
+    <div style="font-size:14.5px;font-weight:600;margin-bottom:6px">确认删除吗？</div>
+    <div id="askBody" style="font-size:12.5px;color:#8a887e;margin-bottom:16px;line-height:1.7"></div>
+    <div style="display:flex;gap:8px;justify-content:flex-end">
+      <button class="dlg-btn dlg-cancel" onclick="askCancel()" style="background:#f1efe8;color:#6b6a63;border:0;border-radius:999px;padding:7px 18px;font-size:12.5px;cursor:pointer">取消</button>
+      <button class="dlg-btn dlg-ok" onclick="askOk()" style="background:#b07c7c;color:#fff;border:0;border-radius:999px;padding:7px 18px;font-size:12.5px;cursor:pointer">确认删除</button>
+    </div>
+  </div>
+</div>
 </body>
 </html>
 
