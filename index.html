@@ -178,6 +178,9 @@ button:active{opacity:.6}
 .cal-cell.cal-today{border-color:var(--brown)}
 .cal-dots{display:flex;gap:2px;height:4px}
 .cal-dot{width:14px;height:4px;border-radius:2px;display:inline-block}
+.mquad{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.mcard{border:1.5px solid var(--line);border-radius:10px;padding:8px 9px;font-size:11.5px;line-height:1.65;cursor:pointer;background:#faf9f5;color:var(--sub)}
+.mcard b{display:block;font-size:11.5px}
 .chip{display:inline-block;font-size:12px;padding:4px 11px;border:1px solid var(--line);border-radius:999px;color:var(--sub);cursor:pointer;background:#fff;margin:0 6px 6px 0}
 .chip.on{background:#f0efeb;border-color:var(--brown);color:var(--brown)}
 .chip-add{border-style:dashed;color:var(--faint)}
@@ -330,10 +333,10 @@ button:active{opacity:.6}
       <div class="sec">
         <div class="sec-title" style="cursor:pointer" onclick="toggleQuad()">情绪四象限<span class="side" id="quadTri">收起 ▾</span></div>
         <div class="emo-quad" id="quadBody">
-          <div class="quad-card" style="background:#E1F5EE"><b style="color:#0F6E56">A · 高愉悦 × 高能量</b>热情、兴奋、喜悦、专注</div>
-          <div class="quad-card" style="background:#EAF3DE"><b style="color:#3B6D11">B · 高愉悦 × 低能量</b>平静、满足、放松、惬意</div>
-          <div class="quad-card" style="background:#FAECE7"><b style="color:#993C1D">C · 低愉悦 × 高能量</b>焦虑、烦躁、愤怒、挫败</div>
-          <div class="quad-card" style="background:#F1EFE8"><b style="color:#444441">D · 低愉悦 × 低能量</b>低落、无力、疲惫、绝望</div>
+          <div class="quad-card" style="background:#FDEBE7"><b style="color:#B5432E">A · 高愉悦 × 高能量</b>热情、兴奋、喜悦、专注</div>
+          <div class="quad-card" style="background:#E5F4F0"><b style="color:#2C7A62">B · 高愉悦 × 低能量</b>平静、满足、放松、惬意</div>
+          <div class="quad-card" style="background:#FBF3E2"><b style="color:#A66F1E">C · 低愉悦 × 高能量</b>焦虑、烦躁、愤怒、挫败</div>
+          <div class="quad-card" style="background:#EDF0F5"><b style="color:#57657E">D · 低愉悦 × 低能量</b>低落、无力、疲惫、绝望</div>
         </div>
       </div>
       <div style="display:flex;align-items:center;justify-content:space-between;margin:0 2px 10px">
@@ -426,6 +429,8 @@ button:active{opacity:.6}
       </button>
       <div id="dBody-check">
         <div style="margin:2px 0 8px;display:flex;gap:6px;align-items:center" id="last7"></div>
+        <div id="dirCal"></div>
+        <div id="dirEditCard" style="display:none"></div>
         <div id="checkList"></div>
       </div>
 
@@ -1520,13 +1525,14 @@ function applyFoldD(){
 }
 window.toggleD=toggleD;
 /* ============ 今日打卡 ============ */
-var STEP_ORDER=['read1','words','parse','read2'];
-var STEP_LABELS={read1:'第 1 遍原文阅读',words:'背新单词',parse:'阅读解析',read2:'第 2 遍原文阅读'};
+var STEP_ORDER=['read1','words','parse','read2','read3'];
+var STEP_LABELS={read1:'第 1 遍原文阅读',words:'背新单词',parse:'阅读解析',read2:'第 2 遍原文阅读',read3:'第 3 遍原文阅读'};
 var FALLBACK_LABEL='只背了单词（兜底）';
 function tierOf(arr){
   arr=arr||[];
   if(arr.indexOf('fallback')>-1)return 'fallback';
-  var n=arr.filter(function(x){return x!=='fallback'}).length;
+  if(arr.indexOf('read3')>-1)return 'full';
+  var n=arr.filter(function(x){return x!=='fallback'&&x!=='read3'}).length;
   return n>=4?'full':(n>0?'half':'none');
 }
 function tierLabel(t){return {full:'完成档',half:'半档',fallback:'兜底',none:'没做'}[t]||'没做'}
@@ -1535,8 +1541,10 @@ function todayChecks(){
   var d=today();store.checks[d]=store.checks[d]||{};
   return store.checks[d];
 }
-function toggleCheck(fid,key){
-  var tc=todayChecks();
+function toggleCheckAt(ds,fid,key){
+  store.checks=store.checks||{};
+  store.checks[ds]=store.checks[ds]||{};
+  var tc=store.checks[ds];
   var arr=(tc[fid]||[]).slice();
   if(key==='fallback'){
     arr=arr.indexOf('fallback')>-1?[]:['fallback'];
@@ -1545,8 +1553,9 @@ function toggleCheck(fid,key){
     arr=arr.indexOf(key)>-1?arr.filter(function(x){return x!==key}):arr.concat([key]);
   }
   if(arr.length)tc[fid]=arr;else delete tc[fid];
-  save();renderDirection();
+  save();renderChecks();
 }
+function toggleCheck(fid,key){toggleCheckAt(today(),fid,key)}
 window.toggleCheck=toggleCheck;
 function monthChecked(){
   var m=today().slice(0,7);var n=0;
@@ -1598,14 +1607,56 @@ function renderChecks(){
     g+='<span class="d7" style="background:'+colors[tier]+'" title="'+ds+' '+tierLabel(tier)+'"></span>';
   }
   var lg=document.getElementById('last7');if(lg)lg.innerHTML=g;
+  renderDirCal();renderDirEdit();
 }
+var _dirEditDay=null;
+function dirTier(ds){
+  var tc=(store.checks||{})[ds]||{};var keys=Object.keys(tc);
+  if(!keys.length)return 'none';
+  var rank={none:0,fallback:1,half:2,full:3};var best='none';
+  keys.forEach(function(fid){var t=tierOf(tc[fid]);if(rank[t]>rank[best])best=t});
+  return best;
+}
+function renderDirCal(){
+  var wrap=document.getElementById('dirCal');if(!wrap)return;
+  var colors={full:'#3D9E7E',half:'#E8A13D',fallback:'#7A8BA6'};
+  var h=monthGrid(today().slice(0,7),function(ds,d2){
+    var t=dirTier(ds);var c=colors[t];
+    return '<span class="cal-cell'+(ds===today()?' cal-today':'')+'"'+(c?' style="background:'+c+';color:#fff;cursor:pointer"':' style="cursor:pointer"')+' onclick="showDirEdit(\''+ds+'\')"><b>'+d2+'</b></span>';
+  });
+  wrap.innerHTML='<div class="sec" style="margin-bottom:10px"><div class="sec-title">本月打卡<span class="side">点一天补卡 · 满格绿 半格黄 兜底灰蓝</span></div>'+h+'</div>';
+}
+function showDirEdit(ds){_dirEditDay=ds;renderDirEdit()}
+window.showDirEdit=showDirEdit;
+function renderDirEdit(){
+  var el=document.getElementById('dirEditCard');if(!el)return;
+  if(!_dirEditDay){el.style.display='none';return}
+  var ds=_dirEditDay;var tc=(store.checks||{})[ds]||{};
+  var targets=activeFive().filter(function(f){return f.steps&&f.steps.length});
+  var h='<div class="sec" style="border-color:var(--brown)"><div class="sec-title">补打卡 · '+esc(archDay(ds))+'<span class="side">勾选保存 · 第3遍原文阅读勾上即满格</span></div>';
+  if(!targets.length){h+='<div style="font-size:12.5px;color:var(--faint);line-height:1.8;padding-bottom:8px">这天没有启用打卡步骤的目标。</div></div>';el.style.display='block';el.innerHTML=h;return}
+  targets.forEach(function(f){
+    var arr=tc[f.id]||[];var hasFb=arr.indexOf('fallback')>-1;
+    h+='<div class="chk-card" style="margin-bottom:10px"><div class="chk-t">'+esc(f.t||f.name||'（目标）')+'</div>';
+    STEP_ORDER.forEach(function(k){
+      var on=arr.indexOf(k)>-1;
+      h+='<label class="chk-row'+(hasFb?' lock':'')+'"><input type="checkbox" '+(on?'checked':'')+' '+(hasFb?'disabled':'')+' onchange="toggleCheckAt(\''+ds+'\',\''+f.id+'\',\''+k+'\')"> '+STEP_LABELS[k]+'</label>';
+    });
+    h+='<label class="chk-row" style="border-top:1px dashed var(--line);margin-top:4px"><input type="checkbox" '+(hasFb?'checked':'')+' onchange="toggleCheckAt(\''+ds+'\',\''+f.id+'\',\'fallback\')"> '+FALLBACK_LABEL+'</label>';
+    var t=tierOf(arr);
+    h+='<div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--line);display:flex;align-items:baseline;justify-content:space-between"><span style="font-size:11px;color:var(--faint)">'+esc(archDay(ds))+'</span><span style="font-size:11.5px;color:#3b5b7e">'+(t==='none'?'还没开始':'当天＝'+tierLabel(t))+'</span></div></div>';
+  });
+  h+='<div class="btn-row" style="justify-content:flex-end"><button class="act" onclick="_dirEditDay=null;renderDirEdit()">收起</button></div></div>';
+  el.style.display='block';el.innerHTML=h;
+}
+
 
 /* ============ 情绪追踪 Emotion Tracker ============ */
 var EMO_ZONES={
-  A:{axis:'高愉悦 × 高能量',words:'热情、兴奋、喜悦、专注',c:'#1D9E75',bg:'#E1F5EE'},
-  B:{axis:'高愉悦 × 低能量',words:'平静、满足、放松、惬意',c:'#639922',bg:'#EAF3DE'},
-  C:{axis:'低愉悦 × 高能量',words:'焦虑、烦躁、愤怒、挫败',c:'#D85A30',bg:'#FAECE7'},
-  D:{axis:'低愉悦 × 低能量',words:'低落、无力、疲惫、绝望',c:'#888780',bg:'#F1EFE8'}
+  A:{axis:'高愉悦 × 高能量',words:'热情、兴奋、喜悦、专注',c:'#E8593D',bg:'#FDEBE7'},
+  B:{axis:'高愉悦 × 低能量',words:'平静、满足、放松、惬意',c:'#3D9E7E',bg:'#E5F4F0'},
+  C:{axis:'低愉悦 × 高能量',words:'焦虑、烦躁、愤怒、挫败',c:'#E8A13D',bg:'#FBF3E2'},
+  D:{axis:'低愉悦 × 低能量',words:'低落、无力、疲惫、绝望',c:'#7A8BA6',bg:'#EDF0F5'}
 };
 function mood(){store.mood=store.mood||{};store.mood.zones=store.mood.zones||{};store.mood.diary=store.mood.diary||{};store.mood.rev=store.mood.rev||{};store.mood.deep=store.mood.deep||[];return store.mood}
 function emoYm(){return store.eMonth||ymOf(today())}
@@ -1654,10 +1705,10 @@ function openEmoPanel(ds){
 window.openEmoPanel=openEmoPanel;
 function renderEmoPanelChips(){
   var el=document.getElementById('emoZoneRow');if(!el)return;
-  el.innerHTML=Object.keys(EMO_ZONES).map(function(z){
+  el.innerHTML='<div class="mquad">'+Object.keys(EMO_ZONES).map(function(z){
     var on=_emoZones.indexOf(z)>-1;var Z=EMO_ZONES[z];
-    return '<span class="chip'+(on?' on':'')+'" style="'+(on?'background:'+Z.bg+';border-color:'+Z.c+';color:'+Z.c:'')+'" onclick="toggleEmoZone(\''+z+'\')">'+z+' · '+Z.axis+'</span>';
-  }).join('');
+    return '<div class="mcard'+(on?' mcard-on':'')+'"'+(on?' style="background:'+Z.bg+';border-color:'+Z.c+';color:'+Z.c+'"':'')+' onclick="toggleEmoZone(\''+z+'\')"><b>'+z+' · '+Z.axis+'</b>'+Z.words+'</div>';
+  }).join('')+'</div>';
 }
 function toggleEmoZone(z){var i=_emoZones.indexOf(z);if(i>-1)_emoZones.splice(i,1);else _emoZones.push(z);renderEmoPanelChips()}
 window.toggleEmoZone=toggleEmoZone;
@@ -1756,6 +1807,7 @@ window.saveDeep=saveDeep;
 function delDeep(id){if(!confirm('删除这条分析？'))return;var mg=mood();mg.deep=mg.deep.filter(function(x){return x.id!==id});_deepId=null;save();renderEmotion()}
 window.delDeep=delDeep;
 function renderEmotion(){
+  store.eTab=store.eTab||'track';
   try{applyQuad()}catch(e){}
   var ym=emoYm();
   document.getElementById('emoMonthLabel').textContent=ym.split('-')[0]+'年'+parseInt(ym.split('-')[1],10)+'月';
@@ -1779,10 +1831,10 @@ function slp(){
   store.sleep.days=store.sleep.days||{};
   store.sleep.tags=store.sleep.tags||{};
   store.sleep.tags.behavior=store.sleep.tags.behavior||['看书','泡脚','拉伸','学习','冥想','听播客','无屏幕30分钟'];
-  store.sleep.tags.factors=store.sleep.tags.factors||['玩手机','想事情','情绪不好','经期？','加班','咖啡','奶茶','运动','晚饭太晚','环境吵'];
-  store.sleep.tags.body=store.sleep.tags.body||['肩颈紧','头沉','眼睛干','腰酸','无'];
+  store.sleep.tags.factors=store.sleep.tags.factors||['玩手机','想事情','情绪不好','经期？','加班','咖啡','奶茶','天气','睡前喝水多','运动','晚饭太晚','环境吵'];
+  store.sleep.tags.body=store.sleep.tags.body||['肩颈紧','头沉','眼皮肿','腰酸','无'];
   /* v7h：标签池收敛回预设词——v7f 时期沉淀的自定义词从池中清掉（记录数据在 days 里不丢） */
-  var POOL={behavior:['看书','泡脚','拉伸','学习','冥想','听播客','无屏幕30分钟'],factors:['玩手机','想事情','情绪不好','经期？','加班','咖啡','奶茶','运动','晚饭太晚','环境吵'],body:['肩颈紧','头沉','眼睛干','腰酸','无']};
+  var POOL={behavior:['看书','泡脚','拉伸','学习','冥想','听播客','无屏幕30分钟'],factors:['玩手机','想事情','情绪不好','经期？','加班','咖啡','奶茶','天气','睡前喝水多','运动','晚饭太晚','环境吵'],body:['肩颈紧','头沉','眼皮肿','腰酸','无']};
   Object.keys(POOL).forEach(function(k){
     var cur=(store.sleep.tags[k]||[]).slice();
     POOL[k].forEach(function(w){if(cur.indexOf(w)<0)cur.push(w)});
@@ -1791,6 +1843,7 @@ function slp(){
   Object.keys(store.sleep.days).forEach(function(d){
     var v=store.sleep.days[d];
     if(v&&v.factors)v.factors=v.factors.map(function(t){return t==='经期'?'经期？':t});
+    if(v&&v.body)v.body=v.body.map(function(t){return t==='眼睛干'?'眼皮肿':t});
   });
   return store.sleep;
 }
@@ -1805,7 +1858,7 @@ function durTxt(m){if(!m)return '--';return Math.floor(m/60)+' 时 '+(m%60)+' �
 function openSlpDay(ds){
   _slpDay=ds;_slpAddKind=null;
   var v=slp().days[ds];
-  _slpDraft=JSON.parse(JSON.stringify(v||{bed:'',rise:'',durM:0,energy:'',state:'',ease:'',wake:'',behavior:[],factors:[],body:[],note:''}));
+  _slpDraft=JSON.parse(JSON.stringify(v||{bed:'',rise:'',durM:0,energy:'',state:'',ease:'',wake:'',behavior:[],factors:[],body:[],note:'',city:'gz'}));
   renderSlpEditor();
 }
 window.openSlpDay=openSlpDay;
@@ -1854,6 +1907,7 @@ function renderSlpEditor(){
   var d=_slpDraft;
   var h='<div class="sec" style="border-color:var(--brown)">'+
    '<div class="sec-title">'+esc(archDay(_slpDay))+'<span class="side">能勾的都勾 · 30 秒</span></div>'+
+   '<div style="display:flex;align-items:center;gap:6px;margin-bottom:2px"><span style="font-size:12px;color:var(--sub)">当晚所在城市</span>'+pillRowHtml('city',[['gz','广州'],['fs','佛山']],d.city||'gz')+'</div>'+
    slpChipsHtml('behavior','睡前行为','昨晚做了什么 · 可多选')+
    '<div style="display:flex;gap:10px;margin-top:12px">'+
      '<div style="flex:1"><div style="font-size:11px;color:var(--faint)">上床</div><input type="time" id="slpBed" value="'+(d.bed||'')+'" onchange="slpSyncTimes()" style="width:100%;height:37px;font-size:15px;line-height:37px;padding:0 9px;text-align:center;-webkit-appearance:none;appearance:none;min-height:0;border:1px solid var(--line);background:var(--fill);border-radius:8px;outline:none;color:var(--ink)"></div>'+
@@ -1885,16 +1939,37 @@ function saveSlpDay(){
   slpSyncTimes();
   var d=_slpDraft;
   var has=d.bed||d.rise||d.energy||d.state||d.ease||(d.wake!=='')||d.note||(d.behavior||[]).length||(d.factors||[]).length||(d.body||[]).length;
-  if(has){d.durM=calcDur(d.bed,d.rise);slp().days[_slpDay]=d}
+  var dayKey=_slpDay;
+  if(has){d.durM=calcDur(d.bed,d.rise);d.city=d.city||'gz';slp().days[_slpDay]=d}
   else{delete slp().days[_slpDay]}
   _slpDay=null;save();renderSleep();toast('已记录');
+  if(has)fetchWeatherFor(dayKey,d.city||'gz');
 }
 window.saveSlpDay=saveSlpDay;
+var CITIES={gz:{name:'广州',lat:23.13,lon:113.26},fs:{name:'佛山',lat:23.02,lon:113.12}};
+var WCODE={0:'晴',1:'基本晴',2:'多云',3:'阴',45:'雾',48:'雾凇',51:'毛毛雨',53:'毛毛雨',55:'毛毛雨',61:'小雨',63:'中雨',65:'大雨',66:'冻雨',67:'冻雨',71:'小雪',73:'中雪',75:'大雪',77:'雪粒',80:'阵雨',81:'阵雨',82:'强阵雨',85:'阵雪',86:'阵雪',95:'雷雨',96:'雷雨',99:'雷雨'};
+function daysAgo(ds){var d=new Date(ds);var t=new Date(today());return Math.round((t-d)/86400000)}
+function fetchWeatherFor(ds,city){
+  var age=daysAgo(ds);
+  if(age<0||age>7)return;
+  var c=CITIES[city]||CITIES.gz;
+  var u='https://api.open-meteo.com/v1/forecast?latitude='+c.lat+'&longitude='+c.lon+'&daily=temperature_2m_max,temperature_2m_min,precipitation_sum,weather_code&timezone=Asia%2FShanghai&past_days=7&forecast_days=1';
+  fetch(u).then(function(r){return r.json()}).then(function(j){
+    var di=((j.daily&&j.daily.time)||[]).indexOf(ds);
+    if(di<0)return;
+    var w={tmax:Math.round(j.daily.temperature_2m_max[di]),tmin:Math.round(j.daily.temperature_2m_min[di]),rain:j.daily.precipitation_sum[di]||0,code:j.daily.weather_code[di]};
+    w.txt=w.tmin+'~'+w.tmax+'°C '+(WCODE[w.code]||'')+(w.rain>0?' · 降水'+w.rain+'mm':'');
+    var v=slp().days[ds];
+    if(v){v.weather=w;save();renderSleep()}
+  }).catch(function(){})
+}
+
 function renderSlpCal(){
   var s=slp();
   function cell(ds,d2){
     var v=s.days[ds];var bar='';
     if(v&&v.energy)bar='<span class="cal-dots"><i class="cal-dot" style="background:'+SLP_ENERGY[v.energy].c+'"></i></span>';
+    if(v&&v.weather&&v.weather.rain>0)bar+='<span class="cal-dots"><i class="cal-dot" style="background:#6fa8dc" title="有降水"></i></span>';
     return '<span class="cal-cell'+(ds===today()?' cal-today':'')+'" onclick="openSlpDay(\''+ds+'\')"><b>'+d2+'</b>'+bar+'</span>';
   }
   return monthGrid(slpYm(),cell);
@@ -2138,6 +2213,7 @@ function renderSlpTrend(){
   document.getElementById('slpTrend').innerHTML=h;
 }
 function renderSleep(){
+  store.sTab=store.sTab||'track';
   var ym=slpYm();
   document.getElementById('slpMonthLabel').textContent=ym.split('-')[0]+'年'+parseInt(ym.split('-')[1],10)+'月';
   var tabs=[['track','打卡'],['review','复盘'],['trend','趋势']];
@@ -2324,6 +2400,7 @@ function doExport(range,label){
       if((v.body||[]).length)parts.push('身体：'+v.body.join('、'));
       if((v.factors||[]).length)parts.push('因素：'+v.factors.join('、'));
       if(v.note)parts.push('备注：'+v.note);
+      if(v.weather)parts.push(v.weather.txt);
       L.push('- '+d+' '+parts.join(' · '));cnt++;
     });
     Object.keys(sp.rev||{}).sort().forEach(function(ym){
