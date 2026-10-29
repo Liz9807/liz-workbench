@@ -428,6 +428,7 @@ button:active{opacity:.6}
         <span class="side" id="checkMeta">本月已打 0 天</span>
       </button>
       <div id="dBody-check">
+        <div style="font-size:11.5px;color:#8a887e;background:#f6f5f0;border-radius:8px;padding:8px 10px;margin:2px 0 8px;line-height:1.8">如果今晚太累或加班，那么就打开「不背单词」学 10 个单词。<br>如果只做得完一步，那么就完成完整学习任务里的任意一步。<br>如果断了一天以上，那么不陷入自责情绪了，接着往下学习。</div>
         <div style="margin:2px 0 8px;display:flex;gap:6px;align-items:center" id="last7"></div>
         <div id="dirCal"></div>
         <div id="dirEditCard" style="display:none"></div>
@@ -1588,7 +1589,6 @@ function renderChecks(){
       h+='<label class="chk-row'+(hasFb?' lock':'')+'"><input type="checkbox" '+(on?'checked':'')+' '+(hasFb?'disabled':'')+' onchange="toggleCheck(\''+f.id+'\',\''+k+'\')"> '+STEP_LABELS[k]+'</label>';
     });
     h+='<label class="chk-row" style="border-top:1px dashed var(--line);margin-top:4px"><input type="checkbox" '+(hasFb?'checked':'')+' onchange="toggleCheck(\''+f.id+'\',\'fallback\')"> '+FALLBACK_LABEL+'</label>';
-    h+='<div class="ifthen">如果今晚太累或加班，那么就打开「不背单词」学 10 个单词。<br>如果只做得完一步，那么就完成完整学习任务里的任意一步。<br>如果断了一天以上，那么不陷入自责情绪了，接着往下学习。</div>';
     h+='</div>';
   });
   if(!targets.length)h='<div class="row" style="border-bottom:0"><span class="no">·</span><div class="txt"><div class="nm" style="color:var(--faint);font-size:13px">在「编辑」里勾选「启用打卡步骤」后，这里会出现每日勾选。</div></div></div>';
@@ -1624,22 +1624,21 @@ function renderDirCal(){
     var t=dirTier(ds);var c=colors[t];
     return '<span class="cal-cell'+(ds===today()?' cal-today':'')+'" style="cursor:pointer" onclick="showDirEdit(\''+ds+'\')"><b>'+d2+'</b>'+(t!=='none'?'<span class="cal-dots"><i class="cal-dot" style="background:'+c+'"></i></span>':'<span class="cal-dots"><i class="cal-dot" style="background:#e5e2da"></i></span>')+'</span>';
   });
-  wrap.innerHTML='<div class="sec" style="margin-bottom:10px"><div class="sec-title">本月打卡<span class="side">点一天补卡 · 点色=当天完成度</span></div>'+h+'</div>';
+  wrap.innerHTML='<div class="sec" style="margin-bottom:10px"><div class="sec-title">本月打卡<span class="side">点日期展开 · 再点收起</span></div>'+h+'</div>';
 }
-function showDirEdit(ds){_dirEditDay=ds;renderDirEdit()}
+function showDirEdit(ds){if(_dirEditDay===ds){_dirEditDay=null}else{_dirEditDay=ds}renderDirEdit()}
 window.showDirEdit=showDirEdit;
 function renderDirEdit(){
   var el=document.getElementById('dirEditCard');if(!el)return;
   if(!_dirEditDay){el.style.display='none';return}
   var ds=_dirEditDay;var tc=(store.checks||{})[ds]||{};
   var targets=activeFive().filter(function(f){return f.steps&&f.steps.length});
-  var h='<div class="sec" style="border-color:var(--brown)"><div class="sec-title">补打卡 · '+esc(archDay(ds))+'<span class="side">勾选保存 · 第3遍原文阅读勾上即满格</span></div>';
+  var h='<div class="sec" style="border-color:var(--brown)"><div class="sec-title">'+esc(archDay(ds))+'<span class="side">勾选保存 · 第3遍原文阅读勾上即满格</span></div>';
   if(!targets.length){h+='<div style="font-size:12.5px;color:var(--faint);line-height:1.8;padding-bottom:8px">这天没有启用打卡步骤的目标。</div></div>';el.style.display='block';el.innerHTML=h;return}
   targets.forEach(function(f){
     var arr=tc[f.id]||[];var hasFb=arr.indexOf('fallback')>-1;
     h+='<div class="chk-card" style="margin-bottom:10px"><div class="chk-t">'+esc(f.t||f.name||'（目标）')+'</div>';
     STEP_ORDER.forEach(function(k){
-    h+='<div class="ifthen">如果今晚太累或加班，那么就打开「不背单词」学 10 个单词。<br>如果只做得完一步，那么就完成完整学习任务里的任意一步。<br>如果断了一天以上，那么不陷入自责情绪了，接着往下学习。</div>';
       var on=arr.indexOf(k)>-1;
       h+='<label class="chk-row'+(hasFb?' lock':'')+'"><input type="checkbox" '+(on?'checked':'')+' '+(hasFb?'disabled':'')+' onchange="toggleCheckAt(\''+ds+'\',\''+f.id+'\',\''+k+'\')"> '+STEP_LABELS[k]+'</label>';
     });
