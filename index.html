@@ -356,8 +356,7 @@ button:active{opacity:.6}
         <div class="sec"><div class="sec-title">本月情绪<span class="side">点一天记录 · 区可多选</span></div><div id="emoCalWrap"></div></div>
         <div id="emoDayEditor" style="display:none;margin-top:8px"></div>
       </div>
-      <div id="emoReview" style="display:none"></div>
-      <div id="emoDeep" style="display:none"></div>
+            <div id="emoDeep" style="display:none"></div>
       <div class="free-zone"></div>
       <div class="footnote">看见情绪周期规律，挖掘来处与去处</div>
     </div>
@@ -568,7 +567,7 @@ button:active{opacity:.6}
       <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--faint)"><input type="checkbox" id="expMood" checked> 情绪日记</label>
       <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--faint)"><input type="checkbox" id="expSleep" checked> 睡眠打卡</label>
     </div>
-    <div style="font-size:11px;color:var(--faint);margin-top:6px;line-height:1.6">不包含反愿景 / 愿景 / 目标清单（正本在知识库）。导出后：打卡 → 贴《英语阅读｜10周学习目标》；减法新增 → 贴《我的人生系统》；情绪 → Labs《情绪追踪》；睡眠 → Labs《睡眠追踪》。</div>
+    <div style="font-size:11px;color:var(--faint);margin-top:6px;line-height:1.6">不包含反愿景 / 愿景 / 目标清单（正本在知识库）。导出后：打卡 → 贴《英语阅读｜10周学习目标》；减法新增 → 贴《我的人生系统》；情绪 → Self《情绪记录》；睡眠 → Self《身体·运动·表达》· 作息与身体信号。</div>
     <div style="font-size:11.5px;color:var(--sub);margin:14px 0 6px;letter-spacing:.5px">备份 / 恢复</div>
     <div style="display:flex;flex-direction:column;gap:8px">
       <button class="pill" style="background:#f1efe9;color:var(--ink)" onclick="backupJSON()">完整备份 JSON</button>
@@ -1593,7 +1592,7 @@ function renderChecks(){
   var wrap=document.getElementById('checkList');if(!wrap)return;
   wrap.style.display=(_dirEditDay==='__off__'||(_dirEditDay&&_dirEditDay!==today()))?'none':'block';
   var meta=document.getElementById('checkMeta');
-  if(meta)meta.textContent='本月已打 '+monthChecked()+' 天';
+  if(meta){var m2=today().slice(0,7);var nn=0;var ff=0;var rank={none:0,fallback:1,half:2,full:3};Object.keys(store.checks||{}).forEach(function(d){if(d.slice(0,7)===m2&&Object.keys(store.checks[d]).length){nn++;var best='none';Object.keys(store.checks[d]).forEach(function(fid){var t=tierOf(store.checks[d][fid]||[]);if(rank[t]>rank[best])best=t});if(best==='full')ff++}});meta.textContent='本月已打 '+nn+' 天 · 完成率 '+(nn?Math.round(ff/nn*100):0)+'%'}
   var targets=activeFive().filter(function(f){return f.steps&&f.steps.length});
   var tc=todayChecks();
   var h='';
@@ -1780,21 +1779,6 @@ function renderEmoShow(){
    '<div class="btn-row" style="justify-content:flex-end"><button class="pill" style="background:#f1efe9;color:var(--ink);font-size:12.5px;padding:6px 16px" onclick="openEmoPanel(\''+ds+'\')">'+(filled?'编辑':'写一条')+'</button></div></div>';
 }
 
-function saveMoodRev(k,v){var ym=emoYm();mood().rev[ym]=mood().rev[ym]||{};mood().rev[ym][k]=v;save()}
-window.saveMoodRev=saveMoodRev;
-function renderEmoReview(){
-  var ym=emoYm();var r=mood().rev[ym]||{};
-  function ta(k,ph,val){return '<textarea rows="2" placeholder="'+ph+'" onchange="saveMoodRev(\''+k+'\',this.value)">'+esc(val||'')+'</textarea>'}
-  document.getElementById('emoReview').innerHTML=
-   '<div class="sec"><div class="sec-title">四象限触发词<span class="side">'+ym.split('-')[0]+'年'+parseInt(ym.split('-')[1],10)+'月 · 月底回看时填</span></div>'+
-   Object.keys(EMO_ZONES).map(function(z){var Z=EMO_ZONES[z];
-     return '<div style="font-size:12px;color:'+Z.c+';margin:8px 0 4px">'+z+' · '+Z.axis+'</div>'+ta(z,Z.words+'…',r[z])}).join('')+
-   '</div>'+
-   '<div class="sec"><div class="sec-title">调节策略<span class="side">竖着写，不并列赶</span></div>'+
-   '<div style="font-size:12px;color:#993C1D;margin:2px 0 4px">当下处于 C 区，你想做什么？</div>'+ta('cs','例：叫停，走五分钟；当天不接新任务…',r.cs)+
-   '<div style="font-size:12px;color:#444441;margin:10px 0 4px">当下处于 D 区，你想做什么？</div>'+ta('ds','例：允许低电量，只做最小一件事…',r.ds)+
-   '</div>';
-}
 function deepEditorHtml(){
   var it=null;if(_deepId!=='new'){it=(mood().deep||[]).find(function(x){return x.id===_deepId})||null}
   var d=(it&&it.date)||today();
@@ -1848,16 +1832,15 @@ function renderEmotion(){
   try{applyQuad()}catch(e){}
   var ym=emoYm();
   document.getElementById('emoMonthLabel').textContent=ym.split('-')[0]+'年'+parseInt(ym.split('-')[1],10)+'月';
-  var tabs=[['track','追踪'],['review','回顾'],['deep','分析']];
+  var tabs=[['track','追踪'],['deep','分析']];
   document.getElementById('emoTabs').innerHTML=tabs.map(function(t){
     return '<span class="subtab'+(store.eTab===t[0]?' on':'')+'" onclick="setEmoTab(\''+t[0]+'\')">'+t[1]+'</span>'}).join('');
   document.getElementById('emoTrack').style.display=store.eTab==='track'?'block':'none';
-  document.getElementById('emoReview').style.display=store.eTab==='review'?'block':'none';
-  document.getElementById('emoDeep').style.display=store.eTab==='deep'?'block':'none';
+    document.getElementById('emoDeep').style.display=store.eTab==='deep'?'block':'none';
   if(store.eTab==='track'){
     document.getElementById('emoCalWrap').innerHTML=renderEmoCal();
     if(_emoShowDay)renderEmoShow();else document.getElementById('emoDayEditor').style.display='none';
-  }else if(store.eTab==='review'){renderEmoReview()}
+  }
   else{renderEmoDeep()}
 }
 
@@ -1881,6 +1864,8 @@ function slp(){
     var v=store.sleep.days[d];
     if(v&&v.factors)v.factors=v.factors.map(function(t){return t==='经期'?'经期？':t});
     if(v&&v.body)v.body=v.body.map(function(t){return t==='眼睛干'?'眼皮肿':t});
+    if(v&&v.factors){v.factors=v.factors.map(function(t){return t==='天气？'?'天气':(t==='睡前喝太多水？'?'睡前喝水多':t)});v.factors=v.factors.filter(function(t,i,a){return a.indexOf(t)===i})}
+    if(v&&v.body){v.body=v.body.filter(function(t,i,a){return a.indexOf(t)===i})}
   });
   return store.sleep;
 }
@@ -1889,11 +1874,11 @@ function slpShift(d){var p=slpYm().split('-');var dt=new Date(parseInt(p[0],10),
 window.slpShift=slpShift;
 function setSlpTab(t){store.sTab=t;_slpDay=null;_slpAddKind=null;save();renderSleep()}
 window.setSlpTab=setSlpTab;
-var _slpDay=undefined,_slpDraft=null,_slpAddKind=null;
+var _slpDay=undefined,_slpDraft=null,_slpAddKind=null,_cityAdd=false;
 function calcDur(bed,rise){if(!bed||!rise)return 0;var b=bed.split(':'),r=rise.split(':');var m=(parseInt(r[0],10)*60+parseInt(r[1],10))-(parseInt(b[0],10)*60+parseInt(b[1],10));if(m<=0)m+=1440;return m}
 function durTxt(m){if(!m)return '--';return Math.floor(m/60)+' 时 '+(m%60)+' 分'}
 function openSlpDay(ds){
-  if(ds===_slpDay){_slpDay='__off__';_slpDraft=null;renderSlpEditor();return}
+  if(ds===_slpDay){_slpDay='__off__';_slpDraft=null;_cityAdd=false;renderSlpEditor();return}
   _slpDay=ds;_slpAddKind=null;
   var v=slp().days[ds];
   _slpDraft=JSON.parse(JSON.stringify(v||{bed:'',rise:'',durM:0,energy:'',state:'',ease:'',wake:'',behavior:[],factors:[],body:[],note:'',city:'gz'}));
@@ -1908,7 +1893,7 @@ function slpSyncTimes(){
 }
 function slpSet(k,v){slpSyncTimes();_slpDraft[k]=(_slpDraft[k]===v?'':v);renderSlpEditor()}
 window.slpSet=slpSet;
-function toggleSlpTag(kind,t){slpSyncTimes();var arr=_slpDraft[kind]||[];var i=arr.indexOf(t);if(i>-1)arr.splice(i,1);else arr.push(t);_slpDraft[kind]=arr;renderSlpEditor()}
+function toggleSlpTag(kind,t){slpSyncTimes();var arr=_slpDraft[kind]||[];var i=arr.indexOf(t);if(i>-1){arr.splice(i,1)}else{if(t.indexOf('？')<0){var q=arr.indexOf(t+'？');if(q>-1)arr.splice(q,1)}if(arr.indexOf(t)<0)arr.push(t)}_slpDraft[kind]=arr;renderSlpEditor()}
 window.toggleSlpTag=toggleSlpTag;
 function addSlpTag(kind){slpSyncTimes();_slpAddKind=kind;renderSlpEditor()}
 window.addSlpTag=addSlpTag;
@@ -1944,9 +1929,8 @@ function renderSlpEditor(){
   if(!_slpDay||_slpDay==='__off__'){el.style.display='none';return}
   if(!_slpDraft)_slpDraft=JSON.parse(JSON.stringify(slp().days[_slpDay]||{bed:'',rise:'',durM:0,energy:'',state:'',ease:'',wake:'',behavior:[],factors:[],body:[],note:'',city:'gz'}));
   var d=_slpDraft;
-  var h='<div class="sec" style="border-color:var(--brown)">'+
+  var h='<div class="sec" style="border-color:var(--brown);padding-bottom:12px">'+
    '<div class="sec-title">'+esc(archDay(_slpDay))+'<span class="side">能勾的都勾 · 30 秒</span></div>'+
-   '<div style="display:flex;align-items:center;gap:6px;margin-bottom:2px"><span style="font-size:12px;color:var(--sub)">当晚所在城市</span>'+pillRowHtml('city',[['gz','广州'],['fs','佛山']],d.city||'gz')+'</div>'+
    slpChipsHtml('behavior','睡前行为','昨晚做了什么 · 可多选')+
    '<div style="display:flex;gap:10px;margin-top:12px">'+
      '<div style="flex:1"><div style="font-size:11px;color:var(--faint)">上床</div><input type="time" id="slpBed" value="'+(d.bed||'')+'" onchange="slpSyncTimes()" style="width:100%;height:37px;font-size:15px;line-height:37px;padding:0 9px;text-align:center;-webkit-appearance:none;appearance:none;min-height:0;border:1px solid var(--line);background:var(--fill);border-radius:8px;outline:none;color:var(--ink)"></div>'+
@@ -1963,9 +1947,11 @@ function renderSlpEditor(){
    pillRowHtml('wake',[['0','0'],['1','1'],['2','2'],['3+','3 次以上']],d.wake)+
    slpChipsHtml('body','身体感受','可多选')+
    slpChipsHtml('factors','影响因素','可多选 · 复盘原因分析用')+
+   '<div style="font-size:12px;color:var(--sub);margin:12px 0 4px">当晚所在城市 · 天气｜'+(function(){var v=slp().days[_slpDay]||{};if(v.weather)return '<span style="color:var(--ink)">'+v.weather.txt+' · '+((cityOf(v.city||'gz')||CITIES.gz).name)+'</span>';var st=_slpWStatus[_slpDay];if(st==='out')return '<span style="color:var(--faint)">超过 7 天，不再补抓</span>';if(st==='fail')return '<span style="color:var(--faint)">未取到 · 再点一次保存可重试</span>';return '<span style="color:var(--faint)">未取到</span>'})()+'</div>'+
+   '<div style="display:flex;gap:6px;flex-wrap:wrap;margin:0 0 12px">'+(function(){var cityOpts=[['gz','广州'],['fs','佛山']].concat((store.myCities||[]).map(function(c){return [c.id,c.name]}));var cur=d.city||'gz';var p=cityOpts.map(function(o){return '<span class="pill3'+(cur===o[0]?' on':'')+'" onclick="toggleCity(\''+o[0]+'\')">'+o[1]+'</span>'}).join('');p+='<span class="pill3'+(_cityAdd?' on':'')+'" onclick="addCityStart()">＋ 添加</span>';if(_cityAdd)p+='<div style="display:flex;gap:6px;margin-top:5px"><input id="cityNew" placeholder="输入城市名，如「长沙」" style="flex:1;font-family:inherit;font-size:12.5px;padding:7px 10px;border:1px solid var(--line);background:var(--fill);border-radius:8px;outline:none;color:var(--ink)"><button class="pill" style="padding:6px 14px;font-size:12px;flex:none" onclick="confirmAddCity()">确认</button></div>';return p})()+'</div>'+
    '<div style="font-size:12px;color:var(--sub);margin-top:12px">备注 <span style="color:var(--faint)">可空</span></div>'+
    '<textarea id="slpNote" rows="2" style="font-size:13px" placeholder="例：凌晨 3 点醒了一次，想起标书的事">'+esc(d.note||'')+'</textarea>'+
-   '<div class="btn-row"><button class="act" onclick="closeSlpDay()">收起</button>'+
+   '<div class="btn-row" style="margin-top:12px"><button class="act" onclick="closeSlpDay()">收起</button>'+
    (slp().days[_slpDay]?'<button class="act" style="color:#b07c7c" onclick="clearSlpDay()">清除记录</button>':'')+
    '<button class="pill" onclick="saveSlpDay()">保存</button></div></div>';
   el.innerHTML=h;el.style.display='block';
@@ -1988,19 +1974,42 @@ window.saveSlpDay=saveSlpDay;
 var CITIES={gz:{name:'广州',lat:23.13,lon:113.26},fs:{name:'佛山',lat:23.02,lon:113.12}};
 var WCODE={0:'晴',1:'基本晴',2:'多云',3:'阴',45:'雾',48:'雾凇',51:'毛毛雨',53:'毛毛雨',55:'毛毛雨',61:'小雨',63:'中雨',65:'大雨',66:'冻雨',67:'冻雨',71:'小雪',73:'中雪',75:'大雪',77:'雪粒',80:'阵雨',81:'阵雨',82:'强阵雨',85:'阵雪',86:'阵雪',95:'雷雨',96:'雷雨',99:'雷雨'};
 function daysAgo(ds){var d=new Date(ds);var t=new Date(today());return Math.round((t-d)/86400000)}
-function fetchWeatherFor(ds,city){
+function cityOf(key){if(CITIES[key])return CITIES[key];return (store.myCities||[]).find(function(c){return c&&c.id===key})||null}
+function toggleCity(k){slpSyncTimes();_slpDraft.city=k;renderSlpEditor()}
+function addCityStart(){_cityAdd=true;renderSlpEditor()}
+function confirmAddCity(){
+  var inp=document.getElementById('cityNew');var name=(inp&&inp.value.trim())||'';
+  if(!name){toast('先输入城市名');return}
+  toast('正在查找 '+name+'…');
+  fetch('https://geocoding-api.open-meteo.com/v1/search?count=1&language=zh&format=json&name='+encodeURIComponent(name))
+   .then(function(r){return r.json()})
+   .then(function(j){
+     var r0=j.results&&j.results[0];
+     if(!r0){toast('没找到「'+name+'」');return}
+     var key='g'+r0.id;
+     store.myCities=store.myCities||[];
+     var dup=store.myCities.find(function(c){return c.id===key});
+     if(dup){dup.name=r0.name}else{store.myCities.push({id:key,name:r0.name,lat:r0.latitude,lon:r0.longitude})}
+     save();
+     _slpDraft.city=key;_cityAdd=false;
+     renderSlpEditor();toast('已添加 '+r0.name);
+   }).catch(function(e){console.warn('geocoding fail',e);toast('查找失败，稍后再试')});
+}
+var _slpWStatus={};
+function fetchWeatherFor(ds,city,retry){
   var age=daysAgo(ds);
-  if(age<0||age>7)return;
-  var c=CITIES[city]||CITIES.gz;
+  if(age<0||age>7){_slpWStatus[ds]='out';renderSlpEditor();return}
+  var v0=slp().days[ds];if(v0)delete v0.weather;
+  var c=cityOf(city)||CITIES.gz;
   var u='https://api.open-meteo.com/v1/forecast?latitude='+c.lat+'&longitude='+c.lon+'&daily=temperature_2m_max,temperature_2m_min,precipitation_sum,weather_code&timezone=Asia%2FShanghai&past_days=7&forecast_days=1';
   fetch(u).then(function(r){return r.json()}).then(function(j){
     var di=((j.daily&&j.daily.time)||[]).indexOf(ds);
-    if(di<0)return;
+    if(di<0){_slpWStatus[ds]='fail';renderSlpEditor();if(retry)toast('已记录 · 天气未取到，可再点一次保存');else setTimeout(function(){fetchWeatherFor(ds,city,true)},3000);return}
     var w={tmax:Math.round(j.daily.temperature_2m_max[di]),tmin:Math.round(j.daily.temperature_2m_min[di]),rain:j.daily.precipitation_sum[di]||0,code:j.daily.weather_code[di]};
     w.txt=w.tmin+'~'+w.tmax+'°C '+(WCODE[w.code]||'')+(w.rain>0?' · 降水'+w.rain+'mm':'');
     var v=slp().days[ds];
-    if(v){v.weather=w;save();renderSleep()}
-  }).catch(function(){})
+    if(v){v.weather=w;_slpWStatus[ds]='ok';save();renderSleep();toast('已记录 · 天气已取')}
+  }).catch(function(e){console.warn('weather fetch fail',e);_slpWStatus[ds]='fail';renderSlpEditor();if(retry)toast('已记录 · 天气未取到，可再点一次保存');else setTimeout(function(){fetchWeatherFor(ds,city,true)},3000)})
 }
 
 function renderSlpCal(){
@@ -2190,7 +2199,7 @@ function renderSlpReview(){
    '<span style="flex:1;text-align:center;font-size:11.5px;padding:5px 0;background:#f6f5f1;border-radius:8px;color:var(--sub);min-width:110px">睡觉 '+rngOf(st.beds)+'</span>'+
    '<span style="flex:1;text-align:center;font-size:11.5px;padding:5px 0;background:#f6f5f1;border-radius:8px;color:var(--sub);min-width:110px">起床 '+rngOf(st.rises)+'</span></div>'+
    '<div style="display:flex;gap:5px;margin-top:7px;flex-wrap:wrap">'+
-   bucketHtml('≥9 时',st.buckets['9'])+bucketHtml('7–9 时',st.buckets['79'])+bucketHtml('5–7 时',st.buckets['57'])+bucketHtml('≤5 时',st.buckets['5'])+'</div></div>';
+   bucketHtml('≥9 时',st.buckets['9'])+bucketHtml('7–9 时',st.buckets['79'])+bucketHtml('5–7 时',st.buckets['57'])+bucketHtml('≤5 时',st.buckets['5'])+'</div>'+'<div style="font-size:11.5px;color:var(--sub);margin-top:7px">'+(function(){var bm=(st.beds||[]).map(function(t){var p=t.split(':');return parseInt(p[0],10)*60+parseInt(p[1],10)});if(!bm.length)return '上床波动 —';var bAvg=bm.reduce(function(x,y){return x+y},0)/bm.length;var bDev=Math.round(bm.reduce(function(x,y){return x+Math.abs(y-bAvg)},0)/bm.length);var inR1=bm.filter(function(x){return Math.abs(x-bAvg)<=60}).length;return '上床波动 ±'+bDev+' 分 · '+inR1+' 天在 ±1 时内'})()+'</div></div>';
   h+='<div class="sec"><div class="sec-title">2　状态怎么样</div>'+
    '<div style="display:flex;gap:5px;flex-wrap:wrap">'+
    bucketHtml('睡得好',st.state.good)+bucketHtml('还行',st.state.ok)+bucketHtml('不好',st.state.bad)+'</div>'+
@@ -2201,24 +2210,44 @@ function renderSlpReview(){
    '<div style="flex:1;min-width:150px;background:#f6f5f1;border-radius:10px;padding:9px 11px"><div style="font-size:11px;color:var(--faint)">睡得不好的日子反复出现</div><div style="font-size:12.5px;line-height:1.9;margin-top:4px;color:var(--sub)">'+topN(st.badFactors,4)+'</div></div>'+
    '<div style="flex:1;min-width:150px;background:#f6f5f1;border-radius:10px;padding:9px 11px"><div style="font-size:11px;color:var(--faint)">睡得好的日子反复出现</div><div style="font-size:12.5px;line-height:1.9;margin-top:4px;color:var(--sub)">'+topN(st.goodFactors,4)+'</div></div>'+
    '</div></div>';
-  var insCard='';
-  if(rv.draftInsight){
-    insCard='<div class="slp-pending" style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin:0 0 10px"><span>帮手草稿待采用 · 点开修改补充</span><button class="pill" style="padding:4px 14px;font-size:12px;flex:none" onclick="openSlpInsEdit(\''+ym+'\')">打开</button></div>';
+  /* 本月趋势（SVG 折线） */
+  var dim=new Date(parseInt(ym.slice(0,4),10),parseInt(ym.slice(5,7),10),0).getDate();
+  var W=340,H=130,padL=18,padR=8,padT=10,padB=20,y0=4,y1=10;
+  function px(d){return padL+(dim>1?(d-1)/(dim-1):0)*(W-padL-padR)}
+  function py(hh){return padT+(1-(hh-y0)/(y1-y0))*(H-padT-padB)}
+  var segs=[],cur=[],badPts=[];
+  var mmin=null,mmx=null,mminD='',mmxD='';
+  for(var dd=1;dd<=dim;dd++){
+    var dsk=ym+'-'+(dd<10?'0':'')+dd;
+    var v=s.days[dsk];
+    if(v&&v.durM){
+      var hh=v.durM/60;
+      cur.push([px(dd),py(hh)]);
+      if(v.state==='bad')badPts.push([px(dd),py(hh)]);
+      if(mmin===null||hh<mmin){mmin=hh;mminD=dsk.slice(5)}
+      if(mmx===null||hh>mmx){mmx=hh;mmxD=dsk.slice(5)}
+    }else{
+      if(cur.length>1)segs.push(cur);
+      cur=[];
+    }
   }
-  h+='<div class="sec"><div class="sec-title">4　洞察<span class="side">帮手出草稿 · 你补充后采用</span></div>'+insCard+
-   (rv.insight?'<div style="font-size:13px;line-height:1.9;color:var(--ink);white-space:pre-wrap;word-break:break-word;padding-bottom:8px">'+esc(rv.insight)+'</div>':'<div style="font-size:12.5px;color:var(--faint);line-height:1.8;padding-bottom:8px">这个月的睡眠有什么规律或关联？有什么障碍、决策和行动？</div>')+
-   '<div class="btn-row" style="justify-content:flex-end"><button class="pill" style="background:#f1efe9;color:var(--ink);font-size:12.5px;padding:6px 16px" onclick="openSlpInsEdit(\''+ym+'\')">编辑</button></div></div>';
-  var wdh='';
-  if(rv.draftO||rv.draftG||rv.draftR){
-    wdh='<div class="slp-pending" style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin:0 0 10px"><span>帮手草稿待采用 · 障碍 / 目标 / 计划</span><button class="pill" style="padding:4px 14px;font-size:12px;flex:none" onclick="openSlpWoopEdit(\''+ym+'\')">打开</button></div>';
+  if(cur.length>1)segs.push(cur);
+  var grid='';
+  for(var gy=y0;gy<=y1;gy++){
+    grid+='<line x1="'+padL+'" y1="'+py(gy)+'" x2="'+(W-padR)+'" y2="'+py(gy)+'" stroke="#e5e2da" stroke-width="1"/>'+
+          '<text x="'+(padL-6)+'" y="'+(py(gy)+3)+'" font-size="9" fill="#9a988f" text-anchor="end">'+gy+'</text>';
   }
-  h+='<div class="sec"><div class="sec-title">5　复盘<span class="side">帮手出草稿 · 也可自己填</span></div>'+wdh+
-   ((rv.woopO||rv.woopG||rv.woopR)?'':'<div style="font-size:12.5px;color:var(--faint);line-height:1.8;padding-bottom:4px">这个月卡住你的是什么？下阶段目标一句话，计划写成如果…那么…</div>')+
-   (rv.woopO?'<div style="font-size:11.5px;color:var(--faint);margin-top:2px">障碍</div><div style="font-size:13px;line-height:1.8;color:var(--ink);white-space:pre-wrap;word-break:break-word">'+esc(rv.woopO)+'</div>':'')+
-   (rv.woopG?'<div style="font-size:11.5px;color:var(--faint);margin-top:8px">下阶段目标（采用后显示在置顶卡）</div><div style="font-size:13px;line-height:1.8;color:var(--ink);white-space:pre-wrap;word-break:break-word">'+esc(rv.woopG)+'</div>':'')+
-   (rv.woopR?'<div style="font-size:11.5px;color:var(--faint);margin-top:8px">计划（如果…那么…）</div><div style="font-size:13px;line-height:1.8;color:var(--ink);white-space:pre-wrap;word-break:break-word">'+esc(rv.woopR)+'</div>':'')+
-   '<div class="btn-row" style="justify-content:flex-end"><button class="pill" style="background:#f1efe9;color:var(--ink);font-size:12.5px;padding:6px 16px" onclick="openSlpWoopEdit(\''+ym+'\')">编辑</button></div>'+
-   '</div>';
+  var plines=segs.map(function(seg){
+    return '<polyline points="'+seg.map(function(p){return p[0].toFixed(1)+','+p[1].toFixed(1)}).join(' ')+'" fill="none" stroke="#3b5b7e" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>';
+  }).join('');
+  var dots=badPts.map(function(p){return '<circle cx="'+p[0].toFixed(1)+'" cy="'+p[1].toFixed(1)+'" r="3.5" fill="#D85A30"/>'}).join('');
+  var xlabels='';
+  [1,8,15,22,dim].forEach(function(d){xlabels+='<text x="'+px(d)+'" y="'+(H-6)+'" font-size="9" fill="#9a988f" text-anchor="middle">'+d+'</text>'});
+  function fmtH(hh){return Math.floor(hh)+'时'+Math.round((hh-Math.floor(hh))*60)+'分'}
+  h+='<div class="sec"><div class="sec-title">本月趋势<span class="side">每日时长 · 小时 · 红点=睡得不好</span></div>'+
+     '<svg viewBox="0 0 '+W+' '+H+'" style="width:100%;height:auto">'+grid+plines+dots+xlabels+'</svg>'+
+     (mmin!==null?'<div style="font-size:11.5px;color:var(--sub);margin-top:6px">最短 '+fmtH(mmin)+'（'+mminD+'）· 最长 '+fmtH(mmx)+'（'+mmxD+'）</div>':'')+
+     '</div>';
   document.getElementById('slpReview').innerHTML=h;
 }
 function renderSlpTrend(){
@@ -2377,23 +2406,43 @@ function doExport(range,label){
     arr.sort(function(x,y){return y.d.localeCompare(x.d)});
     if(arr.length){L.push('## 漫游 / 闪念');arr.forEach(function(r){L.push('- ('+r.d+') '+r.t);cnt++});L.push('')}
   }
-  function pushCollect(){var arr=store.collect.filter(inRange);if(arr.length){L.push('## 收集');arr.forEach(function(c){L.push('- '+(c.quote?'★':'')+' '+c.text+(c.src?' — '+c.src:''));cnt++});L.push('')}}
+  function pushCollect(){var arr=store.collect.filter(inRange);if(arr.length){L.push('## 收集');arr.forEach(function(c){L.push('- ('+(c.date||'')+') '+(c.quote?'★':'')+' '+c.text+(c.src?' — '+c.src:''));cnt++});L.push('')}}
   function pushQuotes(){var mine=(store.quotes||[]).filter(function(q){return q.src&&q.src!=='flomo'});if(mine.length){L.push('## 新加入的金句');mine.forEach(function(q){L.push('- '+q.t+(q.src?' — '+q.src:''))});L.push('')}}
   function pushChecks(){
-    var days=Object.keys(store.checks||{}).sort();
-    var any=false;
-    days.forEach(function(d){
-      if(!inRangeDate(d))return;
-      Object.keys(store.checks[d]||{}).forEach(function(fid){
-        var arr=store.checks[d][fid];
+    var tc=store.checks||{};
+    var statDays=Object.keys(tc).sort().filter(function(d){return inRangeDate(d)});
+    var full=0,half=0,fb=0,noneN=0;var halfDates=[];var rank={none:0,fallback:1,half:2,full:3};
+    statDays.forEach(function(d){
+      var best='none';
+      Object.keys(tc[d]||{}).forEach(function(fid){var t=tierOf(tc[d][fid]||[]);if(rank[t]>rank[best])best=t});
+      if(best==='full')full++;else if(best==='half'){half++;halfDates.push(d.slice(5))}
+      else if(best==='fallback')fb++;else noneN++;
+    });
+    var n=statDays.length;
+    var streak=0,maxStreak=0;
+    statDays.forEach(function(d){
+      var best='none';
+      Object.keys(tc[d]||{}).forEach(function(fid){var t=tierOf(tc[d][fid]||[]);if(rank[t]>rank[best])best=t});
+      streak=(best==='full')?(streak+1):0;if(streak>maxStreak)maxStreak=streak;
+    });
+    L.push('## 打卡 · 逐日');
+    L.push('> 贴入知识库 Labs《英语阅读｜10周学习目标》');
+    if(n)L.push('> 本月统计：应打卡 '+n+' 天 · 完成 '+full+' · 半档 '+half+' · 兜底 '+fb+' · 断档 '+noneN);
+    if(n)L.push('> 完成率 '+Math.round(full/n*100)+'%（完成档口径）/ '+Math.round((full+half)/n*100)+'%（半档也算）');
+    if(n)L.push('> 最长连续 '+maxStreak+' 天'+(halfDates.length?' · 半档日期：'+halfDates.join('、'):''));
+    L.push('');
+    var seenF={};
+    statDays.forEach(function(d){
+      Object.keys(tc[d]||{}).forEach(function(fid){
+        var arr=tc[d][fid];
         if(!arr||!arr.length)return;
         var f=store.five.find(function(x){return x.id===fid});
-        if(!any){L.push('## 打卡 · 逐日');L.push('> 贴入知识库 Labs《英语阅读｜10周学习目标》');L.push('');any=true}
-        L.push('- '+d+' '+tierLabel(tierOf(arr))+' · '+(f?f.t:'（目标）'));
+        if(!seenF[fid]){seenF[fid]=true;L.push('> 目标：'+(f?f.t:'（目标）'));L.push('')}
+        L.push('- '+d+' '+tierLabel(tierOf(arr)));
         cnt++;
       });
     });
-    if(any)L.push('');
+    L.push('');
   }
   function pushSub(){
     var mine=store.avoid.filter(function(a){return typeof a==='object'&&!a.seed});
@@ -2406,10 +2455,17 @@ function doExport(range,label){
   }
   function pushMood(){
     var mg=store.mood||{};var any=false;
-    Object.keys(mg.diary||{}).sort().forEach(function(d){
-      if(!inRangeDate(d))return;var v=mg.diary[d];
-      if(!any){L.push('## 情绪 · 三层日记');L.push('> 贴入知识库 Labs《情绪追踪》');L.push('');any=true}
-      var zs=(mg.zones[d]||[]).join('、');
+    var zc={A:0,B:0,C:0,D:0};
+    Object.keys(mg.zones||{}).forEach(function(d){
+      if(!inRangeDate(d))return;
+      (mg.zones[d]||[]).forEach(function(z){if(zc[z]!=null)zc[z]++});
+    });
+    var mdays=Object.keys(Object.assign({},mg.diary,mg.zones)).sort();
+    mdays.forEach(function(d){
+      if(!inRangeDate(d))return;
+      if(!any){L.push('## 情绪 · 三层日记');L.push('> 贴入知识库 Self《情绪记录》');L.push('> 本月分布：A '+zc.A+' 天 · B '+zc.B+' 天 · C '+zc.C+' 天 · D '+zc.D+' 天');L.push('');any=true}
+      var v=mg.diary[d]||{};
+      var zs=(mg.zones[d]||[]).map(function(z){return z+' '+EMO_ZONES[z].axis}).join('；');
       L.push('- '+d+(zs?'（'+zs+'）':''));
       if(v.e1)L.push('  - 最值得说的一件事：'+v.e1);
       if(v.e2)L.push('  - 情绪点：'+v.e2);
@@ -2418,7 +2474,7 @@ function doExport(range,label){
     });
     (mg.deep||[]).slice().sort(function(a,b){return (a.date||'').localeCompare(b.date||'')}).forEach(function(it){
       if(!inRangeDate(it.date))return;
-      if(!any){L.push('## 情绪 · 三层日记');L.push('> 贴入知识库 Labs《情绪追踪》');L.push('');any=true}
+      if(!any){L.push('## 情绪 · 三层日记');L.push('> 贴入知识库 Self《情绪记录》');L.push('');any=true}
       L.push('- '+it.date+' 五步分析：'+(it.s1||''));
       L.push('  - 自动思维：'+(it.s2||'')+' ｜ 情绪：'+(it.s3||''));
       L.push('  - 反应分析：'+(it.s4||'')+' ｜ 结果与行动：'+(it.s5||''));
@@ -2427,10 +2483,33 @@ function doExport(range,label){
     if(any)L.push('');
   }
   function pushSleep(){
-    var sp=store.sleep||{};var any=false;
+    var sp=slp();var any=false;
+      var sd=Object.keys(sp.days||{}).sort().filter(function(d){return inRangeDate(d)});if(sd.length){
+        L.push('## 睡眠 · 每日打卡');L.push('> 贴入知识库 Self《身体·运动·表达》· 作息与身体信号');L.push('');any=true;
+        var durSum=0,durN=0,beds=[],wakeSum=0;var en={bad:0,mid:0,good:0},stn={good:0,ok:0,bad:0},ea={easy:0,mid:0,hard:0};var bodyC={},facC={};
+        sd.forEach(function(d){var v=sp.days[d]||{};
+          if(v.durM){durSum+=v.durM;durN++}
+          if(v.bed)beds.push(v.bed);
+          if(v.wake!=='')wakeSum+=parseInt(v.wake,10)||0;
+          if(v.energy&&en[v.energy]!=null)en[v.energy]++;
+          if(v.state&&stn[v.state]!=null)stn[v.state]++;
+          if(v.ease&&ea[v.ease]!=null)ea[v.ease]++;
+          (v.body||[]).forEach(function(t){bodyC[t]=(bodyC[t]||0)+1});
+          (v.factors||[]).forEach(function(t){facC[t]=(facC[t]||0)+1});
+        });
+        beds.sort();
+        var med=beds.length?beds[Math.floor(beds.length/2)]:'--';
+        function freq(o){return Object.keys(o).sort(function(a,b){return o[b]-o[a]}).map(function(t){return t+' '+o[t]}).join(' · ')||'—'}
+        var avg=durN?Math.floor(durSum/durN/60)+'时'+Math.round(durSum/durN%60)+'分':'--';
+        L.push('> 本月统计（'+sd.length+' 天）');
+        L.push('> 应记 '+sd.length+' 天 · 平均 '+avg+' · 上床中位 '+med+' · 夜醒合计 '+wakeSum+' 次');
+        L.push('> 精力：差 '+en.bad+' / 中 '+en.mid+' / 好 '+en.good+'　状态：好 '+stn.good+' / 还行 '+stn.ok+' / 不好 '+stn.bad+'　入睡：易 '+ea.easy+' / 一般 '+ea.mid+' / 难 '+ea.hard);
+        L.push('> 身体频次：'+freq(bodyC));
+        L.push('> 因素频次：'+freq(facC));
+        L.push('');
+      }
     Object.keys(sp.days||{}).sort().forEach(function(d){
       if(!inRangeDate(d))return;var v=sp.days[d];
-      if(!any){L.push('## 睡眠 · 每日打卡');L.push('> 贴入知识库 Labs《睡眠追踪》');L.push('');any=true}
       var parts=[];
       if(v.bed)parts.push('上床 '+v.bed);if(v.rise)parts.push('起床 '+v.rise);
       if(v.durM)parts.push('时长 '+Math.floor(v.durM/60)+'时'+(v.durM%60)+'分');
@@ -2447,7 +2526,7 @@ function doExport(range,label){
     Object.keys(sp.rev||{}).sort().forEach(function(ym){
       var v=sp.rev[ym];if(!v||!v.insight)return;
       if(!inRangeDate(ym+'-01'))return;
-      if(!any){L.push('## 睡眠 · 每日打卡');L.push('> 贴入知识库 Labs《睡眠追踪》');L.push('');any=true}
+      if(!any){L.push('## 睡眠 · 每日打卡');L.push('> 贴入知识库 Self《身体·运动·表达》· 作息与身体信号');L.push('');any=true}
       L.push('- '+ym+' 洞察（草稿采用制）：'+v.insight.replace(/\n/g,' / '));cnt++;
     });
     if(any)L.push('');
@@ -2460,7 +2539,7 @@ function doExport(range,label){
   if(!cnt)L.push('（这个时间段还没有内容）');
   L.push('', '---', '', '> 请帮手提炼：找出反复出现的卡点 / 念头，建议下周观察什么。');
   var txt=L.join('\n');
-  var fname='planet-export-'+label.replace(/[^0-9A-Za-z\u4e00-\u9fa5]+/g,'-')+'.md';
+  var fname='planet-export-'+label.replace(/ ~ /g,'_').replace(/[^0-9A-Za-z\u4e00-\u9fa5_]+/g,'-')+'.md';
   var blob=new Blob([txt],{type:'text/markdown;charset=utf-8'});
   var aEl=document.createElement('a');aEl.href=URL.createObjectURL(blob);aEl.download=fname;
   document.body.appendChild(aEl);aEl.click();document.body.removeChild(aEl);
