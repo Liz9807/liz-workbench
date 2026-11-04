@@ -2025,8 +2025,8 @@ function renderSlpCal(){
   var s=slp();
   function cell(ds,d2){
     var v=s.days[ds];var bar='';
-    if(v&&v.energy)bar='<span class="cal-dots"><i class="cal-dot" style="background:'+SLP_ENERGY[v.energy].c+'"></i></span>';
-    if(v&&v.weather&&v.weather.rain>0)bar+='<span class="cal-dots"><i class="cal-dot" style="background:#6fa8dc" title="有降水"></i></span>';
+    if(v&&v.energy)bar+='<i class="cal-dot" style="background:'+SLP_ENERGY[v.energy].c+'"></i>';
+    if(bar)bar='<span class="cal-dots">'+bar+'</span>';
     if(ds>today())return '<span class="cal-cell" style="color:var(--faint)"><b>'+d2+'</b></span>';
     return '<span class="cal-cell'+(ds===today()?' cal-today':'')+'" onclick="openSlpDay(\''+ds+'\')"><b>'+d2+'</b>'+bar+'</span>';
   }
@@ -2090,7 +2090,8 @@ function monthStats(ym){
     if(v.ease==='easy')st.ease++;
     if(v.energy&&st.energy[v.energy])st.energy[v.energy]++;
     (v.body||[]).forEach(function(t){st.bodyCount[t]=(st.bodyCount[t]||0)+1});
-    var fs=v.factors||[];
+    var fs=(v.factors||[]).slice();
+    if(v.weather&&v.weather.rain>0)fs.push('下雨天');
     if(v.state==='good')fs.forEach(function(t){st.goodFactors[t]=(st.goodFactors[t]||0)+1});
     if(v.state==='bad')fs.forEach(function(t){st.badFactors[t]=(st.badFactors[t]||0)+1});
   });
