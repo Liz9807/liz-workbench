@@ -2,7 +2,7 @@
  * 策略：HTML 用 network-first（总拿最新）；静态资源 cache-first（图标/manifest）
  * 版本号改了之后，旧缓存会被自动清理
  */
-const VERSION = 'planet-v97-20261101';
+const VERSION = 'planet-v101-20261104';
 const STATIC_CACHE = 'planet-static-' + VERSION;
 const HTML_CACHE = 'planet-html-' + VERSION;
 const STATIC_FILES = [
@@ -40,6 +40,9 @@ self.addEventListener('fetch', e => {
 
   /* GitHub API 不走缓存（同步用） */
   if (url.includes('api.github.com')) return;
+
+  /* 天气/地理编码 API 直连，绝不缓存（缓存后 past_days 相对日期过期会一直"未取到"） */
+  if (url.includes('open-meteo.com')) return;
 
   const isHTML = e.request.mode === 'navigate' ||
                  url.endsWith('/') ||
